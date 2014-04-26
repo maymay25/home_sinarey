@@ -1,0 +1,59 @@
+
+<script type="text/javascript">
+(function(){
+    var mobile_host = "<%= Settings.mobile_root %>";
+    if(!mobile_host){
+        return;
+    }
+    var userAgent = navigator.userAgent,
+        redirect = false;
+        
+    //判断设备      
+    if(/(mobile|wap|ipod|android)/i.test(userAgent)){
+       
+    }else{
+        return;
+    }
+
+    if(/pad/i.test(userAgent) || /ting/i.test(userAgent)){
+       
+        return;
+    }
+    
+    //判断url
+    var host = "http://"+window.location.host;
+    var href = window.location.href;
+     
+     redirect = false;
+    
+    if(href.indexOf("#")<0){
+        redirect = false;
+    }else{
+        //发现页
+        if(/^\D+$/.test(href) && /(explore|u|sound|tag)\/?$/i.test(href)){
+            href = host;
+            redirect = true;
+        }
+        //以数字结尾的
+        if(/\d+\/?$/.test(href)){
+            redirect = true;
+        }
+    }
+    
+    //下载页
+    if(/download\/?$/.test(href)){
+        redirect = true;    
+    }
+    
+    //首页
+    if(host+"/" == href){
+        redirect = true;
+    }
+        
+    if(redirect && host != mobile_host){
+        window.location.replace(href.replace(host, mobile_host));
+    }
+})();
+
+
+</script>

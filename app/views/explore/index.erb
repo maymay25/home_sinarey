@@ -1,0 +1,13 @@
+
+<%== erb :_seo_meta, locals: {seo_meta:{ default_key: "json:cms_data_discovery_page" }} %> 
+<%== erb :_friendly_link, locals: {friendly_link:{ name: "discovery" }} %>
+
+<%== erb :_index %>
+
+<% content_for :script_own do  %>
+<script>
+require(["page/discovery/dis_index"], function(page){
+    page.init();
+});
+</script>
+<% end %>

@@ -1,0 +1,102 @@
+caches:
+  special_id_cache:
+    type: 'list_id'
+    expire_time: 0
+    version: 0.1
+    name: 'specialidlist'
+    shards: 's1'
+  special_cache:
+    type: 'object'
+    expire_time: 0
+    cache_class: 'Special'
+    version: 0.1
+    name: 'special'
+    key_field_name: 'id'
+    shards: 's1'
+  special_track_id_cache:
+    type: 'list_id'
+    expire_time: 0
+    version: 0.1
+    name: 'stidlist'
+    shards: 's1'
+  special_album_id_cache:
+    type: 'list_id'
+    expire_time: 0
+    version: 0.1
+    name: 'saidlist'
+    shards: 's1'
+  special_track_cache:
+    type: 'field_object'
+    expire_time: 0
+    cache_class: 'SpecialTrack'
+    version: 1
+    name: 'trackfield'
+    key_field_name: 'special_id,track_id'
+    regex: '[0-9]+'
+    shards: 's1'
+    fields: 'special_id,track_id,title,cover_path'
+    timeout: 10
+  special_album_cache:
+    type: 'field_object'
+    expire_time: 0
+    cache_class: 'SpecialAlbum'
+    version: 1
+    name: 'albumfield'
+    key_field_name: 'special_id,album_id'
+    regex: '[0-9]+'
+    shards: 's1'
+    fields: 'special_id,album_id,title,cover_path'
+    timeout: 10
+  track_in_record:
+    type: 'object'
+    expire_time: 604800
+    cache_class: TrackInRecord
+    version: 2
+    name: 'track_in_record'
+    key_field_name: 'track_id'
+    shards: 's1,s2,s3,s4'
+    size: 4
+    timeout: 6
+  track_set:
+    type: 'object'
+    expire_time: 604800
+    cache_class: TrackSet
+    version: 2
+    name: 'track_set'
+    key_field_name: 'id'
+    shards: 's1,s2,s3,s4'
+    size: 4
+    timeout: 6
+shard_infos:
+  shard1:
+    host: '192.168.1.174'
+    port: 6379
+    name: 's1'
+    password: 'jredis123456'
+    db: 11
+    timeout: 6
+    pool_timeout: 30
+  shard2:
+    host: '192.168.1.174'
+    port: 6379
+    name: 's2'
+    password: 'jredis123456'
+    db: 12
+    timeout: 6
+    pool_timeout: 30
+  shard3:
+    host: '192.168.1.174'
+    port: 6379
+    name: 's3'
+    password: 'jredis123456'
+    db: 13
+    timeout: 6
+    pool_timeout: 30
+  shard4:
+    host: '192.168.1.174'
+    port: 6379
+    name: 's4'
+    password: 'jredis123456'
+    db: 14
+    timeout: 6
+    pool_timeout: 30

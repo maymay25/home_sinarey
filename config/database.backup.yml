@@ -1,0 +1,29 @@
+development:
+  adapter: postgresql
+  encoding: utf8
+  database: suixin365_dev
+  pool: 1
+  username: username
+  password: password
+  host: 127.0.0.1
+  port: 5432
+
+production:
+  adapter: postgresql
+  encoding: utf8
+  database: suixin365
+  pool: 1
+  username: username
+  password: password
+  host: 127.0.0.1
+  port: 5432
+
+heroku:
+  adapter: postgresql
+  encoding: utf8
+  database: dek0m7du7tv5t8
+  pool: 1
+  username: bwckvtpqsewjnn
+  password: jw5nCCiDbMyBcXNUCLV2BZQlCP
+  host: ec2-54-225-101-18.compute-1.amazonaws.com
+  port: 5432

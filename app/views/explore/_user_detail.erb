@@ -1,0 +1,84 @@
+<div class="titlePanel mgT20">
+    <div class="titleCon">
+        <div class="filter">
+            <span class="title mgL30"><%= @category.title %></span>
+
+            <ul class="nav_list">
+                <li class="nav_item <%= 'on' if params[:condition].blank? or params[:condition]=='hot' %>"><a data-condition="hot" href="javascript:;">精彩推荐</a></li>
+                <li class="nav_item <%= 'on' if params[:condition]=='fans' %>"><a data-condition="fans" href="javascript:;">最多粉丝</a></li>
+                <li class="nav_item <%= 'on' if params[:condition]=='new' %>"><a data-condition="new" href="javascript:;" class="none-border">新晋播主</a></li>
+            </ul>
+
+            <p class="cl"></p>
+        </div>
+    </div>
+    <div class="radioUserlist ">
+        <% listItem_count = @users.count/2+@users.count%2 %>
+        <% listItem_count.times do |i| %>
+        <div class="listItem <%= 'is-last' if i==listItem_count-1  %> ">
+            <% 2.times do |j| %>
+            <%
+              k = i*2+j
+              user = @users[k]
+            %>
+            <% if user %>
+                <div class="radioUserListItem <%= j%2==0 ? 'border-left' : 'border-right' %>">
+                    <div class="radioUserPanel">
+                        <div class="left ">
+                            <a class="userface110" href="<%= link_his_path(user.uid) %>"> 
+                                <img src="<%= picture_url('header', user.logoPic, '180') %>" alt="<%= user.nickname %>" data-options="defaultImg:person_60">
+                            </a>
+                        </div>
+                        <div class="right radioUserInfo">
+                            <a class="title" href="<%= link_his_path(user.uid) %>">
+                                <%= user.nickname %>
+                                <% if user.isVerified %><i class="VIcon">&nbsp;</i><% end %>
+                            </a>
+                            <div class="signature"><%= user.personDescribe %>&nbsp;</div>
+                            <div class="info">
+                                <a href="<%= link_his_path(user.uid,'sound') %>">
+                                    <span class="radioSoundIcon"><%= @tracks_counts[k] %></span>
+                                </a>
+                                <a href="<%= link_his_path(user.uid,'fans') %>">
+                                    <span class="radioFansIcon"><%= @followers_counts[k] %></span>
+                                </a>
+                            </div>
+
+                            <div class="opt mgT10">
+                                <a class="addBtn2 small" user-asyn-follow='<%= user.uid %>' data-options="<%= {uid:user.uid,nickname:user.nickname}.to_json[1..-2] %>" href="javascript:;">
+                                    <span class="default">
+                                      关注
+                                    </span>
+                                    
+                                    <span class="hover">取消</span>
+                                </a>
+                                <a class="addBtn1 hidden1">
+                                    <span class="radioLetterIcon" data-options="nickname:'<%= user.nickname %>'">发私信</span>
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            <% end %>
+            <% end %>
+
+            <p class="cl"></p>
+        </div>
+        <% end if @users.count>0 %>
+    </div>
+</div>
+
+<div class="pagingBar mgTB20">
+    <%== paginate CustomPagination.new(@users_count,@page,@per_page), {outer_window: 1, theme: 'explore'} %>
+</div>
+
+<% if @current_uid %>
+  <% if request.xhr? -%>
+    <%== erb :_user_detail_follow_status %>
+  <% else %>
+    <% content_for :script_own do %>
+      <%== erb :_user_detail_follow_status %>
+    <% end %>
+  <% end %>
+<% end %>

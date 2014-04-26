@@ -1,0 +1,11 @@
+<%== erb :_js_config %>
+<%== erb :_soundmanager_config %>
+
+<% if Sinarey.env == 'production' -%>
+<script src="<%= static_url '/js/almond.js' %>"></script>
+<% else -%>
+<script src="<%= static_url '/js/lib/require.js' %>"></script>
+<script src="<%= static_url '/js/main.js' %>"></script>
+<% end -%>
+
+<%== content_for?(:script_own).confirm && yield_content(:script_own) %>

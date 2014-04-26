@@ -1,0 +1,45 @@
+<script src="<%= static_url '/js/lib/soundmanager2/soundmanager2.js' %>"></script>
+<script type="text/javascript">
+function isPit(){
+    var ug = navigator.userAgent;
+    var pits = /2345|theworld/;
+    if(ug.indexOf("MSIE")< 0){
+        return false;
+    }
+    return pits.test(ug);
+}
+soundManager.setup({
+url:"/swf/20130512/",
+flashVersion:9,
+flashPollingInterval:500,
+html5PollingInterval:500,
+flashLoadTimeout:20000,
+useHighPerformance:true,
+debugMode:false,
+noSWFCache: isPit(),
+defaultOptions : {
+  autoLoad: false,        // enable automatic loading (otherwise .load() will call with .play())
+  autoPlay: false,        // enable playing of file ASAP (much faster if "stream" is true)
+  from: null,             // position to start playback within a sound (msec), see demo
+  loops: 1,               // number of times to play the sound. Related: looping (API demo)
+  multiShot: false,       // let sounds "restart" or "chorus" when played multiple times..
+  multiShotEvents: false, // allow events (onfinish()) to fire for each shot, if supported.
+  onid3: null,            // callback function for "ID3 data is added/available"
+  onload: null,           // callback function for "load finished"
+  onstop: null,           // callback for "user stop"
+  onfinish: null,         // callback function for "sound finished playing"
+  onpause: null,          // callback for "pause"
+  onplay: null,           // callback for "play" start
+  onresume: null,         // callback for "resume" (pause toggle)
+  position: null,         // offset (milliseconds) to seek to within downloaded sound.
+  pan: 0,                 // "pan" settings, left-to-right, -100 to 100
+  stream: true,           // allows playing before entire file has loaded (recommended)
+  to: null,               // position to end playback within a sound (msec), see demo
+  type: null,             // MIME-like hint for canPlay() tests, eg. 'audio/mp3'
+  usePolicyFile: false,   // enable crossdomain.xml request for remote domains (for ID3/waveform access)
+  volume: 100,            // self-explanatory. 0-100, the latter being the max.
+  whileloading: null,     // callback function for updating progress (X of Y bytes received)
+  whileplaying: null      // callback during play (position update)
+}
+});
+</script>

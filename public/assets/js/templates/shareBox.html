@@ -1,0 +1,15 @@
+<div class="W_layer_mask" onclick="javascript:close_template_box($('.shareBox'));"></div>
+
+<div class="shareBox W_layer" id="shareBox">
+  <div class="content">
+    <div class="title">
+      <span>分享<% if(shareTo){ %>到<%= {weibo:'新浪微博',qq:'QQ空间',renren:'人人网',kaixin:'开心网',douban:'豆瓣网'}[shareTo] %><% } %></span>
+    </div>
+    <a href="javascript:void(0);" onclick="javascript:close_template_box($('.shareBox'));" class="W_close" title="关闭" node-type="close"></a>
+    <div><textarea>安慰小屋是一个可以找寻安慰的地方。或许你正遭遇困境，不要难过，你并不孤单。来这里倾述你的烦恼吧</textarea></div>
+    <p class="handle">
+      <button class="btn public ft12 commit" autocomplete="off">分享</button>
+      <button class="btn secondary open ft12 " onclick="javascript:close_template_box($('.shareBox'));">取消</button>
+    </p>
+  </div>
+</div>

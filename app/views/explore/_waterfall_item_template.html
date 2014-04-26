@@ -1,0 +1,49 @@
+ <script type="text/template" id="waterfall_item_template">
+    <div class="waterfall_item  <% if(!waterfall_image){ %>lack_img <% } %>" id="pin<%=id%>" sound_id="<%= id %>" >
+      <div class="item_wrap">
+          <div class="img_wrap">
+            <img src="<%= waterfall_image %>" style=""/>
+            <div class="replace_img">
+            </div>
+            <div class="miniPlayer2 wave">
+            <div class="player_progressbar">
+              <div class="player_wavebox" sound_uploadid="<%= upload_id %>" sound_wave="<%= waveform %>">
+                <div class="player_backgroundbar"></div>
+                <div class="player_playbar"></div>
+              </div>
+            </div>
+            </div>
+            <a class="play_btn playBtn" href="javascript:;"></a>
+          </div>
+          <a class="title" href="<%= url %>"><%= title %></a>
+          <div class="bottom">
+              <span class="username"><%= nickname %></span>
+          </div>
+
+          <div class="sound_info">
+            <a class="likeIcon <% if(!favorites_counts){ %>hidden<% } %>" href="javascript:;" title="赞<%= favorites_counts %>次"><%= favorites_counts %></a>
+            <a class="commentIcon <% if(!comments_counts){ %>hidden<% } %>" href="javascript:;" title="评论<%= comments_counts %>次"><%= comments_counts %></a>
+            <span class="playCountIcon" title="播放<%= plays_counts %>次"><%= plays_counts%>次</span>
+          </div>
+
+      </div>
+
+      <div class="float_info">
+        <a class="imgForwardBtn" href="javascript:;">
+            <span class="content">
+                 <span class="icon"></span>
+                 <% if(shares_counts>0){ %>
+                 <span class="info"><%= shares_counts %></span>
+                 <% } %>
+            </span>
+            <span class="border_right"></span>
+        </a>
+        <a class="imgLikeBtn" href="javascript:;">
+            <span class="content">
+                 <span class="icon"></span>
+            </span>
+            <span class="border_right"></span>
+        </a>
+      </div>
+    </div>
+</script>

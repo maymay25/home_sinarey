@@ -1,0 +1,29 @@
+
+<div class="W_layer_mask" onclick="javascript:window.oauth2_callback(false);"></div>
+
+<div class="W_layer loginBox" id="loginBox">
+
+  <div class="content">
+    <a href="javascript:void(0);" onclick="javascript:window.oauth2_callback(false);" class="W_close" title="关闭" node-type="close"></a>
+    <div class="title">
+      <span><% if(title){ %><%= "登录" %><% }else{ %><%= "登录后继续操作" %><% } %></span>
+    </div>
+    <div class="oauth2">
+      <p>你可以使用以下账号登录：</p>
+      <div class="clr links">
+        <a class="weibo" title="新浪微博" href="javascript:open_oauth2_window('/login/weibo_login');">&nbsp;</a>
+        <a class="qqsite" title="腾讯QQ" href="javascript:open_oauth2_window('/login/qq_login');">&nbsp;</a>
+        <a class="kaixin" title="开心网" href="javascript:open_oauth2_window('/login/kaixin_login');">&nbsp;</a>
+        <a class="renren" title="人人网" href="javascript:open_oauth2_window('/login/renren_login');">&nbsp;</a>
+        <a class="douban" title="豆瓣网" href="javascript:open_oauth2_window('/login/douban_login');">&nbsp;</a>
+      </div>
+      <% if(notice){ %>
+      <div class="notice ft12">
+          <p class="icon"><span class="icon_warn"></span></p>
+          <span class="txt"><% if(notice==true){ %>我们不会同步任何信息到这些平台<% }else{ %><%= notice %><% } %></span>
+      </div>
+      <% } %>
+    </div>
+    <div class="clr"></div>
+  </div>
+</div>

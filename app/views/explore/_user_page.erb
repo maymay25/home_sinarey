@@ -1,0 +1,111 @@
+
+<div id="discoverRadioPage">
+
+    <div class="layout_top">
+        <div class="dis_sound_top">
+            <div class="left">
+                <div class="hallo"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="personWall">
+
+        <div class="bud-1">
+            <% if first_user = @wall_users.first %>
+            <div class="popUserPanel">
+                <div class="userfacebase">
+                    <div class="userbaseface150">
+                        <a href="<%= link_his_path first_user.uid %>">
+                            <img width="149" height="149" src="<%= picture_url('header', first_user.logoPic, 180) %>" alt="<%= first_user.nickname %>">
+                        </a>
+                    </div>
+                    <i class="light">&nbsp;</i>
+                </div>
+            </div>
+                <% if first_user.isVerified %>
+                <span class="BVIcon">&nbsp;</span>
+                <% end %>
+            <% end %>
+        </div>
+
+        <div class="bud-2">
+            <div class="popUserPanel">
+                <div class="userfacebase">
+                    <div class="userbaseface150">
+                        <a href="/verify" target="_blank">
+                            <img width="149" height="149" src="<%= static_url "/css/img/joinus.png" %>" alt="">
+                        </a>
+                    </div> 
+                    <i class="light">&nbsp;</i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bud-3">
+            <% if second_user = @wall_users.second %>
+            <div class="popUserPanel">
+                <div class="userfacebase">
+                    <div class="userbaseface150">
+                        <a href="<%= link_his_path second_user.uid %>">
+                            <img width="149" height="149" src="<%= picture_url('header', second_user.logoPic, 180) %>" alt="<%= second_user.nickname %>">
+                        </a>
+                    </div> 
+                    <i class="light">&nbsp;</i>
+                </div>
+            </div>
+                <% if second_user.isVerified %>
+                <span class="BVIcon">&nbsp;</span>
+                <% end %>
+            <% end %>
+        </div>
+
+        <% ignore_arr = [6,17,19,22,27,29,32,37,45] %>
+
+        <% @wall_users[2..-1].each_with_index do |user,index| %>
+        <% if ignore_arr.include?(4+index) %>
+        <span class="picCon"></span>
+        <span class="picCon"></span>
+        <span class="picCon"></span>
+        <% end %>
+        <% personDescribe = user.personDescribe.truncate(15) if user.personDescribe %>
+        <span class="picCon" data-options="<%= {nickname:user.nickname,personDescribe:personDescribe,position:index>=46 ? 'right' : 'left',href:link_path("/#{user.uid}"),is_v:user.isVerified}.to_json %>">
+            <img width="49" height="49" src="<%= picture_url('header', user.logoPic, 60) %>" alt="">
+        </span>
+        <% end if @wall_users[2..-1] %>
+    </div>
+
+    <div class="personalMain">
+        <div class="left">
+            <div class="category bar2">
+                <div class="left">
+                    <span class="title">分类</span>
+                </div>
+                <div class="right">
+                    <ul class="nav_list">
+                        <% @categories.each do |category| %>
+                        <li data-cid="<%= category.id %>" class="nav_item <%= "on" if params[:category].to_i==category.id %>">
+                            <a href="javascript:;"><%= category.title %></a>
+                        </li>
+                        <% end if @categories  %>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="explore_user_detail_entry">
+            <%== erb :_user_detail %>
+            </div>
+        </div>
+        <div class="right">
+            <div class="advertisement">
+                <%== erb :_advertise, locals: { id: 727915, width:'210px',height:'340px' } %>
+            </div>
+
+            <%== erb :_top_fans %>
+
+            <div class="advertisement1 mgT20">
+                <%== erb :_advertise, locals: { id: 727916, width:'210px',height:'340px' } %>
+            </div>
+        </div>
+    </div>
+</div>

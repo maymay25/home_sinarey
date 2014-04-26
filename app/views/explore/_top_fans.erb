@@ -1,0 +1,54 @@
+<%
+top_fans_users = get_recommend_followed_user(nil, 1, 10)
+%>
+
+<% if (user_list = top_fans_users[:list]).length>0 %>
+<%
+uids = user_list.collect{ |u| u.uid }
+tracks_counts = $counter_client.getByIds(Settings.counter.user.tracks, uids)
+followers_counts = $counter_client.getByIds(Settings.counter.user.followers, uids)
+%>
+
+<div class="rankTab mgT15">
+    <span class="tab_title">粉丝榜</span>
+</div>
+
+<div class="rankUserList">
+
+  <% user_list.each_with_index do |u,i| %>
+
+    <% if i == 0 %>
+    <div class="listItem">
+        <span class="bud-text on"><%= i+1 %></span>
+        <div class="rankUserPanel">
+            <div class="left">
+                <a class="userface60" href="<%= link_his_path(u.uid) %>"> 
+                    <img card="<%= u.uid %>" src="<%= picture_url('header', u.logoPic, '60') %>" alt="<%= u.nickname %>" data-options="defaultImg:person_60">
+                </a>
+            </div>
+            <div class="right rankUserInfo">
+                <span class="title mgB5">
+                    <a href="<%= link_his_path(u.uid) %>" card="<%= u.uid %>">
+                        <%= u.nickname %>
+                        <% if u.isVerified %><i class="VIcon">&nbsp;</i><% end %>
+                    </a>
+                </span>
+                <a href="<%= link_his_path(u.uid,'sound') %>">
+                    <span class="radioSoundIcon"><%= tracks_counts[i] %></span>
+                </a>
+                <a href="<%= link_his_path(u.uid,'fans') %>">
+                    <span class="radioFansIcon"><%= followers_counts[i] %></span>
+                </a>
+            </div>
+        </div>
+    </div>
+    <% else %>
+    <div class="listItem">
+        <span><a href="<%= link_his_path(u.uid) %>" card="<%= u.uid %>"><%= u.nickname %></a></span>
+        <span class="bud-text <%= 'grew' if i > 2 %>"><%= i+1 %></span>
+    </div>
+    <% end %>
+
+  <% end %>
+</div>
+<% end %>

@@ -1,0 +1,75 @@
+default: &default
+  powered: jeffrey
+  email: jeffrey6052@163.com
+  redis:
+    online: false
+    expire: 86400
+development:
+  <<: *default
+  static_root: '/assets'
+  static_version: ''
+  oss_root: http://suixin365.oss.aliyuncs.com
+  oauth2:
+    weibo_key: '4109108691'
+    weibo_secret: 'ff93fdbb7d564b6dc921070123d20a72'
+    weibo_redirect_uri: 'http://dev.suixin365.com/login/weibo_callback'
+    renren_key: '0e2eaa66e08044618ce38cbceb7fceb4'
+    renren_secret: '2f04ecacbf99492e91a6918813d68263'
+    renren_redirect_uri: 'http://dev.suixin365.com/login/renren_callback'
+    kaixin_key: '1824152752697857efc2403344a4d42f'
+    kaixin_secret: 'fb20cc4841722d64b7ed5901d706e399'
+    kaixin_redirect_uri: 'http://dev.suixin365.com/login/kaixin_callback'
+    qq_key: '100491869'
+    qq_secret: 'a336e1d839c59c81f8799b52e71d4b11'
+    qq_redirect_uri: 'http://dev.suixin365.com/login/qq_callback'
+    douban_key: '02d8e7447e7b8453088ab5cd7b728cf9'
+    douban_secret: '26d7736e7b1a14c7'
+    douban_redirect_uri: 'http://dev.suixin365.com/login/douban_callback'
+  app:
+    weibo_api_key: '3165631543'
+    weibo_api_secret: '66cd6c2e3189eaa1ea4f99188e77ef9f'
+    renren_app_id: '236961'
+    renren_app_key: '2fb839f73b9249ee960fd2fa83f24b20'
+    renren_secret_key: '59ad412dc6f94a598e4fe268c8eea614'
+    kaixin_app_id: '100054056'
+    kaixin_app_key: '6810412827083fe475b8c46415e86b66'
+    kaixin_secret_key: 'f25a9401837c0d988fec96fbd90f52aa'
+    qq_app_id: '100733035'
+    qq_app_key: '54c55a5fbaaf9894b6eb41731a613b7e'
+    qq_app_secret: '54c55a5fbaaf9894b6eb41731a613b7e'
+test:
+  <<: *default
+
+production:
+  <<: *default
+  static_root: 'http://img.suixin365.com/assets'
+  static_version: '20140404'
+  oss_root: http://suixin365.oss.aliyuncs.com
+  oauth2:
+    weibo_key: '4109108691'
+    weibo_secret: 'ff93fdbb7d564b6dc921070123d20a72'
+    weibo_redirect_uri: 'http://www.suixin365.com/login/weibo_callback'
+    renren_key: '0e2eaa66e08044618ce38cbceb7fceb4'
+    renren_secret: '2f04ecacbf99492e91a6918813d68263'
+    renren_redirect_uri: 'http://www.suixin365.com/login/renren_callback'
+    kaixin_key: '1824152752697857efc2403344a4d42f'
+    kaixin_secret: 'fb20cc4841722d64b7ed5901d706e399'
+    kaixin_redirect_uri: 'http://www.suixin365.com/login/kaixin_callback'
+    qq_key: '100491869'
+    qq_secret: 'a336e1d839c59c81f8799b52e71d4b11'
+    qq_redirect_uri: 'http://www.suixin365.com/login/qq_callback'
+    douban_key: '085a32386831872d190e96a938949587'
+    douban_secret: 'b1be6c1fd3ef3e5e'
+    douban_redirect_uri: 'http://www.suixin365.com/login/douban_callback'
+  app:
+    weibo_api_key: '3165631543'
+    weibo_api_secret: '66cd6c2e3189eaa1ea4f99188e77ef9f'
+    renren_app_id: '236961'
+    renren_app_key: '2fb839f73b9249ee960fd2fa83f24b20'
+    renren_secret_key: '59ad412dc6f94a598e4fe268c8eea614'
+    kaixin_app_id: '100053572'
+    kaixin_app_key: '571001247612e08f9f231708535512c5'
+    kaixin_secret_key: 'aeffcf034a1761b625ea8583e7403a29'
+    qq_app_id: '100718983'
+    qq_app_key: 'd27db24260f005d1214826e944cd39a5'
+    qq_app_secret: 'd27db24260f005d1214826e944cd39a5'

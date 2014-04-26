@@ -1,0 +1,1 @@
+$waterfall_item_template = File.read("#{Sinarey.root}/app/views/explore/_waterfall_item_template.html")

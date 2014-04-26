@@ -1,0 +1,12 @@
+<div class="W_layer_mask" onclick="javascript:close_template_box($('.QQTshareBox'));"></div>
+<div class="W_layer QQTshareBox" id="QQTshareBox">
+  <div class="content">
+    <div class="title">
+      <span>分享到腾讯微博</span>
+    </div>
+    <a href="javascript:void(0);" onclick="javascript:close_template_box($('.QQTshareBox'));" class="W_close" title="关闭" node-type="close"></a>
+  </div>
+  <div>
+    <iframe class="qqt_share_iframe" src="http://app.t.qq.com/share/index?appid=<%= appid %>&msg=<%= msg %>"></iframe>
+  </div>
+</div>

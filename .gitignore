@@ -1,0 +1,6 @@
+/config/database.yml
+/config/settings.yml
+/config/secret
+*.pid
+*.swp
+puma.state

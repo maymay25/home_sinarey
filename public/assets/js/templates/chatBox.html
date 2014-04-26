@@ -1,0 +1,26 @@
+<div class="W_layer_mask" onclick="javascript:window.cache_chatBox_content=$('#chatBox_content').val();close_template_box($('.chatBox'));"></div>
+
+<div class="W_layer chatBox" id="chatBox">
+  <a href="javascript:;" onclick="javascript:window.cache_chatBox_content=$('#chatBox_content').val();close_template_box($('.chatBox'));" class="W_close" title="关闭" node-type="close"></a>
+  <div class="chatBoxBg">
+    <div class="wbpmcompose wbpmadd wbpmcn">
+      <div class="windowtitle">
+        <% if(nickname){ %>
+        <span class="down">发私信给</span>
+        <span class="up"><%= nickname %></span>
+        <% }else{ %>
+        <span>发私信</span>
+        <% } %>
+      </div>
+      <input type="hidden" id="chatBox_uid" value="<%= uid %>">
+      <div class="replycontent">
+        <textarea placeholder="要对他说点什么..." id="chatBox_content"></textarea>
+      </div>
+      <div class="submit">
+        <div class="wbpm_right">
+          <a href="javascript:;" id="chatBox_submit" class="btn_green btn_send">&nbsp;发送&nbsp;</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

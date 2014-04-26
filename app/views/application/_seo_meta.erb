@@ -1,0 +1,38 @@
+<%
+# begin
+  @config = seo_meta
+
+  #SEO配置,title,meta_key,meta_description
+  if @config
+    if @config[:custom]
+        custom_key = "json:cms_data_default_#{@config[:custom]}_page"
+        seo_data = decode_json_string(CMSREDIS.get(custom_key))
+    else
+      index = @config[:id].nil? ? nil : CMSREDIS.hget("json:element#hash#special_#{@config[:name]}_page##{@config[:name]}_id",@config[:id])
+      seo_data = index.nil? ? nil : decode_json_string(CMSREDIS.lrange("json:cms_data_special_#{@config[:name]}_page",0,100)[index.to_i])
+      if seo_data.nil? && @config[:category_id]
+        index = CMSREDIS.hget("json:element#hash#category_#{@config[:name]}#category_id",@config[:category_id])
+        seo_data = index.nil? ? nil : decode_json_string(CMSREDIS.lrange("json:cms_data_category_#{@config[:name]}",0,100)[index.to_i])
+      end
+      unless seo_data
+        default_key = @config[:default_key] || "json:cms_data_default_#{@config[:name]}_page"
+        seo_data = decode_json_string(CMSREDIS.get(default_key))
+      end
+    end
+    if seo_data
+      content_for :meta_title, parse_seo_meta(@config[:name],@config[:data],seo_data["meta_title"]) if seo_data["meta_title"]
+      content_for :meta_key, parse_seo_meta(@config[:name],@config[:data],seo_data["meta_key"]) if seo_data["meta_key"]
+      if seo_data["meta_description"]
+        _meta_description = parse_seo_meta(@config[:name],@config[:data],seo_data["meta_description"])
+        #seo需求，首页全部显示，其它页面200个汉字
+        if params[:controller] == "welcome" or params[:controller] == "main"
+          content_for :meta_description, _meta_description
+        else
+          content_for :meta_description, cut_str(_meta_description,400)
+        end
+      end
+    end
+  end 
+# rescue
+# end
+%>

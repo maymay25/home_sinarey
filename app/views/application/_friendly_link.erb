@@ -1,0 +1,35 @@
+<%
+@config = friendly_link
+#友情链接配置
+if @config
+  friendly_links = nil
+  got = false
+
+  if @config[:name] == "user" and @config[:uid]
+    index = CMSREDIS.hget("json:element#hash#special_#{@config[:name]}_link#uid","#{@config[:uid]}".to_json)
+    friendly_links_html = index.nil? ? nil : decode_json_string(CMSREDIS.lrange("json:cms_data_special_#{@config[:name]}_link",0,9999)[index.to_i])["link_html"]
+    if friendly_links_html
+      begin
+        content_for :friendly_link, simple_format(friendly_links_html)
+        got = true
+      rescue
+      end
+    end
+  end
+
+  if got==false
+    if @config[:category_name]
+      friendly_links = CMSREDIS.lrange("json:cms_data_category#{@config[:category_name].nil? ? "" : "_"<<@config[:category_name]}#{(@config[:name].nil? || @config[:name]=="discovery") ? "" : "_"<<@config[:name] }_link",0,100).collect{|link|decode_json_string(link)}
+    end
+    if friendly_links.nil? || friendly_links.empty?
+      friendly_links = CMSREDIS.lrange("json:cms_data_#{@config[:name]}_link",0,100).collect{|link|decode_json_string(link)}
+    end
+
+    if friendly_links && friendly_links.count > 0
+      html = ""
+      friendly_links.each{ |link| html << "<a target=\"_blank\" style=\"color: #333;\" href=\"#{link["address"]}\">#{link["name"]}</a>&nbsp;" }
+      content_for :friendly_link, html.html_safe
+    end
+  end
+end 
+%>
