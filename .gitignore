@@ -1,5 +1,6 @@
 /config/database.yml
 /config/settings.yml
+/config/core.root
 /config/secret
 *.pid
 *.swp
