@@ -48,6 +48,7 @@ before_fork do |server, worker|
 end
 
 after_fork do |server, worker|
+
   # the following is *required* for Rails + "preload_app true",
   defined?(ActiveRecord::Base) and
     ActiveRecord::Base.establish_connection
@@ -66,20 +67,10 @@ after_fork do |server, worker|
   defined?(CMSREDIS) and
     CMSREDIS.client.reconnect
 
+  new_app_logger!(worker.nr)
+
   new_bunny!
 
-  # $counter_client.destroy if $counter_client
-  # $discover_client.destroy if $discover_client
-  # $feed_client.destroy if $feed_client
-  # $login_client.destroy if $login_client
-  # $recommend2_client.destroy if $recommend2_client
-  # $remote_profile_client.destroy if $remote_profile_client
-  # $stat_user_track_client.destroy if $stat_user_track_client
-  # $sync_set_client.destroy if $sync_set_client
-  # $wordfilter_client.destroy if $wordfilter_client
-  # $recommend_client.destroy if $recommend_client
-  # $backend_client.destroy if $backend_client
-  # $profile_client.destroy if $profile_client
   new_thrift_clients!
   new_xunch!
 end
