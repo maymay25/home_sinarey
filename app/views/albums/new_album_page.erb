@@ -119,23 +119,25 @@
                     </td>
                     <td colspan="2">
                       <div id="genre" class="selecter selecter-s5 ">
-                        <input type="hidden" name="category_id" value="<%= @categories[0]["id"] %>"/>        
-                        <div class="selecter-selected" data-value="<%= @categories[0]["id"] %>">
-                          <span class="selecter-text"><%= @categories[0]["title"] %></span>
+                        <% default_category = CHOOSE_CATEGORIES[0] %>
+                        <input type="hidden" name="category_id" value="<%= default_category.id %>"/>        
+                        <div class="selecter-selected" data-value="<%= default_category.id %>">
+                          <span class="selecter-text"><%= default_category.title %></span>
                           <em class="selecter-arrow">◆</em>
                         </div>
                         <div class="selecter-options">
                           <ul>
-                            <% @categories.each_with_index do |category,index| %>
-                            <li class="selecter-item" data-value="<%= category["id"] %>"><%= category["title"] %></li>
+                            <% CHOOSE_CATEGORIES.each_with_index do |category,index| %>
+                            <li class="selecter-item" data-value="<%= category.id %>"><%= category.title %></li>
                             <% end %>
                           </ul>
                         </div>
                       </div>
                       <div id="genre_sub" class="selecter selecter-s5">
-                        <input type="hidden" name="sub_category_id" value="<%= MUSIC_CATEGORIES[0] %>"/>        
-                        <div class="selecter-selected">
-                          <span class="selecter-text"><%= MUSIC_CATEGORIES[0] %></span>
+                        <% default_music_category = MUSIC_CATEGORIES[0] %>
+                        <input type="hidden" name="sub_category_id" value="<%= default_music_category %>"/>        
+                        <div class="selecter-selected" data-value="<%= default_music_category %>">
+                          <span class="selecter-text"><%= default_music_category %></span>
                           <em class="selecter-arrow">◆</em>
                         </div>
                         <div class="selecter-options">

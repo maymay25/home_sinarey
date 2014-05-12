@@ -1,5 +1,7 @@
 class TracksController < ApplicationController
 
+  include UploadsHelper
+
   set :views, ['tracks','application']
 
   def dispatch(action,params_options={})
@@ -230,9 +232,9 @@ class TracksController < ApplicationController
 
     halt '' unless params[:id]
 
-    now = Time.new
+    current_now = Time.now
     uuid = SecureRandom.uuid.gsub('-', '')
-    rk = "#{now.to_i}_#{params[:id]}_#{uuid}"
+    rk = "#{current_now.to_i}_#{params[:id]}_#{uuid}"
     if @current_user
       is_v = @current_user.isVerified
       if @current_user.thirdpartyName
@@ -251,7 +253,7 @@ class TracksController < ApplicationController
       thirdpartyName: tpname,
       id: params[:id],
       duration: params[:duration],
-      started_at: now,
+      started_at: current_now,
       played_secs: params[:played_secs],
       rk: rk,
       uuid: params[:uuid] || uuid
@@ -837,6 +839,251 @@ class TracksController < ApplicationController
     end
     
     render_json(arr)
+  end
+
+  #上传声音 表单页
+  def upload_page
+
+    halt_400 unless @current_uid
+
+    halt_403 if @current_user.isLoginBan or is_user_banned?(@current_uid)
+
+    @user_tags = UserTag.stn(@current_uid).where(uid: @current_uid).order("num desc").limit(15)
+
+    @default_category = CHOOSE_CATEGORIES[0]
+    @tags = HumanRecommendCategoryTag.where(category_id: @default_category.id).limit(40)
+    
+    @album_list = Album.stn(@current_uid).where(uid: @current_uid, is_deleted: false, status: 1) if @current_uid
+
+    #容量限制
+    if @current_user.isRobot or @current_user.isVerified  #机器人没有容量限制
+      @progress = 0
+      @capacity_free = nil
+    else
+      default_capacity = Settings.capacity_free
+      used_capacity = $stat_user_track_client.getUserTotalTime(@current_uid)
+      @progress = used_capacity<=default_capacity ? (used_capacity.to_f/default_capacity)*100 : 100
+      @capacity_free = (tmp = ((default_capacity - used_capacity)/60).ceil)>0 ? tmp : 0
+    end
+
+    @checkCaptcha = true
+    if !@current_user.isVerified and !@current_user.isVMobile
+      @checkCaptcha = $wordfilter_client.checkCaptcha(2, @current_uid, get_client_ip);
+    end
+
+    @this_title = "上传声音 喜马拉雅-听我想听"
+
+    erb :upload_page
+  end
+
+  #选择已有专辑
+  def get_album_choose_list_partial
+
+    set_no_cache_header
+
+    halt_400 unless @current_uid
+
+    @page = (tmp=params[:page].to_i)>0 ? tmp : 1
+    @per_page = 12
+
+    all_albums = Album.stn(@current_uid).where(uid: @current_uid, is_deleted: false, status: 1)
+    @albums_count = all_albums.count
+    @albums = all_albums.order("id desc").offset((@page-1)*@per_page).limit(@per_page)
+
+    erb(:_upload_album_choose_list_partial,layout:false)
+  end
+
+  #验证码图片src
+  def get_valid_code_partial
+    set_no_cache_header
+    erb(:_valid_code_partial,layout:false)
+  end
+
+  #上传声音 action  包括单个声音, 多个声音·创建专辑, 多个声音·选择专辑
+  def do_dispatch_upload
+    
+    halt_400 unless @current_uid
+    
+    halt_403({res: false, errors: [['page', '对不起，您已被暂时禁止发布声音']]}) if @current_user.isLoginBan or is_user_banned?(@current_uid)
+
+    if params[:codeid] and !@current_user.isVerified
+      if Net::HTTP.get(URI(File.join(Settings.check_root, "/validateAction?codeId=#{params[:codeid]}&userCode=#{CGI.escape(params[:validcode] || '')}"))) == 'false'
+        halt render_json({res: false, errors: [['page', '验证码不匹配']]})
+      else
+        $wordfilter_client.clearCaptcha(2, @current_uid, get_client_ip);
+      end
+    end
+
+    if params[:is_album].present?
+      if params[:choose_album].present?
+        upload_choose_album_action
+      else
+        upload_create_album_action
+      end
+    else
+      upload_create_track_action
+    end
+
+  end
+
+  private
+
+  def upload_create_track_action
+
+    image = params[:image] #判断图片是否全部上传完成
+    if image.is_a(Array)
+      image.each do |img|
+        halt render_json({res: false, errors: [['page', '图片正在上传中，请稍侯']]}) if image.blank?
+      end
+    end
+
+    #参数整理
+    title, user_source = params[:title].to_s.chomp, params[:user_source].to_i, 
+    category_id = params[:categories].to_i
+    tags = params[:tags].to_s.chomp.squeeze(" ")
+    intro, rich_intro = params[:intro].to_s, params[:rich_intro].to_s
+    is_records_desc = params[:is_records_desc]=='on'
+    is_finished = params[:is_finished].to_i
+    music_category = params[:categories_music]
+    is_public = params[:is_public].to_s!='0'
+    sharing_to = params[:sharing_to]
+    share_content = params[:share_content]
+  end
+
+  def upload_create_album_action
+
+    #参数整理
+    title, user_source = params[:title].to_s.chomp, params[:user_source].to_i, 
+    category_id = params[:categories].to_i
+    tags = params[:tags].to_s.chomp.squeeze(" ")
+    intro, rich_intro = params[:intro].to_s, params[:rich_intro].to_s
+    is_records_desc = params[:is_records_desc]=='on'
+    is_finished, image = params[:is_finished].to_i, params[:image].to_s
+    music_category = params[:categories_music]
+    sharing_to = params[:sharing_to]
+    share_content = params[:share_content]
+
+    # 为空验证
+    catch_errors = catch_upload_basic_errors(title, user_source, category_id, intro, tags)
+    halt render_json({res: false, errors: catch_errors}) if catch_errors.size > 0
+
+    files = (params[:files].is_a?(Array) && params[:files]) || []
+    fileids = (params[:fileids].is_a?(Array) && params[:fileids]) || []
+    halt render_json({res: false, errors: [['page', '数据不正确']]}) if files.length != fileids.length
+    zipfiles = fileids.zip(files)
+
+    new_fileids = fileids.select{|fid| !%w(r m).include?(fid[0]) }
+    new_fileids_size = new_fileids.size
+    halt render_json({res: false, errors: [['page', '哎呀，专辑已经塞满啦']]}) if new_fileids_size > 50
+
+    if new_fileids_size>0 # 检查新上传的声音转码状态
+      transcode_res = TRANSCODE_SERVICE.checkTranscodeState(@current_uid, new_fileids.collect{ |id| Hessian2::TypeWrapper.new(:long, id) })
+      p_transcode_res = Yajl::Parser.parse(transcode_res)
+
+      if !p_transcode_res['success']
+        writelog('check transcode state failed')
+        flash[:error_page_info] = '声音转码失败'
+        halt render_json({res: true, redirect_to: "/#/error_page"})
+      end
+    end
+
+    if image.present?
+      begin
+        img_data = Yajl::Parser.parse(image)
+        if img_data and img_data['status']
+          pic = img_data['data'][0]['processResult']
+          default_cover_path = pic['origin']
+          default_cover_exlore_height = pic['180n_height']
+        end
+      rescue
+        #
+      end
+    end
+
+    # 专辑信息敏感词验证
+    album_dirts = filter_hash( 2, @current_user, get_client_ip, {title:title,intro:intro,tags:tags} )
+    halt render_json({res: false, errors: [['files_dirty_words', album_dirts]]}) if album_dirts.size > 0
+
+    # 声音标题敏感词验证
+    words = {}
+    fileids.each_with_index do |fileid, i|
+      words[fileid.to_s] = files[i]
+    end
+    if words.size > 0
+      files_dirts = filter_hash(2, @current_user, get_client_ip, words, new_fileids_size > 0)
+      halt render_json({res: false, errors: [['files_dirty_words', files_dirts]]}) if files_dirts.size > 0
+    end
+
+    # 定时上传
+    if params[:is_publish] == 'on' and @current_user.isVerified and params[:date] and params[:hour] and params[:minutes]
+
+      delayed_tasks_count = DelayedTrack.where(uid: @current_uid, is_deleted:false).group(:task_count_tag).to_a.size
+      halt render_json({res: false, errors: [['publish', '定时发布任务不能超过10条']]}) if delayed_tasks_count >= 10
+
+      delayed_create_album_and_tracks(params[:date],params[:hour],params[:minutes],zipfiles,category_id,title,tags,user_source,intro,rich_intro,is_records_desc,music_category,is_finished,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height)
+      halt render_json({res: true, redirect_to: "/#/#{@current_uid}/publish/"})
+    end
+
+    create_album_and_tracks(zipfiles,category_id,title,tags,user_source,intro,rich_intro,is_records_desc,music_category,is_finished,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height)
+    halt render_json({res: true, redirect_to: "/#{@current_uid}/album"})
+  end
+
+  def upload_choose_album_action(album_id)
+    album = Album.stn(@current_uid).where(uid: @current_uid, id: params[:choose_album].to_i, is_deleted: false).first
+    halt render_json({res: false, errors: [['page', '抱歉,无法添加到该专辑']]}) unless album
+    
+    files = (params[:files].is_a?(Array) && params[:files]) || []
+    fileids = (params[:fileids].is_a?(Array) && params[:fileids]) || []
+    halt render_json({res: false, errors: [['page', '数据不正确']]}) if files.length != fileids.length
+    zipfiles = fileids.zip(files)
+
+    new_fileids = fileids.select{|fid| !%w(r m).include?(fid[0]) }
+    new_fileids_size = new_fileids.size
+    halt_403({res: false, errors: [['page', '对不起，您已被暂时禁止发布声音']]}) if new_fileids_size>0 and ( @current_user.isLoginBan or is_user_banned?(@current_uid) )
+
+    album_track_count = TrackRecord.stn(@current_uid).where(uid: @current_uid, album_id: album.id, is_deleted: false).count
+    delayed_track_count = DelayedTrack.where(uid: @current_uid, is_deleted: false, album_id: album.id).count
+    temp_track_count = TempAlbumForm.where(uid: @current_uid, state: 0, album_id: album.id).sum('add_tracks') # 专辑缓存表中的数据也算上
+    allcount = delayed_track_count + new_fileids_size + album_track_count + temp_track_count
+    halt render_json({res: false, errors: [['page', '哎呀，专辑已经塞满啦']]}) if new_fileids_size > 50 or (allcount >= 200 and new_fileids_size > 0)
+
+    # 声音标题敏感词验证
+    words = {}
+    fileids.each_with_index {|fileid, i| words[fileid.to_s] = files[i] }
+    if words.size > 0
+      files_dirts = filter_hash(2, @current_user, get_client_ip, words, new_fileids_size > 0)
+      halt render_json({res: false, errors: [['files_dirty_words', files_dirts]]}) if files_dirts.size > 0
+    end
+
+    if new_fileids_size>0
+      transcode_res = TRANSCODE_SERVICE.checkTranscodeState(@current_uid, new_fileids.collect{ |id| Hessian2::TypeWrapper.new(:long, id) })
+      p_transcode_res = Yajl::Parser.parse(transcode_res)
+
+      if !p_transcode_res['success']
+        writelog('check transcode state failed')
+        flash[:error_page_info] = '声音转码失败'
+        halt render_json({res: true, redirect_to: "/#/error_page"})
+      end
+
+      if album.cover_path  # 把专辑封面用作声音默认封面
+        pic = UPLOAD_SERVICE2.uploadCoverFromExistPic(album.cover_path, 3)
+        default_cover_path = pic['origin']
+        default_cover_exlore_height = pic['180n_height']
+      end
+
+      if params[:is_publish]=='on' and @current_user.isVerified and params[:date] and params[:hour] and params[:minutes]
+        delayed_tasks_count = DelayedTrack.where(uid: @current_uid, is_deleted:false).group(:task_count_tag).to_a.size
+        halt render_json({res: false, errors: [['publish', '定时发布任务不能超过10条']]}) if delayed_tasks_count >= 10
+
+        delay_options = {date:params[:date], hour:params[:hour],munites:params[:munites]}
+        rdt_url = "/#{@current_uid}/publish/"
+      end
+    end
+
+    upload_tracks_into_album(album,is_records_desc,zipfiles,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height,delay_options)
+    rdt_url ||= "/#{@current_uid}/album/"
+
+    halt render_json({res: true, redirect_to: rdt_url})
   end
 
 

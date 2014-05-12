@@ -55,7 +55,7 @@
   <% unless @current_uid %>
     <%== erb :_fixed_bottom_ad %>
   <% end %>
-  <%= content_for?(:onload).confirm && yield_content(:onload) %>
+  <%== content_for?(:onload).confirm && yield_content(:onload) %>
   <%== erb :_bdhm %>
 </body>
 </html>

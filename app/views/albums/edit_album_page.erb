@@ -159,7 +159,7 @@
                         </div>
                         <div class="selecter-options">
                           <ul>
-                            <% @categories.each do |category| %>
+                            <% CHOOSE_CATEGORIES.each do |category| %>
                             <li class="selecter-item" data-value="<%= category.id %>"><%= category.title %></li>
                             <% end %>
                           </ul>

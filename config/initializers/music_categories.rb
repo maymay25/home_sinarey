@@ -5,3 +5,6 @@ CATEGORIES = {}.tap do |h|
     h[category.id] = [ category.name, category.title ]
   end
 end
+
+#上传时可选择的分类
+CHOOSE_CATEGORIES = Category.where('id != 0').where(is_display:1).order('order_num asc').to_a

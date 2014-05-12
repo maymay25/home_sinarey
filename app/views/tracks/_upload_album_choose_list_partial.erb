@@ -1,0 +1,25 @@
+<div class="infoTit">
+    <h3 class="h_info">我的专辑(<%= @albums_count %>)</h3>
+</div>
+
+<ul class="album_tile_list">
+    <% @albums.each_with_index do |a,index| %>
+    <li class="item <%= 'mgR0' if (index+1)%4==0 %>" album_id="<%= a.id %>">
+        <div class="content_wrap">
+            <div class="picture">
+                <a class="albumface" href="javascript:;">
+                    <span>
+                        <img alt="" src="<%= picture_url('album', a.cover_path, '100') %>" data-options="defaultImg:album_100" />
+                    </span>
+                </a>
+            </div>
+            <div class="info title"><%= a.title %></div>
+            <div class="select"></div>
+        </div>
+    </li>
+    <% end %>
+</ul>
+
+<div class="pagingBar mgB20">
+    <%== paginate CustomPagination.new(@albums_count,@page,@per_page), {outer_window: 1, theme: 'explore'} %>
+</div>

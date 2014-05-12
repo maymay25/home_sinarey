@@ -45,4 +45,12 @@ class TracksRoute < TracksController
   route :get, :post, %r{^/edit_track/([\d]+)$}               do |id| dispatch(:track_edit_page,id:id) end
   route :post,       %r{^/edit_track/([\d]+)$/update}        do |id| dispatch(:do_update_track,id:id) end
 
+  #上传声音相关
+  route :get, :post, '/upload'                               do dispatch(:upload_page) end
+  route :post,       '/upload/create'                        do dispatch(:do_dispatch_upload) end
+
+  route :get, :post, '/upload/choose_album'                  do dispatch(:get_album_choose_list_partial) end #上传·选择声音模块
+  route :get, :post, '/upload/valid_code_partial'            do dispatch(:get_valid_code_partial) end # 验证码局部页
+  
+
 end
