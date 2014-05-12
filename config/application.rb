@@ -3,6 +3,26 @@ Encoding.default_external='utf-8'
 
 require File.expand_path('boot', __dir__)
 
+require 'active_record'
+
+require 'sinarey_support'
+require 'sinarey_support/sinatra/html_safe'
+
+require "sinatra/multi_route"
+require "sinatra/content_for"
+require "sinatra/cookies"
+
+#load core
+require File.join(Sinarey.core_root, 'config/initializers')
+Dir[ File.join(Sinarey.core_root, 'app/models/*.rb') ].each{|file| require file }
+
+require File.join(Sinarey.core_root, 'app/helpers/inet.rb')
+require File.join(Sinarey.core_root, 'app/helpers/core_helper.rb')
+require File.join(Sinarey.core_root, 'app/helpers/apn_dispatch_helper.rb')
+require File.join(Sinarey.core_root, 'app/helpers/search_helper.rb')
+
+require File.expand_path('establish_connection.rb', __dir__)
+
 require File.expand_path('sinarey', __dir__)
 
 requires = Dir[File.expand_path('initializers/*.rb', __dir__)]
