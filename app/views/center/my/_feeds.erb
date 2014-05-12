@@ -1,0 +1,72 @@
+
+<!-- 容器背景 -->
+<div class="mainbox_wrapper mainbox_bg" id="soundFeedPage">
+
+
+    <div class="mainbox_left">
+        <!-- 个人信息 -->
+        <div class="personal_container mgB30">
+            <div class="personal_header">
+                <div class="picture">
+                    <a href="<%= link_path("/#{@current_uid}/profile") %>">
+                        <img src="<%= picture_url('header', @current_user.logoPic, '60') %>">
+                    </a>
+                </div>
+                <div class="nav_wrap">
+                    <div class="username">
+                        <%= @current_user.nickname %>
+                        <% if @current_user.isVerified %><i class="VIcon">&nbsp;</i><% end %>
+                    </div>
+                    <ul class="nav_list">
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_uid}/profile") %>">主页</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_uid}/sound/") %>">声音</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_uid}/album/") %>">专辑</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_uid}/favorites/") %>">赞过的</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_uid}/follow/") %>">关注</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_uid}/fans/") %>">粉丝</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_uid}/listened/") %>">听过</a></li>
+                        <% if @current_user.isVerified %>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_uid}/publish/") %>">定时发布</a></li>
+                        <% end %>
+                    </ul>
+                </div>
+                <a class="uploadBtn" href="/upload"></a>
+            </div>
+        </div>
+
+        <!-- feedTab -->
+        <div class="feedTab">
+            <div class="fl">
+                <strong class="tab_title">声音流</strong>
+                <div class="selecter fl group-select selecter-s3" inited="true">
+                    <div class="selecter-selected" data-value="0">
+                      <span class="selecter-text">全部</span>
+                      <em class="selecter-arrow">◆</em>
+                    </div>
+                </div>
+            </div>
+            <div class="fr">
+                <a href="#" class="tab_item on" feedType="sound"><span>声音流</span></a>
+                <a href="#" class="tab_item" feedType="event"><span>新鲜事</span></a>
+            </div>
+        </div>
+        <!-- feed提示 -->
+        <div class="feedMoreMessageBox hidden">
+            <a>您有<em>1</em>条新的声音</a>
+        </div>
+        <!-- feed列表 -->
+        <ul class="feedList" listitem="all_play_list">
+          <%== erb :'my/feeds/_index' %>
+        </ul>
+        <div class="pagingBar">
+            <div class="pagingBar_wrapper">
+
+            </div>
+        </div>
+    </div>
+
+    <%== erb :'my/_feeds_right' %>
+
+</div>
+
+<%== $comment_inputbox_template %>

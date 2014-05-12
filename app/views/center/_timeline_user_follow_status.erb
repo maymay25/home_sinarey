@@ -1,0 +1,44 @@
+<script>
+require(['jquery','json2'],function($,json2){
+
+    var $elements = $('[timeline-user-asyn-follow]'),
+        uids = [];
+
+    $elements.each(function(){
+        var $this = $(this);
+        uids.push($this.attr('timeline-user-asyn-follow'));
+    })
+
+    if(uids.length>0){
+      $.ajax({
+          url:'/explore/follow_status',
+          type:"post",
+          dataType:"json",
+          data:{
+              uids: uids.join(',')
+          },
+          success:function(json){
+            var result = json['result'];
+            $elements.each(function(){
+                var $this  = $(this),
+                    uid    = parseInt($this.attr('timeline-user-asyn-follow')),
+                    status = result[uid];
+                if(status && status['is_follow']){
+                  $this.addClass('already');
+                  var options = $this.attr('data-options'),
+                      tmp = ',is_follow:true';
+                  if(status['be_followed']){
+                    $this.addClass('both');
+                    tmp += ',be_followed:true';
+                    $this.children('span.default').html('相互关注');
+                  }else{
+                    $this.children('span.default').html('已关注');
+                  }
+                  $this.attr('data-options',options+tmp);
+                }
+            })
+          }
+      });
+    }
+})
+</script>

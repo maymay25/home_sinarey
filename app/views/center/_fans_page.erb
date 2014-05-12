@@ -1,0 +1,105 @@
+<div id="personalFollow" class="mgT30">
+    <div class="mainbox_left">
+        <div class="personal_container">
+            <div class="personal_header">
+                <div class="picture">
+                    <a href="<%= link_path("/#{@u.uid}/") %>">
+                        <img src="<%= picture_url('header', @u.logoPic, '60') %>">
+                    </a>
+                </div>
+                <div class="nav_wrap">
+                    <div class="username">
+                        <%= @u.nickname %>
+                        <% if @u.isVerified %><i class="VIcon">&nbsp;</i><% end %>
+                        <a class="addBtn3 <%= "already" if @is_follow %> <%= "both" if @be_followed %>" data-options="<%= {uid:@u.uid,is_follow:@is_follow,be_followed:@be_followed,nickname:@u.nickname}.to_json[1..-2] %>" href="javascript:;">
+                            <span class="default"><%= (@is_follow && @be_followed) ? "相互" : @is_follow ? "已" : "" %>关注</span>
+                            <span class="hover">取消</span>
+                        </a>
+                    </div>
+                    <ul class="nav_list">
+                        <li class="nav_item"><a href="<%= link_path("/#{@u.uid}/") %>">主页</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@u.uid}/sound/") %>">声音</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@u.uid}/album/") %>">专辑</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@u.uid}/favorites/") %>">赞过的</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@u.uid}/follow/") %>">关注</a></li>
+                        <li class="nav_item on"><a href="<%= link_path("/#{@u.uid}/fans/") %>">粉丝</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="personal_body">
+                <div class="body_top">
+                    <div class="left">
+                        <span class="title">Ta的粉丝</span>
+                    </div>
+                </div>
+
+                <div class="personal_list_head">
+                    <div class="left">共有<%= @followers_count %>个粉丝</div>
+                </div>
+
+                <div class="body_list_wrap">
+                    <% if @followers and @followers.length>0 %>
+                    <ul class="body_list follow_list">
+                        <% @followers.each_with_index do |f,i| %>
+                        <%
+                            user = @users[f.uid]
+                            if @current_uid
+                                following = Following.stn(@current_uid).where(uid: @current_uid, following_uid: user.uid).select('following_uid, is_mutual').first
+                                is_follow = following.present? 
+                                be_followed = following.present? and following.is_mutual==true
+                            else
+                                is_follow = false
+                                be_followed = false
+                            end
+                        %>
+                        <li class="item">
+                            <div class="content_wrap">
+                                <div class="picture">
+                                    <a href="<%= link_path "/#{user.uid}/" %>">
+                                        <img card="<%= user.uid %>" src="<%= picture_url('header', user.logoPic, '60') %>">
+                                    </a>
+                                </div>
+                                <div class="detail">
+                                    <div class="detail_top">
+                                        <a class="username" card="<%= user.uid %>" href="<%= link_path "/#{user.uid}/" %>">
+                                            <%= user.nickname %>
+                                            <% if user.isVerified %><i class="VIcon">&nbsp;</i><% end %>
+                                        </a>
+                                    </div>
+                                    <div class="detail_content"><%= user.personalSignature %></div>
+                                    <div class="detail_bottom">
+                                        <a href="<%= link_his_path(user.uid,'sound') %>">
+                                            <span class="left sound_counter"><%= @follower_tracks_counts[i] %></span>
+                                        </a>
+                                        <a href="<%= link_his_path(user.uid,'fans') %>">
+                                            <span class="left follower_counter"><%= @follower_followers_counts[i] %></span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="operate_btns">
+                                    <% if @current_uid != user.uid %>
+                                    <a class="sendLetterBtn" href="javascript:;" data-options="nickname:'<%= user.nickname %>'">
+                                        <span class="icon">发私信</span>
+                                    </a>
+                                    <a class="addBtn2 <%= "already" if is_follow %> <%= "both" if be_followed %>" data-options="<%= {uid:user.uid,is_follow:is_follow,be_followed:be_followed,nickname:user.nickname}.to_json[1..-2] %>" href="javascript:;">
+                                        <span class="default"><%= (is_follow && be_followed) ? "相互" : is_follow ? "已" : "" %>关注</span>
+                                        <span class="hover">取消</span>
+                                    </a>
+                                    <% end %>
+                                </div>
+                            </div>
+                        </li>
+                        <% end %>
+                    </ul>
+                    <div class="pagingBar mgTB20">
+                        <%== paginate CustomPagination.new(@followers_count,@page,@per_page), {outer_window: 1, url:"/#{@u.uid}/fans", link_path: @current_uid.present?, max_page: 10, notice: '由于系统限制，你无法查看他的所有粉丝'} %>
+                    </div>
+                    <% end %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%== erb :'_mainbox_right' %>
+    
+</div>

@@ -1,0 +1,11 @@
+<% tir = @tir || TrackInRecord.fetch(params[:id]) %>
+<% if tir %>
+
+  <%
+    trackrich = TrackRich.stn(tir.track_id).where(track_id: tir.track_id).first
+    rich_intro = trackrich ? clean_html(trackrich.rich_intro) : clean_html(tir.intro)
+  %>
+  <article><%== simple_format(rich_intro) %></article>
+  <div><a class="arrow on">收起</a></div>
+  
+<% end %>

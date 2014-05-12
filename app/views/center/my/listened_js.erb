@@ -1,0 +1,9 @@
+$("#mainbox").html('<%== escape_javascript erb(:'my/_listened') %>');
+
+require(["page/center/listened"], function(page){
+    page.init();
+});
+
+<% if @this_title %>
+document.title="<%== escape_javascript @this_title %>";
+<% end %>

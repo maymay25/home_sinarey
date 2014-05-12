@@ -1,0 +1,9 @@
+$("#mainbox").html('<%== escape_javascript erb(:_fans_page) %>');
+
+require(["page/center/fans"], function(page){
+    page.init();
+});
+
+<% if @this_title %>
+document.title="<%== escape_javascript @this_title %>";
+<% end %>

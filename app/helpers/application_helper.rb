@@ -1,6 +1,12 @@
 
 module ApplicationHelper
 
+  def simple_format(string)
+    return '' if string.empty?
+    string = string.gsub("\n\r","<br />").gsub("\r", "").gsub("\n", "<br />")
+    Sanitize.clean(string, :elements => ['a','br','img'], :attributes => {'a' => ['href','target'], 'img' => ['src','alt']})
+  end
+
   def get_default_status(user)
     if Settings.is_approve_first
       (user.isVerified || user.isRobot) ? 1 : 0

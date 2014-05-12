@@ -1,0 +1,251 @@
+<div class="mainbox_right">
+    <div class="ad1">
+      <%== erb :_advertise, locals: { id: 728786, width:'200px',height:'80px' } %>
+    </div>
+    <!-- 右侧导航 -->
+    <div class="homeNavBox">
+        <ul class="homeNav">
+            <li>
+                <a class="navItem on" href="<%= link_path "/" %>">
+                    <span class="myNewThingItem">我的新鲜事</span>
+                </a>
+            </li>
+            <li>
+                <a class="navItem" href="<%= link_path "/#{@current_uid}/" %>">
+                    <span class="homeNavItem">个人中心</span>
+                </a>
+            </li>
+            <li>
+                <a class="navItem" href="<%= link_path "/#{@current_uid}/favorites/" %>">
+                    <span class="myLikedNavItem">我赞的</span>
+                </a>
+            </li>
+            <li>
+                <a class="navItem" href="<%= link_path "/#{@current_uid}/listened/" %>">
+                    <span class="myListenedNavItem">播放历史</span>
+                </a>
+            </li>
+            <li>
+                <div class="append">
+                    <a class="navLink" target="_blank" href="/upload/">发布</a>
+                </div>
+                <a class="navItem" href="<%= link_path "/#{@current_uid}/sound/" %>">
+                    <span class="mySoundNavItem">我的声音</span>
+                </a>
+            </li>
+            <li>
+                <a class="navItem" href="<%= link_path "/#{@current_uid}/album/" %>">
+                    <span class="myAlbumNavItem">我的专辑</span>
+                </a>
+            </li>
+            <li class="at hidden">
+                <a class="navItem" href="<%= link_path "/msgcenter/referme/" %>">
+                    <span class="atMeNavItem">@我的</span>
+                </a>
+            </li>
+            <li class="message hidden">
+                <div class="append">
+                    <a href="<%= link_path "/msgcenter/referme/" %>" class="navNumIcon"> <em></em>
+                    </a>
+                </div>
+                <a class="navItem" href="<%= link_path "/msgcenter/letter/" %>">
+                    <span class="messageNavItem">我的私信</span>
+                </a>
+            </li>
+            <li class="comment hidden">
+                <div class="append">
+                    <a href="<%= link_path "/msgcenter/letter/" %>" class="navNumIcon"> <em></em>
+                    </a>
+                </div>
+                <a class="navItem" href="<%= link_path "/msgcenter/comment/" %>">
+                    <span class="commentNavItem">评论</span>
+                </a>
+            </li>
+        </ul>
+        <div class="homeNavMoreBar">
+            <span class="navNumIcon">
+                <em></em>
+            </span>
+            <a class="off ">展开</a>
+        </div>
+    </div>
+    <div class="fixedBox">
+    <!-- 你可能感兴趣的电台 -->
+<%
+
+    @reason = {}
+    @mids = {}
+    @detail = {}
+
+  #间接关注人 列表
+  begin
+    @indirectFollow = $recommend2_client.indirectFollow(@current_uid, 6)
+
+    uids1 = @indirectFollow.collect{|d| d.fid}.compact || []
+    @indirectFollow.each do |d|
+     begin
+      @reason[d.fid] = "#{d.count}个间接关注人"
+      @mids[d.fid] = d.mids.split(",").collect{|id|id.to_i if id}.sample(2)
+     rescue
+     end
+    end
+    # p "uids1 = #{uids1}"
+  rescue
+    uids1 = []
+  end
+
+  #间接人 详细信息
+  begin
+    mid_uids = @mids.each_value.to_a.flatten
+    if mid_uids and !mid_uids.empty?
+      mid_users = $profile_client.getMultiUserBasicInfos(mid_uids)
+      @mids.each do |key,value|
+        begin
+          _users = @mids[key].collect{ |uid| mid_users[uid] if mid_users[uid] }
+          if _users and _users.count > 0
+            @detail[key] = ""
+            @detail[key] += _users.collect{|u| "<a href='#{link_path("/"+u.uid.to_s)}' title='#{u.nickname}' card='#{u.uid}'>#{cut_str(u.nickname,6)}</a>" }.join(",")
+            @detail[key] += "等也关注了Ta"
+          end
+        end
+      end
+    end
+  rescue
+  end
+
+  #新晋播主 列表
+  begin
+  @newV = $recommend2_client.newV(@current_uid, 6)
+  uids2 = @newV.compact || []
+  uids2.each{|uid| @reason[uid]= "新晋播主" }
+  # p "uids2 = #{uids2}"
+  rescue
+    uids2 = []
+  end
+
+  #分类下播主 列表
+  begin
+  register_category = @current_user.registerCategory || ""
+  @categoryHotUser = $recommend2_client.categoryHotUser(@current_uid, register_category,6)
+
+  uids3 = @categoryHotUser.compact || []
+  uids3.each{|uid| @reason[uid]= "喜马拉雅推荐播主" }
+  # p "uids3 = #{uids3}"
+  rescue
+    uids3 = []
+  end
+
+  uids1 = uids1 + Array.new(6)
+  uids2 = uids2 + Array.new(6)
+  uids3 = uids3 + Array.new(6)
+
+  uids = (uids1[0,2] + uids2[0,2] + uids3[0,2]+uids1[2,2] + uids2[2,2] + uids3[2,2]+uids1[4,2] + uids2[4,2] + uids3[4,2]).compact || []
+  uids = uids.uniq.delete_if{|uid|uid==@current_uid}
+
+  if uids.size > 0
+    ranking_users = $profile_client.getMultiUserBasicInfos(uids)
+    tracks_counts = $counter_client.getByIds(Settings.counter.user.tracks, uids)
+    followers_counts = $counter_client.getByIds(Settings.counter.user.followers, uids)
+  else
+    ranking_users = {}
+    tracks_counts = []
+    followers_counts = []
+  end
+
+  uids = uids.delete_if{|uid| ranking_users[uid].nil? }
+
+%>
+    <% if uids.length>0 %>
+    <div class="recommendedBar">
+      <div class="titleBar">
+        <a href="javascript:;" class="more">换一组</a>
+        <h2 class="title">你可能感兴趣的电台</h2>
+      </div>
+      <ul class="personPanelBar3List">
+        <% uids.each_with_index do |uid,i| ; u = ranking_users[uid] %>
+        <li class="listItem" recommend_uid="<%= uid %>" <% if i>=6 %> style="display:none;" <% end %>>
+          <div class="personPanelBar3">
+            <div class="cl">
+              <div class="left">
+                <a class="userface" href="<%= link_his_path(u.uid) %>">
+                  <img card="<%= u.uid %>" alt="<%= u.nickname %>" src="<%= picture_url('header', u.logoPic, '60')  %>" data-options="defaultImg:person_60"><span></span>
+                </a>
+              </div>
+              <div class="middle">
+                <div class="title">
+                  <a href="<%= link_his_path(u.uid) %>" card="<%= u.uid %>" title="<%= u.nickname %>">
+                    <%= u.nickname.truncate(8) if u.nickname %>
+                    <% if u.isVerified %><i class="VIcon">&nbsp;</i><% end %>
+
+                  </a>
+                </div>
+                <div class="info">
+                  <a class="selectBtn <%= 'unclick' if !@detail[uid] %>" href="javascript:;">
+                    <span><%= @reason[uid] %></span>
+                    <% if @detail[uid] %>
+                    <em>◆</em>
+                    <% end %>
+                  </a>
+                </div>
+              </div>
+              <div class="right">
+                <div class="operate">
+                  <a href="javascript:;" class="closeBtn" title="不感兴趣"></a>
+                </div>
+                <% if @current_uid != u.uid %>
+                <a class="addBtn2 small fr" data-options="uid:<%= u.uid %>,is_follow:false,remove:'li.listItem',remove_state:true,show:':hidden:eq(0)'">
+                  <span>关注</span>
+                </a>
+                <% end %>
+              </div>
+            </div>
+            <% if @detail[uid] %>
+            <div class="infoDetail">
+              <%= @detail[uid].html_safe %>
+            </div>
+            <% end %>
+          </div>
+        </li>
+        <% end %>
+      </ul>
+    </div>
+    <% end %>
+
+
+    <!-- 热门话题 && 我的标签 -->
+    <div class="recommendTagsBar">
+        <div class="tagTab">
+            <a class="tab_item on">
+                <span>热门话题</span>
+            </a>
+            <a class="tab_item">
+                <span>我的标签</span>
+            </a>
+        </div>
+        <div class="tab_content on hotTags">
+          <div class="tagsBox">
+              <% hot_topic = FollowingTag.find_by_sql("select * from tb_topic order by order_num desc limit 5") %>
+              <% hot_topic.each do |t| %>
+              <a class="tagBtn" href="<%= link_path "/tag/#{t.name}/" %>">
+                  <span><%= t.name %></span>
+              </a>
+              <% end %>
+          </div>
+        </div>
+
+        <div class="tab_content myTags">
+          <div class="tagsBox">
+            <% following_tags = FollowingTag.stn(@current_uid).where('tname <> ? and uid = ?', '', @current_uid).limit(20) %>
+            <% if following_tags.size > 0 %>
+                <% following_tags.each_with_index do |f,index| %>
+                  <a class="tagBtn" href="<%= link_path "/tag/#{f.tname}/" %>">
+                      <span><%= f.tname %></span>
+                      <div class="del"></div>
+                  </a>
+                <% end %>
+            <% end %>
+          </div>
+        </div>
+    </div>
+    </div>
+</div>

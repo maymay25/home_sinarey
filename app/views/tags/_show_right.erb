@@ -1,0 +1,70 @@
+
+<div class="ad1">
+  <%== erb :_advertise, locals: { id: 728786, width:'200px',height:'80px' } %>
+</div>
+<%
+tag_followers = FollowerTag.stn(params[:tname]).where(tname: params[:tname]).order("created_at desc")
+follower_uids = tag_followers.limit(6).collect{|t| t.uid}
+profile_users = $profile_client.getMultiUserBasicInfos(follower_uids)
+right_tagfollowers = follower_uids.collect{ |uid| profile_users[uid] }
+%>
+
+
+<% if right_tagfollowers.count > 0 %>
+<% 
+  uids = right_tagfollowers.map{|f| f.uid}
+  if uids.size > 0
+    @tracks_counts = $counter_client.getByIds(Settings.counter.user.tracks, uids)
+    @followers_counts = $counter_client.getByIds(Settings.counter.user.followers, uids)
+  else
+    @tracks_counts, @followers_counts = [], []
+  end
+%>
+
+<div class="recommendedBar">
+  <div class="titleBar">
+    <a href="<%= link_path("/tag/#{@tag_name}/follower") %>" class="more">更多</a>
+    <h2 class="title">这些人添加了该标签</h2>
+  </div>
+  <ul class="personPanelBar3List">
+    <% right_tagfollowers.each_with_index do |f, i| %>
+    <% 
+    if @current_uid
+      following = Following.stn(@current_uid).where(uid: @current_uid, following_uid: f.uid).select('following_uid, is_mutual').first
+      is_follow = following.present?
+      be_followed = following && following.is_mutual
+    else
+      is_follow = false
+      be_followed = false
+    end
+    %>
+
+    <li class="listItem">
+      <div class="personPanelBar3">
+        <div class="cl">
+          <div class="left">
+            <a class="userface" href="<%= link_his_path(f.uid) %>" card="<%= f.uid %>">
+              <img alt="<%= f.nickname %>" src="<%= picture_url('header', f.logoPic, '60') %>" data-options="defaultImg:person_60"><span></span>
+            </a>
+          </div>
+          <div class="middle">
+            <div class="title">
+              <a href="<%= link_his_path(f.uid) %>" title="<%= f.nickname %>"><%= f.nickname %></a>
+            </div>
+          </div>
+          <div class="right">
+              <% if @current_uid != f.uid %>
+              <a class="addBtn2 small <%= "already" if is_follow %> <%= "both" if be_followed %>" data-options="<%= {uid:f.uid,is_follow:is_follow,nickname:f.nickname}.to_json[1..-2] %>" href="javascript:;">
+                  <span class="default"><%= (is_follow && be_followed) ? "相互" : is_follow ? "已" : "" %>关注</span>
+                  <span class="hover">取消</span>
+              </a>
+              <% end %>
+          </div>
+        </div>
+      </div>
+    </li>
+    <% end %>
+  </ul>
+</div>
+
+<% end %>

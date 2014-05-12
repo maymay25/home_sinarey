@@ -18,6 +18,14 @@ require 'sinarey/router'
 HomeRouter = Sinarey::Router.new do
   mount MainRoute
   mount ExploreRoute
+  mount CenterRoute
+  mount TracksRoute
+  mount AlbumsRoute
+  mount MsgcenterRoute
+  mount TagsRoute
+  mount FollowRoute
+  mount PersonalSettingsRoute
+  mount DelayedUploadTasksRoute
   notfound NotFoundRoute
 end
 

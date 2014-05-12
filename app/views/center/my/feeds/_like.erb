@@ -1,0 +1,80 @@
+<% if feed and feed.events.size > 0 %>
+  <%
+     user = @users[feed.uid]
+     user_url = (@current_uid != user.uid ? link_his_path(user.uid) : '#')
+     index = 0;
+  %>
+    <li class="listItem" listitem="<%= feed.id %>" feed_id="<%= feed.id %>">
+        <div class="feed">
+            <div class="left">
+                <a class="userface" href="<%= user_url %>" card="<%= user.uid %>"> 
+                  <img src="<%= picture_url('header', user.logoPic, '60') %>" alt="<%= user.nickname %>">
+                </a>
+            </div>
+            <div class="right">
+                <div class="feed_operate">
+                    <a href="javascript:;" class="closeBtn" title="删除"  feed_id='<%= feed.id %>'></a>
+                </div>
+                <div class="feed_title">
+                    <a href="<%= user_url %>" card="<%= user.uid %>">
+                      <%= user.nickname %>
+                      <% if user.isVerified %><i class="VIcon">&nbsp;</i><% end %>
+                    </a>
+					          <span>赞了<%= feed.events.length %>个声音</span>
+                </div>
+                <div class="feed_content">
+                    <ul>
+                      <% play_list=nil %>
+                        <% feed.events.each do |event| %>
+                        <%
+                           if play_list
+                             play_list=play_list+','+event.toTid.to_s
+                           else
+                             play_list=event.toTid.to_s
+                           end
+                           index +=1
+                           if index >3
+                             li_class = 'hidden'
+                           else
+                               li_class = ''
+                           end
+                        %>
+                        <li class="gapB <%= li_class %>"  sound_id="<%= event.toTid %>">
+                            <div class="miniPlayer">
+                                <a class="playBtn"></a>
+                                <a class="title" href="<%= link_path("/#{event.toUid}/sound/#{event.toTid}") %>"><%= event.title %></a>
+                                <span class="fr">
+                                    来自 <a class="author" href="<%= link_his_path(event.toUid) %>"><%= event.toNickName %></a>
+                                </span>
+                            </div>
+                        </li>
+                      <% end %>
+                    </ul>
+                </div>
+                <div class="feed_bottom">
+                    <span class="feed_createtime"><%= parse_time_until_now(feed.createdAt.to_datetime) %></span>
+                </div>
+            </div>
+        </div>
+      <% if feed.events.size > 3 %>
+          <div class="moreBtn unexpand">
+              <div class="bg"></div>
+              <a href="#"><span class="expandtext">展开</span><span class="unexpandtext">收起</span>更多赞了的声音&nbsp;&nbsp;&nbsp;</a>
+          </div>
+      <% end %>
+      <% if play_list %>
+          <%
+          if @all_play_list
+              @all_play_list=@all_play_list+','+play_list
+          else
+              @all_play_list=play_list
+          end
+          %>
+          <script>
+          require(["page/home/feed"],function(feed){
+               feed.initList('<%= feed.id %>', '<%= play_list %>');
+          });
+          </script>
+      <% end %>
+    </li>
+<% end %>

@@ -1,0 +1,288 @@
+
+<div class="mainbox_wrapper">
+
+  <div class="mainbox_left">
+    <div class="personal_container">  
+      <div class="personal_header">
+        <div class="picture">
+          <a href="<%= link_path("/#{@tir.uid}/") %>">
+            <img src="<%= picture_url('header', @track_user.logoPic, '60') %>">
+          </a>
+        </div>
+        <div class="nav_wrap">
+          <div class="username">
+            <%= @track_user.nickname %>
+            <% if @track_user.isVerified %><i class="VIcon">&nbsp;</i><% end %>
+
+            <% if @track_user.uid != @current_uid %>
+              <a class="addBtn3 <%= "already" if @is_follow %> <%= "both" if @be_followed %>" data-options="<%= {uid:@track_user.uid,is_follow:@is_follow,be_followed:@be_followed,nickname:@track_user.nickname}.to_json[1..-2] %>" href="javascript:;">
+                  <span class="default"><%= (@is_follow && @be_followed) ? "相互" : @is_follow ? "已" : "" %>关注</span>
+                  <span class="hover">取消</span>
+              </a>
+            <% end %>
+
+          </div>
+          <ul class="nav_list">
+            <li class="nav_item"><a href="<%= link_path("/#{@tir.uid}/") %>">主页</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@tir.uid}/sound/") %>">声音</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@tir.uid}/album/") %>">专辑</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@tir.uid}/favorites/") %>">赞过的</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@tir.uid}/follow/") %>">关注</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@tir.uid}/fans/") %>">粉丝</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="personal_body">
+        <div class="detailContent">
+
+          <% if @current_uid and @tir.uid == @current_uid %>
+            <a href="/edit_track/<%= @tir.id %>" class="editBtn2" title="编辑">编辑</a>
+          <% end %>
+
+          <a href="javascript:;" class="reportBtn2" title="举报" data-options="<%= {track_id:@tir.track_id,uid:@current_uid,to_uid:@tir.uid,content_title:@tir.title,content_type:ReportInformation::TYPE["track"]}.to_json %>"></a>
+          <div class="left">
+            <a class="soundface180">
+              <img alt="<%= @tir.title %>" <% if @tir.cover_path and @tir.cover_path!="" %>sound_popsrc="<%= @tir.track_id %>"<% end %> src="<%= picture_url('track', @tir.cover_path, '180') %>" data-options="defaultImg:track_180">
+            </a>
+          </div>
+          <div class="right">
+            <div class="detailContent_title">
+              <h1><%= @tir.title %></h1>
+              <% if !@tir.is_public %>
+                <a class="privacyIcon" record_id="<%= @tir.id %>" title="私密声音"></a>
+              <% end %>
+            </div>
+            <% category = @tir.category_id ? Category.where(id: @tir.category_id).first : nil %>
+            <div class="detailContent_category">
+            <% if category %>
+                类别:&nbsp;<a href="<%= link_path "/#{category.name}/" %>">【<%= category.title %>】</a>
+            <% end %>
+                &nbsp;来源：<%= @tir.user_source == 1 ? "原创" : @tir.user_source == 2 ? "采集" : "未知" %>
+              <% if @tir.singer.present? %>&nbsp;原唱：<%= @tir.singer %><%= "(#{@tir.singer_category})" if @tir.singer_category %><% end %>
+              <% if @tir.singer.present? %>&nbsp;翻唱：<%= @tir.resinger %><% end %>
+              <% if @tir.announcer.present? %>&nbsp;播音：<%= @tir.announcer %><% end %>
+              <% if @tir.author.present? %>&nbsp;作者：<%= @tir.author %><% end %>
+              <% if @tir.composer.present? %>&nbsp;作曲：<%= @tir.composer %><% end %>
+              <% if @tir.arrangement.present? %>&nbsp;编曲：<%= @tir.arrangement %><% end %>
+              <% if @tir.post_production.present? %>&nbsp;后期：<%= @tir.post_production %><% end %>
+            </div>
+
+            <% track_tags = @tir.tags && @tir.tags.split(",") %>
+            <% if track_tags.present? %>
+            <div class="tagBtnList">
+              <% track_tags.each do |tag| %>
+              <a class="tagBtn2" href="<%= link_path("/tag/#{tag}") %>"><span><%= tag %></span></a>
+              <% end %>
+            </div>
+            <% end %>
+
+            <% if @tir.status == 0 %>
+            <div class="listenhelp is-review">
+              <span class="tit">待审核</span>
+              <a class="grouphelp"></a>
+              <div class="grouphelp_txt">
+                >>审核期，无法进行评论、分享等操作哦~ <br/>
+                >>审核预计30分钟完成，请稍后...
+                <span class="arrow_grouphelp"><i></i></span>
+              </div>
+            </div>
+            <% else %>
+
+              <div class="soundContent_playcount"><%= @plays_count %>次播放</div>
+              
+              <% if @tir.is_public %>
+              <!-- Baidu Button BEGIN -->
+              <div id="bdshare" class="mgT20 bdshare_t bds_tools get-codes-bdshare" data="{url:'<%= "#{Settings.home_root}/#{@tir.track_uid}/sound/#{@tir.track_id}" %>',pic:'<%= picture_url('track', @tir.cover_path, '180') %>'}">
+                <span class="bds_more">分享到：</span>
+                <a class="bds_qzone"></a>
+                <a class="bds_tsina"></a>
+                <a class="bds_sqq"></a>
+                <a class="bds_tqq"></a>
+              </div>
+              <!-- Baidu Button END -->
+              <% end %>
+              <a href="javascript:;" track_id="<%= @tir.track_id %>" track_uid="<%= @tir.uid %>" class="shareLink">获取声音链接</a>
+            <% end %>
+
+          </div>
+
+          <% if @tir.rich_intro %>
+          <div class="detailContent_intro">
+              <div class="mid_intro">
+                <article><%= @tir.rich_intro.html_safe %></article>
+                <% if @tir.rich_intro[-3, 3] == '...' %>
+                <div><a class="arrow">展开更多</a></div>
+                <% end %>
+              </div>
+              <div class="rich_intro">
+                <%== erb :_rich_intro if @current_uid.nil? %>
+              </div>
+          </div>
+          <% end %>
+
+        </div>
+      
+        <div class="detail_soundBox2" sound_id="<%= @tir.track_id %>">
+          <div class="sound">
+            <div class="sound_unexpandBox">
+              <div class="sound_titlebar">
+                <span class="sound_playcount" title="播放<%= @plays_count %>次"><%= @plays_count %>次</span>
+                <div class="fr"><span class="sound_position">00:00</span>/<span class="sound_duration"><%= parse_duration @tir.duration %></span></div>
+              </div>
+              <div class="feed_middlePlayerBox">
+                <div class="middlePlayer">
+                  <div class="left">
+                    <a class="playBtn"></a>
+                  </div>
+                  <div class="right">
+                    <!-- 进度条 -->
+                    <div class="player_progressbar">
+                      <div class="player_progressbarBg"></div>
+                      <div class="player_seekbar"></div>
+                      <div class="player_playbar"></div>
+                      <div class="player_wavebox" sound_uploadid="<%= @tir.upload_id %>" sound_wave="<%= file_url @tir.waveform %>"></div>
+                      <div class="player_progressbarCoverBg"></div>
+                      <div class="player_nonius">
+                        <div class="player_nonius_cover"></div>
+                        <div class="player_nonius_time">00:00</div>
+                        <div class="player_nonius_line5"></div>
+                        <div class="player_nonius_line3"></div>
+                      </div>
+                    </div>
+                    <!-- 二维评论 -->
+                    <div class="player_commentbar">
+                    </div>
+                    <div class="player_operate">
+                      <a href="javascript:;" class="player_commentbarBtn"  title="显示/隐藏评论"></a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="sound_content">
+              <div class="sound_bottom">
+                <span class="createtime"><%= parse_time_until_now(@tir.created_at) %></span>
+                <% is_favorited = @current_uid ? Favorite.stn(@current_uid).where(uid: @current_uid, track_id: @tir.track_id).any? : false %>
+                <div class="fr">
+                  <a class="downloadToMobile link1">下载到手机</a>
+                  <a class="likeBtn link1 <%= 'is-sound-liked' if is_favorited %>" href="javascript:;">赞(<span class="count"><%= @favorites_count %></span>)</a>
+                  <a class="commentBtn link1" href="javascript:;">评论(<span class="count"><%= @comments_count %></span>)</a>
+                  <a class="forwardBtn link1" href="javascript:;">转采(<span class="count"><%= @shares_count %></span>)</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="recommendSound mgT30">
+          <div class="recommendSound_head">
+            <span class="recommendSound_head_title">你可能还喜欢</span>
+            <div class="recommendSound_head_border"></div>
+            <a>换一组</a>
+          </div>
+          
+          <div class="recommendSound_body <%= 'loadingMore' if @current_uid %>">
+            <%== erb :_maybe_like_list, locals: {category_id: @tir.category_id || 0} unless @current_uid %>
+          </div>
+        </div>
+        
+        <div class="commentSection mgT30">
+          <div class="tagTab">
+            <a href="javascript:;" class="tab_item <% if !params[:relay] %>on<% end %>"><span>评论</span></a>
+            <a href="javascript:;" class="tab_item <% if params[:relay] %>on<% end %>"><span>转采</span></a>
+          </div>
+
+            <div class="commentSection_body <%= 'hidden' if params[:relay] %>">
+
+              <div class="commentSend">
+                <div class="commentBox mgT20">
+                  <div class="commentBox_middle">
+                    <div class="left">
+                      <a class="userface" href="javascript:;">
+                        <img src="<%= picture_url('header', (@current_user ? @current_user.logoPic : nil), '60') %>" data-options="defaultImg:person_60">
+                      </a>
+                    </div>
+                    <div class="right">
+                      <div class="commentBox_inputBox">
+                        <div class="effect_borderHover"></div>
+                        <div class="effect_borderDefault"></div>
+                        <div class="comment_input">
+                        <textarea></textarea>
+                        <span class="arrow_left"></span>
+                        </div>
+                      </div>
+                      <div class="cl">
+                        <div class="fr">
+                          <span class="charCount">还剩<em>145</em>字</span>
+                          <a href="javascript:;" class="faceBtn"></a>
+                          <a href="javascript:;" class="submitBtn"><span>评论</span></a>
+                        </div>
+                        <span>点亮分享</span>
+                        <a href="javascript:;" class="qqWeiboBtn" title="腾讯微博" data-type="comment" data-name="tQQ"></a>
+                        <a href="javascript:;" class="qZoneBtn" title="QQ空间" data-type="comment" data-name="qzone" ></a>
+                        <a href="javascript:;" class="sinaWeiboBtn" title="新浪微博" data-type="comment" data-name="tSina"></a>
+                        <a href="javascript:;" class="renrenBtn" title="人人网" data-type="comment" data-name="renren"></a>
+                        <a href="<%= Settings.profile_url %>">配置</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div id="comment_list_wrap" class="<%= 'loadingMore' if @current_uid %>">
+              </div>
+            </div>
+
+            <div class="relaySection_body <%= 'hidden' if !params[:relay] %>">
+
+              <div class="commentSend">
+                <div class="commentBox mgT20">
+                  <div class="commentBox_middle">
+                    <div class="left">
+                      <a class="userface" href="javascript:;">
+                        <img src="<%= picture_url('header', (@current_user ? @current_user.logoPic : nil), '60') %>" data-options="defaultImg:person_60">
+                      </a>
+                    </div>
+                    <div class="right">
+                      <div class="commentBox_inputBox">
+                        <div class="effect_borderHover"></div>
+                        <div class="effect_borderDefault"></div>
+                        <div class="comment_input">
+                        <textarea></textarea>
+                        <span class="arrow_left"></span>
+                        </div>
+                      </div>
+                      <div class="cl">
+                        <div class="fr">
+                          <span class="charCount">还剩<em>30</em>字</span>
+                          <a href="javascript:;" class="faceBtn"></a>
+                          <a href="javascript:;" class="submitBtn"><span>转采</span></a>
+                        </div>
+                        <span>点亮分享</span>
+                        <a href="javascript:;" class="qqWeiboBtn" title="腾讯微博" data-type="relay" data-name="tQQ"></a>
+                        <a href="javascript:;" class="qZoneBtn" title="QQ空间" data-type="relay" data-name="qzone" ></a>
+                        <a href="javascript:;" class="sinaWeiboBtn" title="新浪微博" data-type="relay" data-name="tSina"></a>
+                        <a href="javascript:;" class="renrenBtn" title="人人网" data-type="relay" data-name="renren"></a>
+                        <a href="<%= Settings.profile_url %>">配置</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="relay_list_wrap" class="<%= 'loadingMore' if @current_uid %>">
+              </div>
+
+            </div>
+
+        </div>    
+      </div>
+    </div>
+  </div>
+
+  <div class="mainbox_right <% if @current_uid -%>loadingMore<% end -%>">
+    <%== erb :_right, locals: {tir: @tir} unless @current_uid %>
+  </div>
+
+</div>
+
+<%== $reply_box_template %>

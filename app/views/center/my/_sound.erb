@@ -1,0 +1,269 @@
+<div id="personalSound" class="mgT30">
+    <div class="mainbox_left">
+        <div class="personal_container">
+            <div class="personal_header">
+                <div class="picture">
+                    <a href="<%= link_path("/#{@current_user.uid}/profile") %>">
+                        <img src="<%= picture_url('header', @current_user.logoPic, '60') %>">
+                    </a>
+                </div>
+                <div class="nav_wrap">
+                    <div class="username">
+                        <%= @current_user.nickname %>
+                        <% if @current_user.isVerified %><i class="VIcon">&nbsp;</i><% end %>
+                    </div>
+                    <ul class="nav_list">
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/profile") %>">主页</a></li>
+                        <li class="nav_item on"><a href="<%= link_path("/#{@current_user.uid}/sound/") %>">声音</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/album/") %>">专辑</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/favorites/") %>">赞过的</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/follow/") %>">关注</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/fans/") %>">粉丝</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/listened/") %>">听过</a></li>
+                        <% if @current_user.isVerified %>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/publish/") %>">定时发布</a></li>
+                        <% end %>
+                    </ul>
+                </div>
+            </div>
+            <div class="personal_body">
+                <div class="body_top">
+                    <div class="left">
+                        <span class="title">我的声音</span>
+                        <div class="selecter fr group-select selecter-s3">
+                            <%
+                                if params[:user_source] == '1'
+                                    select = '原创'
+                                elsif params[:user_source] == '2'
+                                    select = '采集'
+                                elsif params[:op_type] == "2"
+                                    select = '转采'
+                                elsif params[:is_public] == "0"
+                                    select = '私密'
+                                else 
+                                    select = '全部'
+                                end
+                            %>
+                            <div class="selecter-selected" data-value="0">
+                                <span class="selecter-text"><%= select %></span>
+                                <em class="selecter-arrow">◆</em>
+                            </div>
+                            <div class="selecter-options">
+                                <ul>
+                                    <a class="selecter-item <%= 'selected' if select == '全部' %>" href="<%= link_path "/#{@current_user.uid}/sound/" %>">全部</a>
+                                    <a class="selecter-item <%= 'selected' if select == '原创' %>" href="<%= link_path "/#{@current_user.uid}/sound/?user_source=1" %>">原创</a>
+                                    <a class="selecter-item <%= 'selected' if select == '采集' %>" href="<%= link_path "/#{@current_user.uid}/sound/?user_source=2" %>">采集</a>
+                                    <a class="selecter-item <%= 'selected' if select == '转采' %>" href="<%= link_path "/#{@current_user.uid}/sound/?op_type=2" %>">转采</a>
+                                    <a class="selecter-item <%= 'selected' if select == '私密' %>" href="<%= link_path "/#{@current_user.uid}/sound/?is_public=0" %>">私密</a>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="right">
+                        <ul class="sub_nav_list">
+                            <li class="item first">
+                                <% 
+                                order = params[:order]=="created_at asc" ? "created_at desc" : "created_at asc"
+                                q = {q:params[:q],user_source:params[:user_source],op_type:params[:op_type],is_public:params[:is_public],order:order}.delete_if{ |key,value| value.nil? or value=="" }
+                                link_params = q.collect{|key,value| "#{key}=#{value}" }.join("&")
+                                 %>
+                                <a href="<%= link_path "/#{@current_user.uid}/sound/?#{link_params}" %>" class="sort_icon <%= params[:order]=="created_at asc" ? 'down' : 'up' %>">发布时间</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="personal_list_head">
+                    <div class="left"><%= (params[:q] and params[:q]!="") ? "找到#{@track_records_count}个符合条件的声音" : "共有#{@track_records_count}个声音" %></div>
+                    <div class="personal_list_head_operate"><a class="uploadBtn2" href="/upload"><span>上传录制</span></a></div>
+                    <div class="searchPanel2 right">                        
+                        <input class="search_input" type="text" value="<%= params[:q] %>" name="" autocomplete="off" placeholder="搜索声音">                      
+                        <span class="search_btn"></span>
+                    </div>
+                </div>
+                
+                
+                <% if @track_records.count > 0 %>
+                <div class="body_list_wrap">
+                    <ul class="body_list" sound_ids="<%= @track_records.collect{|r|r.track_id}.join(",") %>">
+                        <% @track_records.each_with_index do |r,i| %>
+                        <%
+                          user = @users[r.track_uid]
+                          is_favorited = @is_favorited[r.track_id]
+                        %>
+                        <li class="item" sound_id="<%= r.track_id %>">
+                            <div class="content_wrap">
+                                <div class="sound">
+
+                                    <div class="sound_unexpandBox">
+                                        <div class="sound_titlebar">
+                                            <div class="sound_titlebar_title">
+                                                <a href="<%= link_path "/#{r.track_uid}/sound/#{r.track_id}" %>" class="sound_title">
+                                                    <%= r.title %>
+                                                    <% if !r.is_public and r.track_uid == @current_uid %>
+                                                    <i class="privacyIcon" record_id="<%= r.id %>" title="私密声音"></i>
+                                                    <% end %>
+                                                </a>
+                                                <span class="from">
+                                                <% if r.album_id %>&nbsp;&nbsp;来自<a href="<%= link_path "/#{r.track_uid}/album/#{r.album_id}" %>">《<%= r.album_title %>》</a><% end %>
+                                                </span>
+                                            </div>
+                                            <% if r.op_type == 2 %><span>【转采】</span><% end %>
+                                            <span class="sound_playcount" title="<%= @track_plays_counts[i] %>次播放"><%= @track_plays_counts[i] %></span>
+
+                                            <div class="personal_operate">
+                                                <% if r.op_type != 2 %>
+                                                <a class="personal_editBtn" href="/edit_track/<%= r.id %>">编辑</a>
+                                                <% end %>
+                                                <a class="personal_deleteBtn destroyBtn" destroy_id="<%= r.id %>">删除</a>
+                                                <% if r.is_public %>
+                                                <a class="personal_addtoAlbum" data-options="<%= Yajl::Encoder.encode({source:r.user_source,track_id:r.track_id,record_id:r.id}) %>"><% if r.album_id %>更改专辑<% else %>添加到专辑<% end %></a>
+                                                <% end %>
+                                            </div>
+
+                                        </div>
+                                        <div class="smallPlayer" sound_uploadid="<%= r.upload_id %>" sound_wave="<%= file_url r.waveform %>">
+                                            <a href="javascript:;" class="playBtn"></a>
+                                            <span class="duration"><%= parse_duration r.duration %></span>
+                                            <% if r.cover_path and r.cover_path!="" %>
+                                            <div class="pin" sound_popsrc="<%= r.track_id %>">
+                                                <a href="<%= link_path "/#{r.track_uid}/sound/#{r.track_id}" %>" class="soundface">
+                                                    <img alt="" src="<%= picture_url('track', r.cover_path, '60') %>" data-options="defaultImg:track_60">
+                                                    <span></span>
+                                                </a>
+                                            </div>
+                                            <% end %>
+                                        </div>
+                                    </div>
+
+                                    <div class="sound_expandBox">
+                                        <div class="sound_titlebar">
+                                            <a class="sound_title" href="<%= link_path "/#{r.track_uid}/sound/#{r.track_id}" %>">
+                                                <%= r.title %>
+                                                <% if !r.is_public and r.track_uid == @current_uid %>
+                                                <i class="privacyIcon" record_id="<%= r.id %>" title="私密声音"></i>
+                                                <% end %>
+                                            </a>
+                                            <span class="sound_playcount" title="<%= @track_plays_counts[i] %>次播放"><%= @track_plays_counts[i] %></span>
+                                            <div class="fr"><span class="sound_position">00:00</span>/<span class="sound_duration"><%= parse_duration r.duration %></span></div>
+
+                                            <div class="personal_operate">
+                                                <% if r.op_type != 2 %>
+                                                <a class="personal_editBtn" href="/edit_track/<%= r.id %>">编辑</a>
+                                                <% end %>
+                                                <a class="personal_deleteBtn destroyBtn" destroy_id="<%= r.id %>">删除</a>
+                                                <% if r.is_public %>
+                                                <a class="personal_addtoAlbum" data-options="<%= Yajl::Encoder.encode({source:r.user_source,track_id:r.track_id,record_id:r.id}) %>"><% if r.album_id %>更改专辑<% else %>添加到专辑<% end %></a>
+                                                <% end %>
+                                            </div>
+
+                                        </div>
+                                        <div class="feed_middlePlayerBox">
+                                            <div class="middlePlayer">
+                                                <div class="left">
+                                                    <a class="playBtn"></a>
+                                                </div>
+                                                <div class="right">
+                                                    <!-- 进度条 -->
+                                                    <div class="player_progressbar">
+                                                        <div class="player_progressbarBg"></div>
+                                                        <div class="player_seekbar"></div>
+                                                        <div class="player_playbar"></div>
+                                                        <% if r.waveform %>
+                                                            <div class="player_wavebox" sound_wave="<%= get_wave_url r.waveform %>" sound_uploadid="<%= r.upload_id %>"></div>
+                                                        <% end %>
+                                                         <div class="player_progressbarCoverBg"></div>
+                                                        <div class="player_nonius">
+                                                            <div class="player_nonius_cover"></div>
+                                                            <div class="player_nonius_time">00:00</div>
+                                                            <div class="player_nonius_line5"></div>
+                                                            <div class="player_nonius_line3"></div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- 二维评论 -->
+                                                    <div class="player_commentbar">
+                                                    </div>
+                                                    <div class="player_operate">
+                                                        <a href="javascript:;" class="player_commentbarBtn"  title="显示/隐藏评论"></a>
+                                                    </div>
+                                                </div>
+
+                                                <% if r.cover_path and r.cover_path!="" %>
+                                                <div class="pin" sound_popsrc="<%= r.track_id %>">
+                                                    <a href="<%= link_path "/#{r.track_uid}/sound/#{r.track_id}" %>" class="soundface">
+                                                        <img alt="" src="<%= picture_url('track', r.cover_path, '60') %>" data-options="defaultImg:track_60">
+                                                        <span></span>
+                                                    </a>
+                                                </div>
+                                                <% end %>
+                                            </div>
+                                        </div>
+                                        <div class="sound_content">
+                                          <%= r.intro.truncate(160) if r.intro %>
+                                        </div>
+                                    </div>
+
+                                    <div class="sound_bottom">
+                                        <span class="createtime"><%= parse_time_until_now(r[:created_at]) %></span>
+                                        <div class="fr">
+                                            <a class="downloadToMobile link1">下载到手机</a>
+                                            <a href="javascript:;" class="likeBtn link1 <%= 'is-sound-liked' if is_favorited %>">赞(<span class="count"><%= @track_favorites_counts[i] %></span>)</a>
+                                            <a href="javascript:;" class="commentBtn link1">评论(<span class="count"><%= @track_comments_counts[i] %></span>)</a>
+                                            <a href="javascript:;" class="forwardBtn link1">转采(<span class="count"><%= @track_shares_counts[i] %></span>)</a>
+                                            <% if r.status == 0 %>
+                                            <a href="javascript:;" class="link1" notice="待审核声音暂时不能分享...">分享</a>
+                                            <% else %>
+                                            <% bds_config = {
+                                                bdDes:"喜马拉雅好声音",
+                                                text:"#{r.intro.truncate(80) if r.intro} 我觉得《#{r.title}》听起来挺不错的，你觉得呢？（分享自 @喜马拉雅好声音 ）",
+                                                title:r.title,
+                                                pic:picture_url('track', r.cover_path, '180'),
+                                                url:"#{Settings.home_root}/#{r.track_uid}/sound/#{r.track_id}"
+                                            } %>
+                                            <a href="javascript:;" class="bdShareBtn link1" data="<%= Yajl::Encoder.encode(bds_config) %>">分享</a>
+                                            <% end %>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <div class="comment_box_entry"></div>
+                                        <div class="relay_box_entry"></div>
+                                    </div>
+                                </div>
+                                <% if r.status == 0 %>
+                                <div class="listenhelp is-review">
+                                    <span class="tit">待审核</span>
+                                    <a class="grouphelp"></a>
+                                    <div class="grouphelp_txt">
+                                        >>审核期，无法进行评论、分享等操作哦~ <br/>
+                                        >>审核预计30分钟完成，请稍后...
+                                        <span class="arrow_grouphelp"><i></i></span>
+                                    </div>
+                                </div>
+                                <% end %>
+                            </div>
+                        </li>
+                        <% end %>
+                    </ul>
+                    <div class="pagingBar mgTB20">
+                        <%== paginate CustomPagination.new(@track_records_count,@page,@per_page), {outer_window: 1, url:"/#{@current_uid}/sound", link_path: @current_uid.present?} %>
+                    </div>
+                </div>
+                <% elsif @page <= 1 %>
+                    <div class="noItem">                    
+                        <span class="noItemTit">啊呀！你还没有声音！</span><br>
+                        <span>立即<a href="/upload">上传或录制</a>一段声音，展示给大家</span>
+                    </div>
+                <% end %>
+                
+            </div>
+        </div>
+    </div>
+
+
+    <%== erb :'my/_mainbox_sound_right' %>
+
+    <%== $comment_inputbox_template %>
+
+</div>

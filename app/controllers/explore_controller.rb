@@ -2,11 +2,15 @@ class ExploreController < ApplicationController
 
   set :views, ['explore','application']
 
+  def dispatch(action)
+    super(:explore,action)
+    method(action).call
+  end
+
   #发现首页
-  def index
+  def index_page
 
     set_no_cache_header
-    register_page('explore','index')
 
     exadsmar = REDIS.get(Settings.pagedata.exads)
     if exadsmar
@@ -76,14 +80,13 @@ class ExploreController < ApplicationController
 
     @this_title = "发现 喜马拉雅-听我想听"
 
-    halt render_erb_js(:index_js) if request.xhr?
+    halt erb_js(:index_js) if request.xhr?
     erb :index
   end
 
   def sound_page
 
     set_no_cache_header
-    register_page('explore','sound_page')
 
     @categories = $discover_client.selectWebTrackCategoryAndTag()
 
@@ -91,14 +94,13 @@ class ExploreController < ApplicationController
 
     @this_title = "发现-热门声音 喜马拉雅-听我想听"
 
-    halt render_erb_js(:sound_page_js) if request.xhr?
+    halt erb_js(:sound_page_js) if request.xhr?
     erb :sound_page
   end
 
   def seo_sound_page
 
     set_no_cache_header
-    register_page('explore','sound_page')
 
     @categories = $discover_client.selectWebTrackCategoryAndTag()
     @init_category_name = request.fullpath.gsub("/","").split("?")[0].sub('.ajax','')
@@ -108,14 +110,13 @@ class ExploreController < ApplicationController
     @init_category_title = this_category.title
     params[:category] = this_category.id
 
-    halt render_erb_js(:sound_page_js) if request.xhr?
+    halt erb_js(:sound_page_js) if request.xhr?
     erb :sound_page
   end
 
   def seo_new_sound_page
 
     set_no_cache_header
-    register_page('explore','sound_page')
 
     @categories = $discover_client.selectWebTrackCategoryAndTag()
     fullpath = request.fullpath
@@ -132,12 +133,14 @@ class ExploreController < ApplicationController
     params[:category] = this_category.id
     params[:condition] = 'zuixinshangchuan'
 
-    halt render_erb_js(:sound_page_js) if request.xhr?
+    halt erb_js(:sound_page_js) if request.xhr?
     erb :sound_page
   end
 
   def sound_detail
+
     set_no_cache_header
+
     category = params[:category].to_i
     category = nil unless category > 0
     tag = (params[:tag].nil? || params[:tag]=="") ? nil : params[:tag]
@@ -218,7 +221,6 @@ class ExploreController < ApplicationController
   def user_page
 
     set_no_cache_header
-    register_page('explore','user_page')
 
     @categories = $discover_client.selectWebHumanCategory()
 
@@ -229,12 +231,12 @@ class ExploreController < ApplicationController
     user_detail('init')
     @this_title = "发现-个人电台 喜马拉雅-听我想听"
 
-    halt render_erb_js(:user_page_js) if request.xhr?
+    halt erb_js(:user_page_js) if request.xhr?
     erb :user_page
   end
 
   def user_detail(command=nil)
-    set_no_cache_header
+
     @page = (params[:page] && params[:page].to_i) || 1
     @per_page = 20
     category = params[:category].to_i
@@ -268,26 +270,28 @@ class ExploreController < ApplicationController
     @users         = users
     @users_count   = hot_server_data[:count]
 
-    render_to_string(partial: :'_user_detail') unless command=="init"
+    if command!="init"
+      set_no_cache_header
+      halt render_to_string(partial: :'_user_detail')
+    end
   end
 
   def album_page
     
     set_no_cache_header
-    register_page('explore','album_page')
 
     @categories = $discover_client.selectWebAlbumCategoryAndTag()
     album_detail('init')
     @this_title = "发现-热门专辑 喜马拉雅-听我想听"
 
-    halt render_erb_js(:album_page_js) if request.xhr?
+    halt erb_js(:album_page_js) if request.xhr?
     erb :album_page
   end
 
   #condition: hot.热门(默认) recent.最近更新 classic.经典
   #status 0 -> 全部，1->完结，2->连载中
   def album_detail(command=nil)
-    set_no_cache_header
+
     category = params[:category].to_i
     category = nil unless category > 0
     tag = (params[:tag].nil? || params[:tag]=="") ? nil : params[:tag]
@@ -346,15 +350,20 @@ class ExploreController < ApplicationController
       @album_plays_counts = []
     end
 
-    render_to_string(partial: :'_album_detail') unless command=="init"
+    if command!="init"
+      set_no_cache_header
+      halt render_to_string(partial: :'_album_detail')
+    end
   end
 
   #批量获取用户的关注状态
   def get_follow_status
-    return render json: {res: true, result:{}} if params[:uids].blank?
-    return render json: {res: true, result:{}} if @current_uid.nil?
-    hash = {}
-    fuids = []
+
+    set_no_cache_header
+
+    return render_json({res: true, result:{}}) if params[:uids].blank?
+    return render_json({res: true, result:{}}) if @current_uid.nil?
+    hash,fuids = {},[]
     params[:uids].split(',').each do |uid|
       next unless (uid=uid.to_i) > 0
       hash[uid] = {}

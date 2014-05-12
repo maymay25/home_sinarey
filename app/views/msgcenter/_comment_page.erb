@@ -1,0 +1,148 @@
+<div id="msgComment" class="mainbox_wrapper">
+    <div class="mainbox_left">
+        <div class="msg_container">
+            <div class="msg_header">
+                <span class="title">消息中心</span>
+                <ul class="nav_list">
+                    <li class="nav_item">
+                        <a href="<%= link_path "/msgcenter/notice" %>">系统通知</a>
+                    </li>
+                    <li class="nav_item">
+                        <a href="<%= link_path "/msgcenter/referme" %>">@我的</a>
+                    </li>
+                    <li class="nav_item on">
+                        <a href="javascript:;">评论</a>
+                    </li>
+                    <li class="nav_item">
+                        <a href="<%= link_path "/msgcenter/letter" %>">私信</a>
+                    </li>
+                    <li class="nav_item">
+                        <a href="<%= link_path "/msgcenter/like" %>">赞</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="msg_body">
+                <div class="msg_body_top">
+                    <div class="left">
+                        <span class="title">评论</span>
+                        <span class="count">(<%= @all_count %>个)</span>
+                    </div>
+                    <div class="right">
+                        <ul class="sub_nav_list">
+                            <li class="item first <%= 'on' if params[:type]!="out" %>">
+                                <a href="<%= link_path "/msgcenter/comment" %>">评论我的(<%= @inbox_count %>)</a>
+                            </li>
+                            <li class="item <%= 'on' if params[:type]=="out" %>">
+                                <a href="<%= link_path "/msgcenter/comment?type=out" %>">我评论的(<%= @outbox_count %>)</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <ul class="msg_notice_list">
+                    <% @comments.each do |msg| %>
+                    <% 
+                    if msg.track_id
+                      tir = TrackInRecord.fetch(msg.track_id)
+                      if tir.nil? or !tir.is_public or tir.is_deleted or tir.status != 1
+                        msg.destroy
+                        next
+                      end
+
+                      comment = Comment.stn(tir.track_id).where(id: msg.comment_id).first
+                      unless comment # 对应评论不存在
+                        msg.destroy 
+                        next
+                      end
+                    end
+                    %>
+
+                    <li class="msg_notice_item">
+                        <div class="content_wrap">
+                            <div class="picture">
+                                <a href="<%= link_his_path(msg.uid) %>">
+                                    <img width="60px" height="60px" alt="<%= msg['nickname'] %>" src="<%= picture_url('header', msg.avatar_path, '60') %>" data-options="defaultImg:person_60">
+                                </a>
+                            </div>
+                            <div class="detail">
+                                <div class="detail_top">
+
+                                    <% if msg['message_type']==2 %>
+                                    <span>
+                                        <a class="from" href="<%= link_his_path(msg.uid) %>" card="<%= msg.uid %>"><%= msg.uid == @current_uid ? '你' : msg.nickname %></a>
+                                    </span>
+                                    <span>评论了
+                                    <a href="<%= link_his_path(msg.to_uid) %>" card="<%= msg.to_uid %>">
+                                        <%= msg.to_uid==@current_uid ? '你' : msg.to_nickname %>
+                                    </a>
+                                    的</span>
+                                    <span>
+                                        <a class="where" href="<%= link_path("/#{msg.track_uid}/sound/#{msg.track_id}") %>"><%= msg.track_title %></a>
+                                    </span>
+                                    <% else %>
+                                    <span>
+                                        <a class="from" href="<%= link_his_path(msg.uid) %>" card="<%= msg.uid %>"><%= msg.uid == @current_uid ? '你' : msg.nickname %></a>
+                                    </span>
+                                    <span>在</span>
+                                    <span>
+                                        <a class="where" href="<%= link_path("/#{msg.track_uid}/sound/#{msg.track_id}") %>"><%= msg.track_title %></a>
+                                    </span>
+                                    <span>的评论中回复了
+                                        <% if msg.to_uid == @current_uid %>你<% else %><a href="<%= link_his_path(msg.to_uid) %>" card="<%= msg.to_uid %>"><%= msg.to_nickname %></a><% end %>
+                                    </span>
+                                    <% end %>
+                                </div>
+                                <div class="detail_content">
+                                    <div class="others_comment">
+                                        <div class="comment_content">
+                                            <span><%= puts_face(msg.content).html_safe %></span>
+                                            <span class="arrow_left"></span>
+                                        </div>
+                                    </div>
+                                    
+                                    <% if msg.message_type == 3 %>
+                                    <div class="original_comment">
+                                        <span class="tip"><%= msg.to_uid == @current_uid ? '我' : 'Ta' %>的评论</span>
+                                        <span class="comment_content"><%= puts_face(msg.pcomment_content).html_safe %></span>
+                                    </div>
+                                    <% end %>
+
+                                </div>
+                                <div class="detail_bottom">
+                                    <span class="left"><%= parse_time_until_now(msg.created_at) %></span>
+                                    <span class="right">
+                                        <% if msg.uid != @current_uid %>
+                                        <a href="javascript:;" class="replyBtn" data-options="<%= Yajl::Encoder.encode({c_id: msg.comment_id, c_second:msg.second, c_nickname: msg.nickname, t_id: msg.track_id}) %>">回复</a>
+                                        <% end %>
+                                        <a href="javascript:;" class="destroyBtn" data-options="<%= Yajl::Encoder.encode({c_id: msg.comment_id,t_id: msg.track_id}) %>">删除评论</a>
+                                    </span>
+                                </div>
+                                <div class="reply_box_entry"></div>
+                            </div>
+                        </div>
+                    </li>
+                    <% end %>
+                </ul>
+
+                <div class="pagingBar mgTB20">
+                    <%== paginate CustomPagination.new(@comments_count,@page,@per_page), {outer_window: 1, url:"/msgcenter/comment", link_path: @current_uid.present?} %>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <%== $reply_box_template %>
+
+    <div class="mainbox_right">
+        <div class="msg_helper">
+            <div class="msg_header_title">评论小帮助</div>
+            <div class="question">不想收到评论怎么办</div>
+            <div class="answer">
+                去
+                <a href="/#/personal_settings/message">消息设置</a>
+                进行评论权限设置
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,9 @@
+$("#mainbox").html('<%== escape_javascript erb(:'my/_publish') %>');
+
+require(["page/center/publish"], function(page){
+    page.init();
+});
+
+<% if @this_title %>
+document.title="<%== escape_javascript @this_title %>";
+<% end %>

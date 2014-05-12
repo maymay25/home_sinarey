@@ -1,0 +1,89 @@
+<% if feed and feed.events.size > 0 %>
+    <%
+       user = @users[feed.uid]
+       user_url = (@current_uid != user.uid ?  link_his_path(user.uid) : '#')
+        arr = feed.events.collect{ |f| f.toUid }
+        if arr and arr.size > 0
+            user_tracks_counts = $counter_client.getByIds(Settings.counter.user.tracks, arr)
+            user_followers_counts = $counter_client.getByIds(Settings.counter.user.followers, arr)
+        else
+          user_tracks_counts = []
+          user_followers_counts = []
+        end
+
+    %>
+    <!-- 关注用户 -->
+    <li class="listItem">
+      <div class="feed">
+        <div class="left">
+          <a class="userface" href="<%= user_url %>" card="<%= user.uid %>">
+            <img src="<%= picture_url('header', user.logoPic, '60') %>" alt="<%= user.nickname %>" />
+          </a>
+        </div>
+        <div class="right">
+          <div class="feed_operate">
+            <a href="javascript:;" class="closeBtn" title="删除"  feed_id='<%= feed.id %>'></a>
+          </div>
+          <div class="feed_title">
+            <a href="<%= user_url %>" card="<%= user.uid %>">
+              <%= user.nickname %>
+              <% if user.isVerified %><i class="VIcon">&nbsp;</i><% end %>
+            </a>
+			      <span>关注了<%= feed.events.length %>个人</span>
+          </div>
+          <div class="feed_content">
+            <div class="personPanelBar2List">
+                  <% feed.events.each_with_index do |event,index| %>
+                  <%
+                     if index >=6
+                       li_class = 'hidden'
+                     else
+                         li_class = ''
+                     end
+                     if @current_uid
+                       following = Following.stn(@current_uid).where(uid: @current_uid, following_uid: event.toUid).select('following_uid, is_mutual').first
+                       is_follow = following.present?
+                       be_followed = following && following.is_mutual
+                     else
+                      is_follow = false
+                      be_followed = false
+                     end
+                    %>
+              <div class="personPanelBar2 <%= li_class %>" >
+                <div class="left">
+                  <a class="userface" href="<%= link_his_path(event.toUid) %>" card="<%= event.toUid %>">
+                    <img src="<%= picture_url('header', event.toImagePath, '60') %>" alt="<%= event.toNickName %>" />
+                  </a>
+                </div>
+                <div class="right">
+                  <div>
+                    <a class="title" href="<%=(@current_uid != event.toUid ?  link_his_path(event.toUid):'#') %>" title="<%= event.toNickName %>"><%= event.toNickName %></a>
+                  </div>
+                  <div>
+                    <a class="soundCount"><%= user_tracks_counts[index] %></a>
+                    <a class="followerCount"><%= user_followers_counts[index] %></a>
+                  </div>
+                  <div>
+                    <a class="addBtn2 small <%= "already" if is_follow %> <%= "both" if be_followed %>"  data-options="uid:<%= event.toUid %>,is_follow:<%= is_follow %>,nickname:'<%= event.toNickName %>'" >
+                      <span class="default"><%= (is_follow && be_followed) ? "相互" : is_follow ? "已" : "" %>关注</span>
+                      <span class="hover">取消</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <% end %>
+            </div>
+          </div>
+          <div class="feed_bottom">
+            <span class="feed_createtime"><%= parse_time_until_now(feed.createdAt.to_datetime) %></span>
+          </div>
+        </div>
+      </div>
+      <% if feed.events.size > 6 %>
+          <div class="moreBtn unexpand">
+            <div class="bg"></div>
+            <a href="#"><span class="expandtext">展开</span><span class="unexpandtext">收起</span>更多他关注的人&nbsp;&nbsp;&nbsp;</a>
+          </div>
+      <% end %>
+    </li>
+<% end %>

@@ -1,0 +1,9 @@
+$("#mainbox").html('<%== escape_javascript erb(:_follower) %>');
+
+require(['page/final/final_tag'], function (page) {
+  page.init();
+});
+
+<% if @this_title %>
+  document.title="<%== escape_javascript @this_title %>";
+<% end %>

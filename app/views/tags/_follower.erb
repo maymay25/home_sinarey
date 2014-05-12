@@ -1,0 +1,95 @@
+<div class="mainbox_wrapper">
+  <div class="mainbox_left">
+    <div class="tagPanel gapModuleB">
+      <div class="tagWrapper"></div>
+      <div class="fl">
+        <div class="tagHead">
+          <span class="tagName"><%= @tag_name %></span>&nbsp;&nbsp;<span>已有<span class="tagCount"><%= @tagfollowers_count %></span>人感兴趣</span>
+        </div>
+        <div class="count">
+          声音<a href="<%= link_path("/tag/#{@tag_name}") %>"><%= @tagtracks_count %></a><span></span>
+          感兴趣<a class="tagCount" href="<%= link_path("/tag/#{@tag_name}/follower") %>"><%= @tags_followers_count %></a>
+        </div>
+      </div>
+      <a class="interestBtn <% if @is_follow %>already<% end %>" data-tag="<%= @tag_name %>" href="javascript:;">
+        <span class="interest">
+          <em>+</em>
+          <span>感兴趣</span>
+        </span>
+        <span class="uninterest">不感兴趣</span>
+      </a>
+    </div>
+    <div class="soundTab">
+      <div class="fl">
+        <strong class="tab_title">对该标签感兴趣的人</strong>
+      </div>
+    </div>
+
+    <div class="body_list_wrap">
+      <ul class="body_list follow_list">
+        <%
+        uids = @tagfollowers.map{|l| l.uid }
+        if uids.size > 0
+          tracks_counts = $counter_client.getByIds(Settings.counter.user.tracks, uids)
+          followers_counts = $counter_client.getByIds(Settings.counter.user.followers, uids)
+          followings_counts = $counter_client.getByIds(Settings.counter.user.followings, uids)
+        else
+          tracks_counts, followers_counts, followings_counts = [], [], []
+        end
+        %>
+
+      <% @tagfollowers.each_with_index do |user, i| %>
+        <%
+        if @current_uid
+          following = Following.stn(@current_uid).where(uid: @current_uid, following_uid: user.uid).select('following_uid, is_mutual').first
+          is_follow = following.present?
+          be_followed = following && following.is_mutual
+        else
+          is_follow = false
+          be_followed = false
+        end
+        %>
+        <li class="item" >
+          <div class="content_wrap">
+            <div class="picture">
+              <img alt="<%= user.nickname %>" card="<%= user.uid %>" class="tx" src="<%= picture_url('header', user.logoPic, '60') %>">
+            </div>
+            <div class="detail">
+              <div class="detail_top">
+                <a class="username" card="<%= user.uid %>" href="<%= link_his_path(user.uid) %>"><%= user.nickname %><i class="VIcon"></i></a>
+              </div>
+              <div class="detail_content">
+                <%= user.personalSignature %>
+              </div>
+              <div class="detail_bottom">
+                <span class="left follower_counter"><%= followers_counts[i] %></span>
+                <span class="left sound_counter"><%= tracks_counts[i] %></span>
+                <span class="left attention_counter"><%= followings_counts[i] %></span> 
+              </div>
+            </div>
+            <div class="operate_btns">
+              <% if @current_uid != user.uid %>
+              <a class="sendLetterBtn" href="javascript:;" data-options="nickname:'<%= user.nickname %>'"><span class="icon">发私信</span></a>
+              <a class="addBtn2 <%= "already" if is_follow %> <%= "both" if be_followed %>" data-options="uid:<%= user.uid %>,is_follow:<%= is_follow %>,nickname:'<%= user.nickname %>'"href="javascript:;">
+                <span class="default"><%= (is_follow && be_followed) ? "相互" : is_follow ? "已" : "" %>关注</span>
+                <span class="hover">取消</span>
+              </a>
+              <% end %>
+            </div>
+          </div>
+        </li>
+        <% end %>
+      </ul>
+      <div class="pagingBar mgTB20">
+        <%== paginate CustomPagination.new(@tagfollowers_count,@page,@per_page), {outer_window: 1, url:"/tag/#{@tag_name}/follower", link_path: @current_uid.present?} %>
+      </div>
+    </div>
+  </div>
+
+  <div class="mainbox_right">
+    <div class="ad1">
+      <%== erb :_advertise, locals: { id: 728786, width:'200px',height:'80px' } %>
+    </div>
+  </div>
+
+</div> 

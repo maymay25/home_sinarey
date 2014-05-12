@@ -1,0 +1,5 @@
+$("#mainbox").html('<%== escape_javascript erb(:_privacy_page) %>');
+
+require(["page/setting/privacy"], function(page){
+    page.init();
+});

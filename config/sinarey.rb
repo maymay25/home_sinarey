@@ -12,7 +12,11 @@ require "sinatra/cookies"
 require File.join(Sinarey.core_root, 'config/initializers')
 Dir[ File.join(Sinarey.core_root, 'app/models/*.rb') ].each{|file| require file }
 
+require File.join(Sinarey.core_root, 'app/helpers/inet.rb')
 require File.join(Sinarey.core_root, 'app/helpers/core_helper.rb')
+require File.join(Sinarey.core_root, 'app/helpers/apn_dispatch_helper.rb')
+require File.join(Sinarey.core_root, 'app/helpers/search_helper.rb')
+
 
 module Sinarey
 

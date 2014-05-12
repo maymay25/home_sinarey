@@ -1,0 +1,238 @@
+  <div class="mainbox_wrapper">
+  <div class="mainbox_left">
+    <div class="personal_container">
+      <div class="personal_header">
+        <div class="picture">
+          <a href="<%= link_path("/#{@u.uid}/") %>">
+            <img src="<%= picture_url('header', @u.logoPic, '60') %>">
+          </a>
+        </div>
+        <div class="nav_wrap">
+          <div class="username">
+            <%= @u.nickname %>
+            <% if @u.isVerified %><i class="VIcon">&nbsp;</i><% end %>
+            <% if @u.uid != @current_uid %>
+              <a class="addBtn3 <%= "already" if @is_follow %> <%= "both" if @be_followed %>" data-options="<%= {uid:@u.uid,is_follow:@is_follow,be_followed:@be_followed,nickname:@u.nickname}.to_json[1..-2] %>" href="javascript:;">
+                  <span class="default"><%= (@is_follow && @be_followed) ? "相互" : @is_follow ? "已" : "" %>关注</span>
+                  <span class="hover">取消</span>
+              </a>
+            <% end %>
+          </div>
+          <ul class="nav_list">
+            <li class="nav_item"><a href="<%= link_path("/#{@u.uid}/") %>">主页</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@u.uid}/sound/") %>">声音</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@u.uid}/album/") %>">专辑</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@u.uid}/favorites/") %>">赞过的</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@u.uid}/follow/") %>">关注</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@u.uid}/fans/") %>">粉丝</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="personal_body" sound_ids="<%= @tracks.collect{|t|t.track_id}.join(",") if @tracks %>">
+        <div class="detailContent follower" sound_id="<%= @tracks[0].track_id if @tracks and @tracks[0] %>">
+          <% if @current_uid and @album.uid == @current_uid %>
+            <a href="/edit_album/<%= @album.id %>" class="editBtn2" title="编辑">编辑</a>
+          <% end %>
+          <a href="javascript:;" class="reportBtn2" title="举报" data-options="<%= {album_id:@album.id, uid:@current_uid, to_uid:@u.uid,content_title:@album.title,content_type:ReportInformation::TYPE["album"]}.to_json %>"></a>
+          <div class="left">
+            <a href="javascript:;" class="albumface180">
+              <span>
+                <img alt="<%= @album.title %>" popsrc="<%= picture_url('album', @album.cover_path, 'origin') if @album.cover_path %>" src="<%= picture_url('album', @album.cover_path, '180') %>" data-options="defaultImg:album_180">
+              </span>
+            </a>
+            <% case @album.is_finished when 2,true %>
+                <span class="labelEnd2"></span>
+            <% when 1,false  %>
+                <span class="labelSerial2"></span>
+            <% end %>
+          </div>
+          <div class="right">
+            <div class="detailContent_title"><h1><%= @album.title %></h1></div>
+            <div class="detailContent_category">
+              类别: <a rel="nofollow" href="<%= link_path("/#{@category_name}/?scope=album") %>">【<%= @category_title %>】</a>
+              <span>最后更新: <%= (@album.last_uptrack_at || @album.updated_at).strftime("%Y-%m-%d") %></span>
+            </div>
+            <div class="tagBtnList">
+              <% if @album["tags"] and @album["tags"].strip!="" %>
+              <% @album["tags"].split(",").each do |tag| %>
+                <a class="tagBtn2" rel="nofollow" href="<%= link_path("/tag/#{tag}") %>">
+                  <span><%= tag %></span>
+                </a>
+              <% end %>
+              <% end %>
+            </div>
+
+            <% if @album.status == 0 %>
+              <div class="listenhelp is-review">
+                <span class="tit">待审核</span>
+                <a class="grouphelp"></a>
+                <div class="grouphelp_txt">
+                  >>审核期，无法进行评论、分享等操作哦~ <br/>
+                  >>审核预计30分钟完成，请稍后...
+                  <span class="arrow_grouphelp"><i></i></span>
+                </div>
+              </div>
+            <% else %>
+              <% if @all_tracks_count>0 %>
+              <div class="detailContent_playcount">
+                <a class="playBtn"></a>
+                <div class="detailContent_playcountDetail">
+                  <span><%= parse_wan(@plays_count) %></span>
+                  次播放
+                </div>
+              </div>
+              <% else %>
+              <div class="noSound"></div>
+              <% end %>
+              <div id="bdshare" class="bdshare_t bds_tools get-codes-bdshare"  data="{url:'<%= "#{Settings.home_root}/#{@album.uid}/album/#{@album.id}" %>',pic:'<%= picture_url('album', @album.cover_path, '180') %>'}">
+                <span class="bds_more">分享到：</span>
+                <a class="bds_qzone"></a>
+                <a class="bds_tsina"></a>
+                <a class="bds_sqq"></a>
+                <a class="bds_tqq"></a>
+              </div>
+              <a href="javascript:;" album_id="<%= @album.id %>" album_uid="<%= @album.uid %>" class="shareLink shareLink2">获取专辑链接</a>
+            <% end %>
+
+          </div>
+
+          <% if @album.rich_intro %> 
+          <div class="detailContent_intro">
+            <div class="mid_intro">
+              <article><%= @album.rich_intro.html_safe %></article>
+              <% if @album.rich_intro[-3, 3] == '...' %>
+              <div><a class="arrow">展开更多</a></div>
+              <% end %>
+            </div>
+            <div class="rich_intro">
+              <article><%== simple_format(@rich_intro) if @rich_intro %></article>
+              <div><a class="arrow on">收起</a></div>
+            </div>
+          </div>
+          <% end %>
+        </div>
+
+        <% if @tracks && @tracks.size > 0 %>
+        <div class="detail_soundBox follower j-sound_detail" sound_id="<%= @tracks[0].track_id %>">
+          <div class="sound">
+            <div class="sound_titlebar">
+              <a class="sound_title j-sound_title" title="<%= @tracks[0].title %>" href="<%= link_path("/#{@tracks[0].track_uid}/sound/#{@tracks[0].track_id}") %>"><%= @tracks[0].title %></a>
+              <span class="sound_playcount j-sound_playCount" title="<%= @init_track_play_count %>次播放"><%= @init_track_play_count %></span>
+              <div class="fr">
+                <span class="sound_position">00:00</span>/<span class="sound_duration j-sound_durationStr"><%= parse_duration @tracks[0].duration %></span>
+              </div>
+            </div>
+            <div class="detail_middlePlayerBox">
+              <div class="middlePlayer">
+                <div class="left">
+                  <a class="playBtn"></a>
+                </div>
+                <div class="right">
+                  <!-- 进度条 -->
+                  <div class="player_progressbar">
+                    <div class="player_progressbarBg"></div>
+                    <div class="player_seekbar"></div>
+                    <div class="player_playbar"></div>
+                    <div class="player_wavebox" sound_uploadid="<%= @tracks[0].upload_id %>" sound_wave="<%= file_url @tracks[0].waveform %>"></div>
+                    <div class="player_progressbarCoverBg"></div>
+                    <div class="player_nonius">
+                      <div class="player_nonius_cover"></div>
+                      <div class="player_nonius_time">00:00</div>
+                      <div class="player_nonius_line5"></div>
+                      <div class="player_nonius_line3"></div>
+                    </div>
+                  </div>
+                  <!-- 二维评论 -->
+                  <div class="player_commentbar"></div>
+                  <div class="player_operate">
+                    <a href="javascript:;" class="player_commentbarBtn" title="显示/隐藏评论"></a>
+                  </div>
+                </div>
+                <% if @tracks[0].cover_path and @tracks[0].cover_path!="" %>
+                <div class="pin" sound_popsrc="<%= @tracks[0].track_id %>">
+                    <a href="<%= link_path "/#{@tracks[0].track_uid}/sound/#{@tracks[0].track_id}" %>" class="soundface">
+                        <img alt="<%= @tracks[0].title %>" src="<%= picture_url('track', @tracks[0].cover_path, '60') %>" data-options="defaultImg:track_60">
+                        <span></span>
+                    </a>
+                </div>
+                <% end %>
+              </div>
+            </div>
+            <div class="sound_bottom">
+              <span class="createtime j-sound_timeUntilNow"><%= parse_time_until_now(@tracks[0].created_at) %></span>
+              <% is_favorited = @current_uid ? Favorite.stn(@current_uid).where(uid: @current_uid, track_id: @tracks[0].track_id).any? : false %>
+              <div class="fr">
+                <a class="downloadToMobile link1">下载到手机</a>
+                <a class="likeBtn link1 <%= 'is-sound-liked' if is_favorited %>" href="javascript:;">赞(<span class="count j-sound_favoritesCount"><%= @init_track_favorite_count %></span>)</a>
+                <a class="commentBtn link1" href="javascript:;">评论(<span class="count j-sound_commentCount"><%= @init_track_comment_count %></span>)</a>
+                <a class="forwardBtn link1" href="javascript:;">转采(<span class="count j-sound_shareCount"><%= @init_track_share_count %></span>)</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="body_top mgT20">
+          <div class="left">
+            <span class="title">
+              专辑里的声音
+              <span class="albumSoundcount">(<%= @all_tracks_count %>)</span>
+            </span>
+          </div>
+          <div class="right">
+            <ul class="sub_nav_list">
+              <li class="item first <%= 'on' if params[:order].blank? %>">
+                <a href="<%= params[:order] ? link_path("/#{@album.uid}/album/#{@album.id}") : 'javascript:;' %>">默认排序</a>
+              </li>
+              <li class="item first <% if params[:order] %>on<% end %>">
+                <a class="<%= 'sort_icon down' if params[:order]=="created_at asc" %><%= 'sort_icon up' if params[:order]=="created_at desc" %>" href="<%= link_path "/#{@album.uid}/album/#{@album.id}?order=#{params[:order]=="created_at desc" ? "created_at asc" : "created_at desc"}" %>">发布时间</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="album_soundlist <%= "is_more" if @tracks.count<=10 %>">
+          <ul>
+            <% check_current_user = @current_uid == @album['uid'] %>
+            <%  @tracks.each_with_index do |r,index| %>
+            <% fav = @current_uid ? Favorite.stn(@current_uid).where(uid: @current_uid, track_id: r.track_id).any? : false %>
+            <li sound_id="<%= r.track_id %>">
+              <div class="miniPlayer3">
+                <a class="playBtn"></a>
+                <a class="title" href="<%= link_path("/#{r.track_uid}/sound/#{r.track_id}") %>"><%= r.title %></a>
+                <% if check_current_user %>
+                <div class="album_soundlist_operate">
+                  <% if r.op_type==TrackRecordOrigin::OP_TYPE[:UPLOAD] %>
+                  <a href="<%= "/edit_track/#{r.id}" %>">编辑</a>
+                  <% end %>
+                  <a class="destroyBtn" href="javascript:;" destroy_id="<%= r.id %>">删除</a>
+                </div>
+                <% end %>
+                <div class="operate">
+                  <a class="likeBtn <% if fav %>liked<% end %>" href="javascript:;" title="赞" track_uid="<%= r.track_uid %>" track_id="<%= r.track_id %>"></a>
+                  <% if r.status!=0 %>
+                  <a class="shareBtn" href="javascript:;" title="分享" track_uid="<%= r.track_uid %>" track_id="<%= r.track_id %>" ></a>
+                  <% end %>
+                  <a class="commentBtn" href="javascript:;" title="评论" track_uid="<%= r.track_uid %>"></a>
+                  <a class="forwardBtn" href="javascript:;" title="转采" track_uid="<%= r.track_uid %>" track_id="<%= r.track_id %>" track_title="<%= r.title %>" track_intro="<%= r.intro %>"></a>
+                  <span><%= r.created_at.strftime("%Y-%m-%d") %></span>
+                </div>
+                <span title="<%= @tracks_play_count[index] %>次播放" class="sound_playcount"><%= @tracks_play_count[index] %></span>
+              </div>
+            </li>
+            <% end %>
+          </ul>
+        </div>
+        <% end %>
+        <div class="pagingBar">
+          <%== paginate CustomPagination.new(@all_tracks_count,@page,@per_page), {outer_window: 1, url:"/#{@album.uid}/album/#{@album.id}", link_path: @current_uid.present?} %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mainbox_right <% if @current_uid -%>loadingMore<% end -%>">
+    <%== erb :_right, locals: {album: @album} unless @current_uid %>
+  </div>
+
+</div>

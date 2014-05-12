@@ -1,0 +1,5 @@
+$("#mainbox").html('<%== escape_javascript erb(:_blacklist_page) %>');
+
+require(["page/setting/blacklist"], function(page){
+    page.init();
+});

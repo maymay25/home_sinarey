@@ -1,0 +1,196 @@
+<div id="<%= params[:style]=="tile" ? "personalAlbumTile" : "personalAlbum"  %>" class="mycenter_album mgT30">
+    <div class="mainbox_left">
+        <div class="personal_container">
+            <div class="personal_header">
+                <div class="picture">
+                    <a href="<%= link_path("/#{@current_user.uid}/profile") %>">
+                        <img src="<%= picture_url('header', @current_user.logoPic, '60') %>">
+                    </a>
+                </div>
+                <div class="nav_wrap">
+                    <div class="username">
+                        <%= @current_user.nickname %>
+                        <% if @current_user.isVerified %><i class="VIcon">&nbsp;</i><% end %>
+                    </div>
+                    <ul class="nav_list">
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/profile") %>">主页</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/sound/") %>">声音</a></li>
+                        <li class="nav_item on"><a href="<%= link_path("/#{@current_user.uid}/album/") %>">专辑</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/favorites/") %>">赞过的</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/follow/") %>">关注</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/fans/") %>">粉丝</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/listened/") %>">听过</a></li>
+                        <% if @current_user.isVerified %>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/publish/") %>">定时发布</a></li>
+                        <% end %>
+                    </ul>
+                </div>
+            </div>
+            <div class="personal_body">
+                <div class="body_top">
+                    <div class="left">
+                        <span class="title">我的专辑</span>
+                    </div>
+                    <span class="album_layout">
+                        <a class="albumLayoutIcon list <%= 'on' if params[:style]!='tile' %>" href="<%= link_path "/#{@current_user.uid}/album/" %>"></a>
+                        <a class="albumLayoutIcon tile <%= 'on' if params[:style]=='tile' %>" href="<%= link_path "/#{@current_user.uid}/album/?style=tile" %>"></a>
+                    </span>
+                    <div class="right">
+                        <ul class="sub_nav_list">
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="personal_list_head">
+                    <div class="left"><%= (params[:q] and params[:q]!="") ? "找到#{@albums_count}个符合条件的专辑" : "共有#{@albums_count}张专辑" %></div>
+                    <div class="personal_list_head_operate"><a class="creatalbumBtn" href="/new_album"><span>创建专辑</span></a></div>
+                    <div class="searchPanel2 right">
+                        <input class="search_input" type="text" value="<%= params[:q] %>" name="" autocomplete="off" placeholder="搜索专辑">                      
+                        <span class="search_btn"></span>
+                    </div>
+                </div>
+
+                <% if @albums %>
+                    <% if @albums.count>0 %>
+                    <div class="body_list_wrap">
+                        <% if params[:style]=="tile" %>
+                        <ul class="body_list album_tile_list">
+                            <% @albums.each do |a| %>
+                            <li class="item" album_id="<%= a.id %>">
+                                <div class="content_wrap2">
+                                    <div class="picture">
+                                        <a class="albumface" href="<%= link_path "/#{a.uid}/album/#{a.id}" %>">
+                                            <span>
+                                                <img alt="" src="<%= picture_url('album', a.cover_path, '100') %>"  data-options="defaultImg:album_100">
+                                            </span>
+                                        </a>
+                                        <% case a.is_finished when 2,true %>
+                                            <span class="labelEnd"></span>
+                                        <% when 1,false  %>
+                                            <span class="labelSerial"></span>
+                                        <% end %>
+                                        <div class="personal_operate">
+                                            <a class="personal_editBtn2" href="/edit_album/<%= a.id %>"></a>
+                                            <a class="personal_deleteBtn2 destroyBtn" href="javascript:;"></a>
+                                        </div>
+                                    </div>
+                                    <div class="info title"><a href="<%= link_path "/#{a.uid}/album/#{a.id}" %>"><%= a.title %></a></div>
+                                    <div class="info time">更新 <%= (a.last_uptrack_at || a.updated_at).strftime("%Y-%m-%d") %></div>
+                                    <% if a.last_uptrack_id and a.last_uptrack_title %>
+                                    <div class="info last miniPlayer3" sound_id="<%= a.last_uptrack_id %>">
+                                        <a href="javascript:;" class="playBtn"></a>
+                                        <a class="text" href="<%= link_path "/#{a.uid}/sound/#{a.last_uptrack_id}" %>">
+                                            <%= a.last_uptrack_title  %>
+                                        </a>
+                                    </div>
+                                    <% end %>
+                                    <% if a.status == 0 %>
+                                    <div class="listenhelp is-review">
+                                        <span class="tit">待审核</span>
+                                        <a class="grouphelp"></a>
+                                        <div class="grouphelp_txt">
+                                            >>审核期，无法进行评论、分享等操作哦~ <br/>
+                                            >>审核预计30分钟完成，请稍后...
+                                            <span class="arrow_grouphelp"><i></i></span>
+                                        </div>
+                                    </div>
+                                    <% end %>
+                                </div>
+                            </li>
+                            <% end %>
+
+                            <% if @albums.size < 10 %>
+                            <li class="item creatAlbum">
+                                <div class="content_wrap2">
+                                    <div class="picture">
+                                        <a class="albumface" href="/new_album"><span><em>+</em>创建专辑</span></a>
+                                    </div>
+                                </div>
+                            </li>
+                            <% end %>
+
+                        </ul>
+                        <% else %>
+                        <ul class="body_list album_list">
+                            <% @albums.each_with_index do |a,index| %>
+                            <li class="item" album_id="<%= a.id %>">
+                                <div class="content_wrap">
+                                    <div class="album">
+                                        <div class="left">
+                                            <a class="albumface" href="<%= link_path "/#{a.uid}/album/#{a.id}" %>">
+                                                <span>
+                                                    <img alt="" src="<%= picture_url('album', a.cover_path, '100') %>"  data-options="defaultImg:album_100">
+                                                </span>
+                                            </a>
+                                            <% case a.is_finished when 2,true %>
+                                                <span class="labelEnd"></span>
+                                            <% when 1,false  %>
+                                                <span class="labelSerial"></span>
+                                            <% end %>
+                                        </div>
+                                        <div class="right">
+                                            <div class="title"><a href="<%= link_path "/#{a.uid}/album/#{a.id}" %>">《<%= a.title %>》</a></div>
+                                            <div class="content">
+                                                <%= a.intro.truncate(160) if a.intro %>
+                                            </div>
+                                            <div class="bottom">
+                                                <% if a.status!=0 %>
+                                                <span class="info"><%= @album_tracks_counts[index] %>个声音</span><br/>
+                                                <% end %>
+                                                <% if a.last_uptrack_id and a.last_uptrack_title %>
+                                                <span class="last_info miniPlayer3" sound_id="<%= a.last_uptrack_id %>">
+                                                    <span class="tip">[最后更新]</span>
+                                                    <a href="javascript:;" class="playBtn"></a>
+                                                    <a href="<%= link_path "/#{a.uid}/sound/#{a.last_uptrack_id}" %>" class="text">
+                                                        <%= a.last_uptrack_title  %>
+                                                    </a>
+                                                </span>
+                                                <% end %>
+                                                <% if a.status==0 %>
+                                                <br>
+                                                <div class="mgT10">
+                                                    <div class="listenhelp is-review">
+                                                        <span class="tit">待审核</span>
+                                                        <a class="grouphelp"></a>
+                                                        <div class="grouphelp_txt">
+                                                            >>审核期，无法进行评论、分享等操作哦~ <br/>
+                                                            >>审核预计30分钟完成，请稍后...
+                                                            <span class="arrow_grouphelp"><i></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <% end %>
+                                            </div>
+                                        </div>
+                                        <div class="time2"><%= parse_time_until_now(a.last_uptrack_at || a.created_at) %></div>
+                                        <div class="personal_operate">
+                                            <a class="personal_editBtn" href="/edit_album/<%= a.id %>">编辑</a>
+                                            <a class="personal_deleteBtn destroyBtn" href="javascript:;">删除</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <% end %>
+                        </ul>
+                        <% end %>
+
+                        <div class="pagingBar mgTB20">
+                            <%== paginate CustomPagination.new(@albums_count,@page,@per_page), {outer_window: 1, url:"/#{@current_uid}/album", link_path: @current_uid.present?} %>
+                        </div>
+                        
+                    </div>
+                    <% elsif @page<=1 %>
+                    <div class="noItem">                    
+                        <span class="noItemTit">啊呀！你还没有专辑！ </span><br>
+                        <span>立即<a href='new_album'>创建专辑</a>，方便收录你的声音哦</span>
+                    </div>
+                    <% end %>
+                <% end %>
+
+            </div>
+        </div>
+    </div>
+
+    <%== erb :'my/_mainbox_right' %>
+    
+</div>

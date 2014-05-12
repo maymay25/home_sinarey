@@ -1,0 +1,5 @@
+$("#mainbox").html('<%== escape_javascript erb(:_comment_page) %>');
+
+require(['page/message/comment'], function(page) {
+    page.init();
+});

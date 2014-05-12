@@ -1,0 +1,9 @@
+$("#mainbox").html('<%== escape_javascript erb(:_follow_page) %>');
+
+require(["page/center/follow"], function(page){
+    page.init();
+});
+
+<% if @this_title %>
+document.title="<%== escape_javascript @this_title %>";
+<% end %>

@@ -1,0 +1,37 @@
+<% if feed and feed.events.size > 0 %>
+    <%
+       user = @users[feed.uid]
+       user_url = (@current_uid != user.uid ?  link_his_path(user.uid) : '#')
+    %>
+    <li class="listItem">
+      <div class="feed">
+        <div class="left">
+          <a class="userface" href="<%= user_url %>" card="<%= user.uid %>">
+            <img src="<%= picture_url('header', user.logoPic, '60') %>" alt="<%= user.nickname %>">
+          </a>
+        </div>
+        <div class="right">
+          <div class="feed_operate">
+            <a href="javascript:;" class="closeBtn" title="删除"  feed_id='<%= feed.id %>'></a>
+          </div>
+          <div class="feed_title">
+            <a href="<%= user_url %>" card="<%= user.uid %>">
+              <%= user.nickname %>
+              <% if user.isVerified %><i class="VIcon">&nbsp;</i><% end %>
+            </a>
+            <span>关注了<%= feed.events.size %>个标签</span>
+          </div>
+          <div class="feed_content">
+            <div class="tagBtnList">
+              <% feed.events.each do |event| %>
+              <a class="tagBtn" href="/tag/<%= event.tagName %>"><span><%= event.tagName %></span></a>
+              <% end %>
+            </div>
+          </div>
+          <div class="feed_bottom">
+            <span class="feed_createtime"><%= parse_time_until_now(feed.createdAt.to_datetime) %></span>
+          </div>
+        </div>
+      </div>
+    </li>
+<% end %>

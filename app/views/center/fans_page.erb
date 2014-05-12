@@ -1,0 +1,13 @@
+
+<%== erb :_seo_meta, locals: {seo_meta:{ name: "user", id: params[:uid], data: @u, custom: "user_fans" }} %> 
+<%== erb :_friendly_link, locals: {friendly_link:{ name: "user", uid: params[:uid] }} %>
+
+<%== erb :_fans_page %>
+
+<% content_for :script_own do  %>
+<script type="text/javascript">
+  require(["page/center/fans"], function(page){
+      page.init();
+  });
+</script>
+<% end %>

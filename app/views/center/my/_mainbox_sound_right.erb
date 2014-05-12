@@ -1,0 +1,81 @@
+<div class="mainbox_right">
+    <div class="ad1">
+        <%== erb :_advertise, locals: { id: 728786, width:'200px',height:'80px' } %>
+    </div>
+    
+
+    <!--我关注的人-->
+    <%
+      all_followings = Following.stn(@current_uid).where(uid: @current_uid).select('id, following_uid')
+      followings = all_followings.order('id desc').limit(10)
+      following_uids = followings.collect{|f| f.following_uid}
+    %>
+    <% if following_uids.size > 0 %>
+    <% followings_profile = $profile_client.getMultiUserBasicInfos(following_uids) %>
+    <div class="fansBar mgT20">
+        <div class="titleBar">
+            <a href="<%= link_his_path(@current_uid,'follow') %>" class="more">更多</a>
+            <h2 class="title">我关注的人(<%= all_followings.count %>)</h2>
+        </div>
+        <div class="fans_content">
+            <% following_uids.each do |uid| ; ; u = followings_profile[uid] %>
+            <a href="<%= link_his_path(u.uid) %>" title="<%= u.nickname %>">
+                <img card="<%= u.uid %>" alt="<%= u.nickname %>" src="<%= picture_url('header', u.logoPic, '60')  %>" data-options="defaultImg:person_60">
+            </a>
+            <% end %>
+        </div>
+    </div>
+    <% end %>
+
+    <!--我的粉丝-->
+    <%
+      all_followers = Follower.stn(@current_uid).where(following_uid: @current_uid).select('id, uid')
+      followers = all_followers.order('id desc').limit(10)
+      follower_uids = followers.collect{|f| f.uid}
+    %>
+    <% if follower_uids.size > 0 %>
+    <% followers_profile = $profile_client.getMultiUserBasicInfos(follower_uids) %>
+    <div class="fansBar mgT20">
+        <div class="titleBar">
+            <a href="<%= link_his_path(@current_uid,'fans') %>" class="more">更多</a>
+            <h2 class="title">我的粉丝(<%= all_followers.count %>)</h2>
+        </div>
+        <div class="fans_content">
+            <% follower_uids.each do |uid| ; ; u = followers_profile[uid] %>
+            <a href="<%= link_his_path(u.uid) %>" title="<%= u.nickname %>">
+                <img card="<%= u.uid %>" alt="<%= u.nickname %>" src="<%= picture_url('header', u.logoPic, '60')  %>" data-options="defaultImg:person_60">
+            </a>
+            <% end %>
+        </div>
+    </div>
+    <% end %>
+
+    <!--我最新的专辑-->
+
+    <% if @my_newest_albums and @my_newest_albums.length > 0 %>
+    <div class="albumBar mgT20">
+      <div class="titleBar">
+        <h2 class="title">我最新的专辑</h2>
+      </div>
+      <ul>
+        <% @my_newest_albums.each_with_index do |r,index| %>
+        <li>
+          <div class="albumPanelBar2">
+            <div class="left">
+            <a class="albumface100" href="<%= link_path("/#{r.uid}/album/#{r.id}") %>">
+              <span>
+                <img alt="<%= r.title %>" src="<%= picture_url('album', r.cover_path, '100') %>" data-options="defaultImg:album_100">
+              </span>
+            </a>
+            </div>
+            <div class="right">
+              <a href="<%= link_path("/#{r.uid}/album/#{r.id}") %>" title="<%= r.title %>">《<%= cut_str(r.title,16) %>》</a>
+              <span><%= @album_tracks_count[index] %>个声音</span>
+            </div>
+          </div>
+        </li>
+        <% end %>
+      </ul>
+    </div>
+    <% end %>
+</div>

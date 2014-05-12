@@ -6,12 +6,10 @@
         <div class="albumfaceOutter">
             <a href="<%= link_path("/#{album.uid}/album/#{album.id}") %>" class="albumface"><span><img src="<%= picture_url('album', album.cover_path, '180') %>" alt="<%= album.title %>"></span></a>
             <div class="playcountOutter"><div class="mask"></div><span class="sound_playcount"><%= @album_plays_counts[index] %></span></div>
-            <% if album.category_id == Category::ID[:book] %>
-                <% case album.is_finished when 2 %>
-                    <span class="labelEnd"></span>
-                <% when 1 %>
-                    <span class="labelSerial"></span>
-                <% end %>
+            <% case album.is_finished when 2,true %>
+                <span class="labelEnd"></span>
+            <% when 1,false %>
+                <span class="labelSerial"></span>
             <% end %>
         </div>
 

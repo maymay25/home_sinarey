@@ -1,0 +1,56 @@
+<% content_for :script_own do  %>
+  <script type="text/javascript">
+  require(["page/404"], function(page){
+      page.init();
+  });
+  </script>
+<% end %>
+
+<div class="mainbox_wrapper">
+  <div class="podcastRecord">
+    <div class="podcastRecordHd">
+      <span class="podcastIcon">podcast</span>
+      <a class="confirmBtn3" href="/podcast/apply">新建申请</a>
+    </div>
+    <div class="formTit">
+      <em>我的申请记录</em><span class="fr">（有问题请私信联系客服<a target="_blank" href="http://www.ximalaya.com/8914100/">http://www.ximalaya.com/8914100/</a>）</span>
+    </div>
+
+    <ul class="podcastRecordList">
+      <% @aplts.each do |aplt| %>
+      <% album = @albums_hash[aplt.album_id] %>
+      <% next if album.nil? %>
+      <li>
+        <div class="left">
+          <a href="/<%= album.uid %>/album/<%= album.id %>" target="_blank">
+          <img src="<%= picture_url('album', album.cover_path, '100') %>">
+          </a>
+        </div>
+        <div class="middle">
+
+          <div class="tit"><a href="/<%= album.uid %>/album/<%= album.id %>" target="_blank"><%= album.title %></a></div>
+          <div class="time">申请时间：<%= aplt.created_at.strftime("%Y-%m-%d") %></div>
+        </div>
+        <div class="right">
+        <% case aplt.status when 0 %>
+          <span class="reviewIcon">正在审核中</span>
+        <% when 1 %>
+          <span class="correctIcon">申请已通过</span>
+        <% when 2 %>
+          <span class="errorIcon">申请被拒绝</span>
+        <% end %>
+        </div>
+      </li>
+      <% end %>
+    </ul>
+    <div class="pagingBar mgTB20">
+        <% if ( tmp = params[:page].to_i ) > 1 %>
+        <a class="pagingBar_btn" href="/podcast/record?page=<%= tmp - 1 %>" rel="prev">上一页</a>
+        <% end %>
+        <% if @next_page %>
+        <a class="pagingBar_btn" href="/podcast/record?page=<%= @next_page %>" rel="next">下一页</a>
+        <% end %>
+    </div>
+  </div>
+
+</div>

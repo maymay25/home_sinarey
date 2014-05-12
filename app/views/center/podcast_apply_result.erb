@@ -1,0 +1,20 @@
+<% content_for :script_own do  %>
+  <script type="text/javascript">
+  require(["page/404"], function(page){
+      page.init();
+  });
+  </script>
+<% end %>
+
+<div class="mainbox_wrapper">
+  <div class="podcastApplyFinish">
+    <div class="pic"><img src="<%= file_url(@aplt.pod_cover_path) %>"/></div>
+    <div class="tit"><a href="/<%= @album.uid %>/album/<%= @album.id %>" target="_blank"><%= @album.title %></a></div>
+    <div class="txt">恭喜~您的申请提交成功~</div>
+    <div class="txt">我们将认真审核您的申请，并将通过私信联系您，请耐心等待~</div>
+    <div class="operate">
+      <a class="confirmBtn3" href="/podcast/apply">新建申请</a>
+      <a class="confirmBtn3" href="/podcast/record">查看记录</a>
+    </div>
+  </div>
+</div>

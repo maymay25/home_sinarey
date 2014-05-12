@@ -3,11 +3,15 @@ class MainController < ApplicationController
 
   set :views, ['main','application']
 
+  def dispatch(action)
+    super(:main,action)
+    method(action).call
+  end
+
   #新版未登录首页
   def index
 
     set_no_cache_header
-    register_page('main','index')
 
     halt erb(:index2,layout:false) unless @current_uid
 
@@ -18,6 +22,11 @@ class MainController < ApplicationController
     set_no_cache_header
     tracks, users = $counter_client.getByNames([Settings.counter.tracks, Settings.counter.vusers], 0)
     render_json({tracks: tracks, users: users})
+  end
+
+  def error_page
+    halt erb_js(:page_error_js) if request.xhr?
+    erb :page_error
   end
 
   def silian_sound

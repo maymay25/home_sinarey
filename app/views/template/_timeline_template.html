@@ -1,0 +1,36 @@
+<script type="text/template" id="combinemarker">
+    <div class="timelinePanel" data-time="<%= year %>">
+        <div class="timeline_feed">
+            <div class="timeline_content timeline_marker">
+                <span class="point1"></span>
+                <a href="javascript:;">
+                    <% if(isMonth){ %>
+                        <% if(end){ %>
+                            <%= year %>年<%= start %>月-<%= end %>月
+                        <% }else{ %>
+                            <%= year %>年<%= start %>月
+                        <% } %>
+                        <!--<%= year %>年<%= end?end:start %>月- -->
+                    <% }else{ %>
+                        <% if(end){ %>
+                            <%= start %>年-<%= end %>年
+                        <% }else{ %>
+                            <%= start %>年
+                        <% } %>
+                    <% } %>
+                </a>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="loading">
+    <div class="timelinePanel">
+        <div class="loadingMore"></div>
+    </div>
+</script>
+
+<script type="text/template" id="marker">
+    <div class="timelinePanel no-height" id="marker<%= year %><%= month %>" data-time="<%= year %>-<%= month %>">       
+    </div>
+</script>

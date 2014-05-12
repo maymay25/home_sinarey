@@ -1,0 +1,29 @@
+
+<% seo_track_info = {title:@tir.title,category_title:@category_title,album_title:@tir.album_title,author:@tir.author,nickname:@tir.nickname,tags:@tir.tags,intro:@tir.intro,composer:@tir.composer,announcer:@tir.announcer} %>
+<%== erb :_seo_meta, locals: {seo_meta:{ name: "track", id: @tir.track_id, category_id: @tir.category_id, data: seo_track_info }} %> 
+<%== erb :_friendly_link, locals: {friendly_link:{  name: "track", category_name: @category_name }} %>
+
+<%= render partial: "liker" %>
+
+
+<% if !request.xhr? %>
+
+  <% content_for :script_own do  %>
+
+    <script type="text/javascript">
+      var bds_config = {'bdText':"\"<%= escape_javascript @tir.intro %>\" 我觉得《<%= escape_javascript @tir.title %>》听起来挺不错的，你觉得呢？（分享自 @喜马拉雅好声音 ）"};
+      if(document.getElementById("bdshell_js"))document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + new Date().getHours();
+    </script>
+
+    <script type="text/javascript">
+
+      require(["page/final/sound_liker"], function(page){
+          page.init();
+      });
+
+    </script>
+
+  <% end %>
+
+<% end %>
+

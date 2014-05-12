@@ -1,0 +1,21 @@
+
+<%== erb :_seo_meta, locals: {seo_meta:{ name: "tag", data: { tname:@tag_name, intro: "" }}} %> 
+<%== erb :_friendly_link, locals: {friendly_link:{ name: "tag" }} %>
+
+<%== erb :_show %>
+
+<% if !request.xhr? %>
+
+  <% content_for :script_own do  %>
+
+    <script type="text/javascript">
+
+      require(['page/final/final_tag'], function (page) {
+        page.init();
+      });
+
+    </script>
+
+  <% end %>
+
+<% end %>

@@ -1,0 +1,57 @@
+<div class="mainbox_wrapper">
+    <div class="set_container">
+        <div class="set_header">账号设置</div>
+        <div class="set_left">
+            <div class="set_useravatar">
+                <a class="userface" href="<%= link_path "/#{@current_uid}" %>">
+                    <img src="<%= picture_url('header', @current_user.logoPic, '200') %>">
+                </a>
+            </div>
+            <ul class="set_nav">
+                <li><a href="<%= Settings.profile_url %>">个人设置</a></li>
+                <li><a href="<%= link_path "/personal_settings/message" %>">消息设置</a></li>
+                <li class="on">
+                    <a href="<%= link_path "/personal_settings/privacy" %>">隐私设置</a>
+                    <ul class="set_nav sortlist-expand">
+                        <li><a href="<%= link_path "/personal_settings/privacy" %>">通用</a></li>
+                        <li class="on"><a href="javascript:;">黑名单</a></li>
+                        <li><a href="<%= link_path "/personal_settings/feed" %>">新鲜事</a></li>
+                    </ul>
+                </li>                   
+                <li><a href="/passport/header">头像设置</a></li>
+                <li><a href="/passport/sync_set">同步设置</a></li>
+            </ul>
+
+        </div>
+        <div class="set_right">
+            <div class="set_title">黑名单设置</div>
+            <div class="set_blacklist">
+                
+                <% if @blacklist.size > 0 %>
+                <ul>
+                    <li>
+                        <div class="set_blacklist_name">用户名称</div>
+                        <div class="set_blacklist_date">&nbsp;&nbsp;拉黑日期</div>
+                        <div class="set_blacklist_status">&nbsp;&nbsp;&nbsp;状态</div>
+                    </li>
+                    <% @blacklist.each do |blacklist| %>
+                    <% user = @profile_users[blacklist.black_uid.to_i] %>
+                    <li>
+                        <div class="set_blacklist_name"><a href="<%= link_path "/#{blacklist.black_uid}" %>" card="<%= blacklist.black_uid %>"><%= user.nickname %></a></div>
+                        <div class="set_blacklist_date"><%= blacklist.created_at.strftime('%Y-%m-%d') %></div>
+                        <div class="set_blacklist_status"><a href="javascript:;" class="removeBtn" remove_from_blacklist='<%= blacklist.black_uid %>'>解除</a></div>
+                    </li>
+                    <% end %>
+                </ul>
+
+                <div class="pagingBar mgTB20">
+                  <%== paginate CustomPagination.new(@blacklist_count,@page,@per_page), {outer_window: 1, url:"/personal_settings/blacklist", link_path: true} %>
+                </div>
+                <% else %>
+                <div class="set_blacklist_none">暂无黑名单</div>
+                <% end %>
+
+            </div>
+        </div>
+    </div>
+</div>

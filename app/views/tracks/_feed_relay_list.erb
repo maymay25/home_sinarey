@@ -1,0 +1,29 @@
+<% if @relays and !@relays.empty? %>
+    <% @relays.each do |relay| %>
+    <li class="listItem">
+        <div class="comment">
+            <div class="left">
+                <a class="userface" card="<%= relay['uid'] %>" href="<%= link_his_path(relay['uid']) %>">
+                    <img src="<%= picture_url('header', relay['avatar_path'], '60') %>" alt="" data-options="defaultImg:person_60">
+                </a>
+            </div>
+            <div class="right">
+                <div class="comment_titleBar">
+                    <a href="<%= link_his_path(relay['uid']) %>"><%= relay['nickname'] %></a>
+                </div>
+                <div class="comment_content">
+                  <%= (relay.comment_content and !relay.comment_content.empty?) ? puts_face(relay.comment_content).html_safe : "转采声音" %>
+                </div>
+                <div>
+                    <span class="comment_createtime"><%= relay['created_at'].strftime('%-m月%-d日 %H:%M') %></span>
+                </div>
+            </div>
+        </div>
+    </li>
+    <% end %>
+
+    <% if @relays_count > @relays.count %>
+    <a href="<%= link_path "/#{@tir['uid']}/sound/#{@tir['track_id']}?relay=true" %>" class="fr">更多</a>
+    <% end %>
+    
+<% end %>

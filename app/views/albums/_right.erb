@@ -1,0 +1,42 @@
+<%
+other_albums = Album.stn(album.uid).where(uid: album.uid).where("id <>#{album.id}").where(is_deleted: false, status: 1).order("created_at desc").limit(3)
+
+album_ids = other_albums.collect{ |a| a.id }
+if album_ids.count > 0
+  _album_tracks_counts = $counter_client.getByIds(Settings.counter.album.tracks, album_ids)
+else
+  _album_tracks_counts = []
+end
+%>
+
+<div class="ad1">
+  <%== erb :_advertise, locals: { id: 727914, width:'200px',height:'80px' } %>
+</div>
+
+<% if other_albums and other_albums.count > 0 %>
+<!-- 他的其他专辑 -->
+<div class="albumBar">
+  <div class="titleBar">
+    <a href="<%= link_path("/#{album.uid}/album/") %>" class="more">更多</a>
+    <h2 class="title">Ta的其他专辑</h2>
+  </div>
+  <ul>
+    <% other_albums.each_with_index do |album, i| %>
+    <li>
+      <div class="albumPanelBar2">
+        <div class="left">
+          <a class="albumface100" href="<%= link_path("/#{album.uid}/album/#{album.id}") %>">
+            <span>
+              <img alt="<%= album.title %>" src="<%= picture_url('album', album.cover_path, '100') %>" data-options="defaultImg:album_100"></span>
+          </a>
+        </div>
+        <div class="right">
+          <a href="<%= link_path("/#{album.uid}/album/#{album.id}") %>" title="<%= album.title %>">《<%= album.title.truncate(16) %>》</a>
+          <span><%= _album_tracks_counts[i] %>个声音</span>
+        </div>
+      </div>
+    </li>
+    <% end %>
+  </ul>
+</div>
+<% end %>

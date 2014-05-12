@@ -1,0 +1,9 @@
+<%== erb :_page_error %>
+
+<% content_for :script_own do -%>
+<script type="text/javascript">
+require(["page/404"], function(page){
+    page.init();
+});
+</script>
+<% end %>

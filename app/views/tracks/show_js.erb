@@ -1,0 +1,19 @@
+$("#mainbox").html('<%== escape_javascript erb(:_show) %>');
+
+require(["page/final/final_sound"], function(page){
+    page.init();
+});
+
+var bds_config = {'bdDesc':'喜马拉雅好声音','bdText':"\"<%== escape_javascript @tir.intro %>\" 我觉得《<%== escape_javascript @tir.title %>》听起来挺不错的，你觉得呢？（分享自 @喜马拉雅好声音 ）"};
+
+if(document.getElementById("bdshell_js")){
+  document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + new Date().getHours();
+}
+
+if(window.bdShare){
+  bdShare.fn.init();
+}
+
+<% if @this_title %>
+document.title="<%== escape_javascript @this_title %>";
+<% end %>

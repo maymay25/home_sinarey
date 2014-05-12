@@ -1,0 +1,9 @@
+$("#mainbox").html('<%== escape_javascript erb(:'my/_feeds') %>');
+
+require(["page/home/feed"], function(feed){
+    feed.init(<%== @feeds_json %>);
+});
+
+<% if @this_title %>
+document.title="<%== escape_javascript @this_title %>";
+<% end %>

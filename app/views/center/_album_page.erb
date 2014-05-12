@@ -1,0 +1,140 @@
+<div id="personalAlbum" class="mgT30">
+    <div class="mainbox_left">
+        <div class="personal_container">
+            <div class="personal_header">
+                <div class="picture">
+                    <a href="<%= link_path("/#{@u.uid}/") %>">
+                        <img src="<%= picture_url('header', @u.logoPic, '60') %>">
+                    </a>
+                </div>
+                <div class="nav_wrap">
+                    <div class="username">
+                        <%= @u.nickname %>
+                        <% if @u.isVerified %><i class="VIcon">&nbsp;</i><% end %>
+                        <a class="addBtn3 <%= "already" if @is_follow %> <%= "both" if @be_followed %>" data-options="<%= {uid:@u.uid,is_follow:@is_follow,be_followed:@be_followed,nickname:@u.nickname}.to_json[1..-2] %>" href="javascript:;">
+                            <span class="default"><%= (@is_follow && @be_followed) ? "相互" : @is_follow ? "已" : "" %>关注</span>
+                            <span class="hover">取消</span>
+                        </a>
+                    </div>
+                    <ul class="nav_list">
+                        <li class="nav_item"><a href="<%= link_path("/#{@u.uid}/") %>">主页</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@u.uid}/sound/") %>">声音</a></li>
+                        <li class="nav_item on"><a href="<%= link_path("/#{@u.uid}/album/") %>">专辑</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@u.uid}/favorites/") %>">赞过的</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@u.uid}/follow/") %>">关注</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@u.uid}/fans/") %>">粉丝</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="personal_body">
+                <div class="body_top">
+                    <div class="left">
+                        <span class="title"><%= @u.nickname %>的专辑</span>
+                    </div>
+                    <span class="album_layout">
+                        <a class="albumLayoutIcon list <%= 'on' if params[:style]!='tile' %>" href="<%= link_path "/#{@u.uid}/album/" %>"></a>
+                        <a class="albumLayoutIcon tile <%= 'on' if params[:style]=='tile' %>" href="<%= link_path "/#{@u.uid}/album/?style=tile" %>"></a>
+                    </span>
+                    <div class="right">
+                        <ul class="sub_nav_list">
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="personal_list_head">
+                    <div class="left"><%= (params[:q] and params[:q]!="") ? "找到#{@albums_count}个符合条件的专辑" : "共有#{@albums_count}张专辑" %></div>
+                    <div class="searchPanel2 right">
+                        <input class="search_input" type="text" value="<%= params[:q] %>" name="" autocomplete="off" placeholder="搜索专辑">                      
+                        <span class="search_btn"></span>
+                    </div>
+                </div>
+
+                <% if @albums %>
+                    <% if @albums.count>0 %>
+                    <div class="body_list_wrap">
+                        <% if params[:style]=="tile" %>
+                        <ul class="body_list album_tile_list">
+                            <% @albums.each do |a| %>
+                            <li class="item" album_id="<%= a.id %>">
+                                <div class="content_wrap2">
+                                    <div class="picture">
+                                        <a class="albumface100" href="<%= link_path "/#{a.uid}/album/#{a.id}" %>">
+                                            <span>
+                                                <img alt="" src="<%= picture_url('album', a.cover_path, '100') %>" data-options="defaultImg:album_100">
+                                            </span>
+                                        </a>
+                                    </div>
+                                    <div class="info title">《<a href="<%= link_path "/#{a.uid}/album/#{a.id}" %>"><%= a.title %></a>》</div>
+                                    <div class="info time">更新 <%= (a.last_uptrack_at || a.updated_at).strftime("%Y-%m-%d") %></div>
+                                    <% if a.last_uptrack_id and a.last_uptrack_title %>
+                                    <div class="info last miniPlayer3" sound_id="<%= a.last_uptrack_id %>">
+                                        <a href="javascript:;" class="playBtn"></a>
+                                        <a class="text" href="<%= link_path "/#{a.uid}/sound/#{a.last_uptrack_id}" %>">
+                                            <%= a.last_uptrack_title.truncate(20) if a.last_uptrack_title %>
+                                        </a>
+                                    </div>
+                                    <% end %>
+                                </div>
+                            </li>
+                            <% end %>
+                        </ul>
+                        <% else %>
+                        <ul class="body_list album_list">
+                            <% @albums.each_with_index do |a,index| %>
+                            <li class="item" album_id="<%= a.id %>">
+                                <div class="content_wrap">
+                                    <div class="album">
+                                        <div class="left">
+                                            <a class="albumface100" href="<%= link_path "/#{a.uid}/album/#{a.id}" %>">
+                                                <span><img alt="" src="<%= picture_url('album', a.cover_path, '100') %>"  data-options="defaultImg:album_100"></span>
+                                            </a>
+                                            <% case a.is_finished when 2,true %>
+                                                <span class="labelEnd"></span>
+                                            <% when 1,false  %>
+                                                <span class="labelSerial"></span>
+                                            <% end %>
+                                        </div>
+                                        <div class="right">
+                                            <div class="title"><a href="<%= link_path "/#{a.uid}/album/#{a.id}" %>">《<%= a.title %>》</a></div>
+                                            <div class="content">
+                                                <%= a.intro.truncate(160) if a.intro %>
+                                            </div>
+                                            <div class="bottom">
+                                                <span class="info"><%= @album_tracks_counts[index] %>个声音</span>
+                                                <% if a.last_uptrack_id and a.last_uptrack_title %>
+                                                <span class="last_info miniPlayer3" sound_id="<%= a.last_uptrack_id %>">
+                                                    <span class="tip">[最后更新]</span>
+                                                    <a href="javascript:;" class="playBtn"></a>
+                                                    <a href="<%= link_path "/#{a.uid}/sound/#{a.last_uptrack_id}" %>" class="text">
+                                                        <%= a.last_uptrack_title  %>
+                                                    </a>
+                                                </span>
+                                                <% end %>
+                                            </div>
+                                        </div>
+                                        <div class="time2"><%= parse_time_until_now(a.last_uptrack_at || a.created_at) %></div>
+                                    </div>
+                                </div>
+                            </li>
+                            <% end %>
+                        </ul>
+                        <% end %>
+
+                        <div class="pagingBar mgTB20">
+                            <%== paginate CustomPagination.new(@albums_count,@page,@per_page), {outer_window: 1, url:"/#{@u.uid}/album", link_path: @current_uid.present?} %>
+                        </div>
+                    </div>
+                    <% elsif @page<=1 %>
+                    <div class="noItem">                    
+                        <span class="noItemTit">啊呀！<%= @u.nickname %>还没有专辑！ </span><br>
+                    </div> 
+                    <% end %>
+                <% end %>
+
+            </div>
+        </div>
+    </div>
+
+    <%== erb :'_mainbox_right' %>
+
+</div>

@@ -36,6 +36,7 @@ module WillPaginate
   module ViewHelpers
     class LinkRenderer < LinkRendererBase
     protected
+    
       def page_number(page)
         if page == current_page
           "<a href='javascript:;' class='pagingBar_page on'>#{page}</a>"
@@ -43,7 +44,11 @@ module WillPaginate
           if @options[:theme] == 'explore'
             "<a href='javascript:;' data-page='#{page}' class='pagingBar_page'>#{page}</a>"
           else
-            "<a href='#{link_path(url(page))}' class='pagingBar_page'>#{page}</a>"
+            if @options[:max_page] && page.to_i > @options[:max_page]
+              "<a href='javascript:;' notice='#{@options[:notice]}' class='pagingBar_page'>#{page}</a>"
+            else
+              "<a href='#{link_path(url(page,@options[:url]))}' class='pagingBar_page'>#{page}</a>"
+            end
           end
         end
       end
@@ -68,7 +73,11 @@ module WillPaginate
           if @options[:theme] == 'explore'
             "<a href='javascript:;' data-page='#{page}' class='#{classname}'#{rel_str}>#{text}</a>"
           else
-            "<a href='#{link_path(url(page))}' class='#{classname}'#{rel_str}>#{text}</a>"
+            if @options[:max_page] && page.to_i > @options[:max_page]
+              "<a href='javascript:;' notice='#{@options[:notice]}' class='#{classname}'#{rel_str}>#{text}</a>"
+            else
+              "<a href='#{link_path(url(page,@options[:url]))}' class='#{classname}'#{rel_str}>#{text}</a>"
+            end
           end
         end
       end
@@ -81,7 +90,33 @@ module WillPaginate
         end
       end
 
-
     end
+  end
+end
+
+module WillPaginate
+  module Sinatra
+
+    class LinkRenderer < ViewHelpers::LinkRenderer
+      protected
+
+      def url(page,link=nil)
+
+        str = link || File.join(request.script_name.to_s, request.path_info)
+
+        params = request.GET.merge(param_name.to_s => page.to_s)
+        params.update @options[:params] if @options[:params]
+        str.dup << '?' << build_query(params)
+      end
+
+      def request
+        @template.request
+      end
+
+      def build_query(params)
+        Rack::Utils.build_nested_query params
+      end
+    end
+
   end
 end

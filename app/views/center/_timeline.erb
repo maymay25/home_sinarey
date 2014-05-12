@@ -1,0 +1,262 @@
+<div id="timelinePage">
+    <div class="picWall">
+        <div class="wall-background">
+            <div class="cover-image">
+                <img id="bgImg" src="<%= file_url(@u.webBackgroundPic) %>" style="left: <%= @u.webBackgroundPicPositionX %>px; top: <%= @u.webBackgroundPicPositionY %>px;" />
+            </div>
+            <% if @current_uid==@u.uid %>
+                <div class="operate">
+                    <a class="uploadCoverBtn" style="position: relative;"><div class="">上传封面图</div><div style="position: absolute;left:0;top:0;"><object id="SWFUpload_0" type="application/x-shockwave-flash" data="/swf/swfupload.swf?preventswfcaching=1370341055598" width="80" height="24" class="swfupload"><param name="wmode" value="transparent"><param name="movie" value="/swf/swfupload.swf?preventswfcaching=1370341055598"><param name="quality" value="high"><param name="menu" value="false"><param name="allowScriptAccess" value="always"><param name="flashvars" value="movieName=SWFUpload_0&amp;uploadURL=%2Fdtres%2Fpicture%2Fupload&amp;useQueryString=false&amp;requeueOnError=false&amp;httpSuccess=&amp;assumeSuccessTimeout=0&amp;params=&amp;filePostName=Filedata&amp;fileTypes=*.gif%3B%20*.jpg%3B%20*.png%3B*.jpeg%3B*.bmp%3B&amp;fileTypesDescription=Image%20Files&amp;fileSizeLimit=5%20MB&amp;fileUploadLimit=0&amp;fileQueueLimit=1&amp;debugEnabled=false&amp;buttonImageURL=&amp;buttonWidth=80&amp;buttonHeight=24&amp;buttonText=&amp;buttonTextTopPadding=0&amp;buttonTextLeftPadding=0&amp;buttonTextStyle=color%3A%20%23000000%3B%20font-size%3A%2016pt%3B&amp;buttonAction=-110&amp;buttonDisabled=false&amp;buttonCursor=-2"></object></div></a><a class="confirmBtn2" href="javascript:;">确认</a><a class="cancelBtn2" href="javascript:;">取消</a>
+                </div>
+            <% end %>
+        </div>
+    </div>
+    <div class="timelineUserInfo">
+        <!--用户头像及基本信息 start-->
+        <div class="timelinepersonPanel">
+
+            <div id="bdshare" class="personal_shareto bdshare_t bds_tools get-codes-bdshare" data="{url:'<%= "#{Settings.home_root}/#{@u.uid}" %>',pic:'<%= picture_url('header', @u.logoPic, 'origin') %>'}">
+                <span>分享电台:</span>
+                <a class="bds_qzone"></a>
+                <a class="bds_tsina"></a>
+                <a class="bds_sqq"></a>
+                <a class="bds_tqq"></a>
+                <span class="shareto_more"></span>
+            </div>
+
+            <div class="timelinefaceWrapper left">
+
+                <div class="useravatar">
+                    <a class="userface180" href="<%= (@u.uid==@current_uid) ? link_path("/#{@u.uid}/profile") : link_path("/#{@u.uid}/") %>">
+                        <img src="<%= picture_url('header', @u.logoPic, '200') %>" alt="">
+                    </a>
+                    <% if @u.uid==@current_uid %>
+                    <a class="editBtn" href="/passport/header"></a>
+                    <% end %>
+                </div>
+
+                <div class="count">
+                    <%
+                    if @his_tracks_count>99999 or @his_followings_count>99999 or @his_followers_count>99999
+                        user_count_class = "f2"
+                    elsif @his_tracks_count>999 or @his_followings_count>999 or @his_followers_count>999
+                        user_count_class = "f1"
+                    else
+                        user_count_class = ""
+                    end
+                    %>
+                    <div>
+                        <a href="<%= link_path("/#{@u.uid}/sound/") %>" class="<%= user_count_class %>"><%= @his_tracks_count %>
+                            <span>声音</span>
+                        </a>
+                    </div>
+                    <div>
+                        <a href="<%= link_path("/#{@u.uid}/follow/") %>" class="<%= user_count_class %>"><%= @his_followings_count %>
+                            <span>关注</span>
+                        </a>
+                    </div>
+                    <div class="none-border">
+                        <a href="<%= link_path("/#{@u.uid}/fans/") %>" class="<%= user_count_class %>"><%= @his_followers_count %>
+                            <span>粉丝</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="userInfo right">
+                <div class="user_info_left left">
+                    <span class="user_name">
+                        <h1><%= @u.nickname %></h1>
+                        <% if @u.isVerified %>
+                        <span class="BVIcon">&nbsp;</span>
+                        <% end %>
+                        <% if @u.uid!=@current_uid %>
+                        <a class="followBtn" timeline-user-asyn-follow='<%= @u.uid %>' data-options="uid:<%= @u.uid %>,nickname:'<%= @u.nickname %>'">
+                            <span class="default">关注</span>
+                            <span class="hover">取消</span>
+                        </a>
+                        <a class="letterBtn" data-options="nickname:'<%= @u.nickname %>'">
+                            <span>发私信</span>
+                        </a>
+                        <% end %>
+                    </span>
+
+                    <% if @current_uid and @u.uid==@current_uid and @current_user.isVerified %>
+                    <div class="listenhelp is-podcast">
+                        <a class="podcastBtn" href="/podcast/record"><span>podcast服务</span></a>
+                        <div class="grouphelp_txt">
+                            苹果podcast（播客）自诞生以来已经改变了全球媒体格局。在podcast上有无数内容被上传，下载。它的核心是让用户选取最激动人心的声音，并且订阅它。
+                            <br><br>
+                            现在，您只需要通过简单的申请，我们审核以后，就可以将您在喜马拉雅的节目同步更新到podcast上，免去您二次更新的麻烦~
+                            <span class="arrow_grouphelp2"><i></i></span>
+                        </div>
+                    </div>
+                    <% end %>
+
+                </div>
+
+
+                <div class="user_info_right right">
+
+                    <% if @current_uid and @u.uid!=@current_uid %>
+
+                        <% is_black = BlackUser.where(uid:@current_uid,black_uid: @u.uid).first.present? %>
+                        <div class="selecter fr group-select selecter-s4 more_operate">
+                            <div class="selecter-selected" data-value="0">
+                                <span class="selecter-text">更多</span> <em class="selecter-arrow">◆</em>
+                            </div>
+                            <div class="selecter-options">
+                                <ul>
+                                    <li data-value="2" data-options="<%= {nickname:@u.nickname,uid:@u.uid,isBlack:is_black}.to_json[1..-2] %>" class="selecter-item"><%= is_black ? "移除" : "加入" %>黑名单</li>
+                                    <li data-value="3" class="selecter-item">复制链接</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    <% elsif @current_uid %>
+                        <a class='mgL10 copy_link' href="javascript:;">复制链接</a>
+                        <a class='mgL10' href="<%= Settings.profile_url %>">个人设置</a>
+                    <% end %>
+
+                </div>
+
+                <div class="userDetail">
+                    <div class="user_detail_left left">
+                        <%
+                        person_signature = @u.personalSignature
+                        person_signature = (@current_uid==@u.uid ? "现在就介绍一下自己最明显的特点，让人们记住我。" : "这个人很懒，什么都没有留下。" ) if person_signature.nil? or person_signature.strip==""
+                        person_signature = person_signature.truncate(70)
+                        %>
+                        <div class="userIntro">
+                            <span class="text"><%= person_signature %></span>
+                            <% if @current_uid==@u.uid %><a href="javascript:;" class="editDescription">编辑</a><% end %>
+                        </div>
+                        <% if @current_uid==@u.uid %>
+                        <div class="userIntroEdit">
+                            <textarea><%= person_signature %></textarea>
+                            <a class="editConfirm">确认</a>
+                            <a class="cancel">取消</a>
+                        </div>
+                        <% end %>
+
+                        <p class="padding">&nbsp;</p>
+                        <p class="fl area <%= 'own' if @current_uid==@u.uid %>">
+                            <span>
+                                <% if @current_uid==@u.uid %>
+                                    <a href="javascript:;"><%= @u.province %></a>
+                                <% else %>
+                                    <%= @u.province %>
+                                <% end %>
+                                <% if "#{@u.city}#{@u.town}".strip!="" %>
+                                • <%= "#{@u.city}#{@u.town}" %>
+                                <% end %>
+                            </span>
+                        </p>
+                    </div>
+                    <div class="user_detail_right right">
+                        <div class="like">
+                            <a href="<%= link_path("/#{@u.uid}/favorites/") %>">
+                                <img src="<%= (@latest_favorite and @latest_favorite.track_cover_path) ? picture_url('track', @latest_favorite.track_cover_path, '180') : static_url("/css/img/common/mycenter_sound.jpg") %>" alt="">
+                            </a>
+                                <span class="bg"></span>
+                            <a class="title" href="<%= link_path("/#{@u.uid}/favorites/") %>">    
+                                <span class="myLikeIcon">赞过的(<%= @his_favorites_count %>)</span>
+                            </a>
+                        </div>
+                        <div class="album">
+                            <a href="<%= link_path("/#{@u.uid}/album/") %>">
+                                <img src="<%= (@latest_album and @latest_album.album_cover_path) ? picture_url('album', @latest_album.album_cover_path, '180') : static_url("/css/img/common/mycenter_album.jpg") %>" alt="">
+                            </a>
+                                <span class="bg"></span>
+                            <a class="title" href="<%= link_path("/#{@u.uid}/album/") %>">    
+                                <span class="myAlbumIcon">专辑(<%= @his_albums_count %>)</span>
+                            </a>
+                        </div>
+                        <div class="sound">
+                            <a href="<%= link_path("/#{@u.uid}/sound/") %>">
+                                <img src="<%= (@latest_track and @latest_track.track_cover_path) ? picture_url('track', @latest_track.track_cover_path, '180') : static_url("/css/img/common/mycenter_favorite.jpg") %>" alt="">
+                            </a>
+                            <span class="bg"></span>
+                            <a class="title" href="<%= link_path("/#{@u.uid}/sound/") %>">
+                                <span class="mySoundIcon">声音(<%= @his_tracks_count %>)</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--用户头像及基本信息 end-->
+    <% 
+        currentDate = @timeline_calendar[:list][0]
+        currentYear = currentDate && currentDate[:year] 
+        currentMonth = currentDate && currentDate[:months_list][0]
+    %>
+    <div class="timeline" data-options="currentYear:<%= currentYear %>,currentMonth:<%= currentMonth %>,uid:<%= @u.uid %>,birthYear:<%= Time.at(@u.createdTime/1000).year-10 %>,birthMonth:<%= Time.at(@u.createdTime/1000).month %>" >
+        <div class="timeline_right fl">
+
+            <%== erb :_timeline_calendar %>
+
+            <div class="timeline_left">&nbsp;</div>
+            <div class="timelinePanel">
+                <div class="timeline_feed">
+                    <% if @followers and @followers.count > 0 %>
+                    <div class="timeline_content timeline_head">
+                        <div class="fans_title">
+                            <span class="headPoint"></span> <b class="text">他的粉丝</b>
+                            <a href="<%= link_path("/#{@u.uid}/fans/") %>">(<%= @his_followers_count %>)</a>
+                        </div>
+                        <div class="fans_content">
+                            <% @followers.each do |f| %>
+                            <% u = @users[f.uid]
+                                next if u.nil?
+                             %>
+                            <a href="<%= link_path "/#{u.uid}" %>">
+                                <img card="<%= u.uid %>" src="<%= picture_url('header',u.logoPic,'60') %>" alt="">
+                            </a>
+                            <% end %>
+                        </div>
+                    </div>
+                    <% end %>
+                </div>
+            </div>
+            <div class="cl" data-rel="timeLineContainer">
+
+                <div class="timelinePanel no-height" id="<%= "marker#{currentYear}#{currentMonth}" %>" data-time="<%= "#{currentYear}-#{currentMonth}" %>" ></div>
+                <div class="timelinePanel current">
+                    <%== erb :_timeline_list %>
+                </div>
+
+            </div>
+
+            <div class="timelinePanel timelineMgb">
+                <span class="timeline_time_info"><%= Time.at(@u.createdTime/1000).strftime("%Y年%m月%d日") %></span>
+                <div class="timeline_feed">
+                    <div class="timeline_content timeline_footer">
+                        <span class="footerPoint"></span>
+                        <span class="arrow1"></span>
+                        <span class="feet"></span>
+                        加入喜马拉雅大家庭
+                    </div>
+                </div>
+            </div>
+
+            <div class="cl"></div>
+        </div>
+
+    </div>
+</div>
+
+<%== $timeline_template %>
+
+<%== $comment_inputbox_template %>
+
+<% if @current_uid %>
+  <% if request.xhr? -%>
+    <%== erb :_timeline_user_follow_status %>
+  <% else %>
+    <% content_for :script_own do %>
+      <%== erb :_timeline_user_follow_status %>
+    <% end %>
+  <% end %>
+<% end %>
+

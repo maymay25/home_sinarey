@@ -1,0 +1,44 @@
+<% if @feeds != nil %>
+
+   <% if @feeds.totalSize.nil? %>
+       <%@feeds.totalSize=0%>
+   <%end%>
+   <% @totalPage = @feeds.totalSize/3 %>
+   <% if @feeds.pageSize == -1 %>
+        $("#mainbox").html('<%== escape_javascript erb(:'my/feeds/_index') %>');
+        require(["page/home/feed"], function(page){
+            page.init(<%== @feeds_json %>)
+            document.title = document.title.replace(/^\(\d+\)/,"");
+        });
+   <% else %>
+        require(["page/home/feed"], function(feed){
+            <%
+            nowIndex = (@page.to_i-1)*30+(@moreCount.to_i+1)*10
+            if @feeds.totalSize.nil?
+               @totalSize=0
+            elsif
+               @totalSize = @feeds.totalSize
+            end
+             %>
+            //if(route.isOnFeedPage()){
+            if(feed.datas.get('feedType')=='<%= params[:feedType] %>'){
+                <%if @moreCount == 2 %>
+                    $(".pagingBar").html('<%== escape_javascript erb(:'my/feeds/_feedPaging') %>').show();
+                <% elsif @totalSize<=nowIndex %>
+                    $(".pagingBar").html('<%== escape_javascript erb(:'my/feeds/_feedPaging') %>').show();
+                <%end%>
+                <%if @moreCount == 0 %>
+                    $(".feedList").html('<%== escape_javascript erb(:'my/feeds/_index') %>');
+                    <%if @totalSize>nowIndex %>
+                        $(".pagingBar").hide();
+                    <% end %>
+                <%else%>
+                    $(".feedList").append('<%== escape_javascript erb(:'my/feeds/_index') %>');
+                <%end%>
+                feed.setMore(<%== @feeds_json %>);
+            //}
+            }
+        });
+   <% end %>
+<% end %>
+
