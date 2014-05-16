@@ -23,8 +23,6 @@ class ApplicationController < Sinarey::Application
     erb :page_500
   end
 
-  not_found { erb :page_404 }
-
   def dispatch(controller,action)
     before_action(controller,action)
     @temp[:page] = "#{controller}##{action}"
@@ -86,7 +84,7 @@ class ApplicationController < Sinarey::Application
 
   # 未登录跳登录页
   def redirect_to_login(from_path = '/')
-    login_url = "#{Settings.login_url}?fromUri=#{request.protocol + request.host_with_port + from_path}"
+    login_url = "#{Settings.login_url}?fromUri=#{request.scheme +'//' + request.env["SERVER_NAME"] + from_path}"
     if request.xhr?
       halt_js "location.href='#{login_url}';"
     else
@@ -107,7 +105,7 @@ class ApplicationController < Sinarey::Application
     if request.xhr?
       halt 400, ''
     else
-      redirect("#{Settings.login_url}?fromUri=#{request.protocol + request.host_with_port}/upload", 303)
+      redirect("#{Settings.login_url}?fromUri=#{request.url}", 303)
     end
   end
 
@@ -147,6 +145,19 @@ class ApplicationController < Sinarey::Application
       halt erb(:page_500_js)
     end
     halt erb(:page_500)
+  end
+
+  def halt_error(msg=nil)
+    flash[:error_page_info] = msg.presence
+    rdt_url = link_path('/error_page')
+    if request.xhr?
+      if request.post?
+        halt render_json({res: true, msg: msg.to_s, redirect_to: rdt_url})
+      else
+        render_js "location.hash='#{rdt_url}';"
+      end
+    end
+    redirect rdt_url,303
   end
 
   def halt_js(script)

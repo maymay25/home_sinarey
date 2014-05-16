@@ -47,13 +47,17 @@ class CenterRoute < CenterController
 
   # notice
   route :post,       '/notices'                     do dispatch(:get_msg_notice) end
-  route :post,       '/notices/clear'               do dispatch(:xhr_clear_msg_notices) end
+  route :post,       '/notices/clear'               do dispatch(:do_clear_msg_notices) end
+
+  route :get,:post,  '/quan_suggest'                do dispatch(:get_quan_suggest) end
+
+  route :post,       '/report/create'               do dispatch(:do_create_report) end
 
   # podcast 申请相关
   route :get,        '/podcast/record'              do dispatch(:podcast_page) end
   route :get,        '/podcast/apply'               do dispatch(:podcast_apply_page) end
   route :get,        '/podcast/apply/:id'           do dispatch(:podcast_apply_result_page) end
   route :get,        '/podcast/apply_albums'        do dispatch(:get_podcast_apply_albums) end
-  route :post,       '/podcast/create'              do dispatch(:xhr_create_podcast) end
+  route :post,       '/podcast/create'              do dispatch(:do_create_podcast) end
 
 end

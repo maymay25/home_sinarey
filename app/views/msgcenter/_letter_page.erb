@@ -49,7 +49,7 @@
                           last = @last_chats[l.id]
                           next unless last
                           user = @users[l.linkman_uid]
-                          chats_count = Chat.stn(@current_uid).where(uid: @current_uid, with_uid: l.linkman_uid).count
+                          # chats_count = Chat.stn(@current_uid).where(uid: @current_uid, with_uid: l.linkman_uid).count
                         %>
                         <li class="msg_notice_item">
                             <div class="content_wrap">
@@ -69,7 +69,7 @@
                                     <div class="detail_bottom">
                                         <span class="left"><%= parse_time_until_now last.created_at %></span>
                                         <span class="letter_counter">
-                                            <a href="<%= link_path("/letter/#{l.linkman_uid}") %>">共<%= chats_count %>条私信<% if l.no_read_count and l.no_read_count > 0 -%>(<%= l.no_read_count %>条未读)<% end -%></a>
+                                            <a href="<%= link_path("/letter/#{l.linkman_uid}") %>">查看聊天记录<% if l.no_read_count and l.no_read_count > 0 -%>(<%= l.no_read_count %>条未读)<% end -%></a>
                                         </span>
                                         <span class="right">
                                             <a href="javascript:;" data-options="nickname:'<%= l.linkman_nickname %>'">回复</a>

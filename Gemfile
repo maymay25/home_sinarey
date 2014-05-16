@@ -16,7 +16,6 @@ gem 'sinarey_support',require: []
 gem 'sinatra-contrib'
 
 gem 'timerizer'
-gem 'rack-flash3', require: 'rack-flash'
 
 gem 'settingslogic'
 gem 'oj'

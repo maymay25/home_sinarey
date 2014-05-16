@@ -1,0 +1,117 @@
+<link href="<%= css_url '/css/passport/passport.css' %>" rel="stylesheet" type="text/css" />
+<!--主体 start-->
+<div id="home_wrapper">
+    <div id="home_containter">
+        <div class="personalSet aboutUs aboutUs-contact">
+            <div class="personalSet-main">
+                <div class="personalSet-main-tit"> <strong>联系我们</strong>
+                </div>
+                <div class="aboutUs-panel">
+                    <p class="p_img">
+                        <img src="<%= static_url '/css/img/passport/map2.png' %>" alt="" />
+                    </p>
+                    <p>地址: 上海市浦东新区张江高科技园区祖冲之路899弄11号楼</p>
+                    <p>邮编: 201203</p>
+                    <p>电话：021-50179077   021-50179078   021-50179079</p>
+                    <p>传真:  021-50179082</p>
+
+                    <div class="contact-panel">
+                        <dl>
+                            <dt>播主客服</dt>
+                            <dd>联系人：Silvia</dd>
+                            <dd>邮箱：silvia@ximalaya.com</dd>
+                            <dd>电话: 021-50179079-135</dd>
+                        </dl>
+                        <dl>
+                            <dt>客户服务</dt>
+                            <dd class="email pos_01">邮箱：</dd>
+                            <dd>bug反馈群: 296386679</dd>
+                            <dd>
+                                帮助中心：
+                                <a class="a_blank" target="_blank" href="https://help.ximalaya.com">https://help.ximalaya.com</a>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>媒体联系</dt>
+                            <dd>联系人：朱女士</dd>
+                            <dd>电话：021-50179079-126</dd>
+                            <dd>邮箱：pr@ximalaya.com</dd>
+                        </dl>
+                        <dl>
+                            <dt>商务合作（电台、电视台、博客、版权、自媒体）</dt>
+                            <dd>联系人：张小姐</dd>
+                            <dd>电话：021-50179079-129</dd>
+                            <dd>邮箱：lily@ximalaya.com</dd>
+                            <dd>联系人：杨先生</dd>
+                            <dd>电话：021-50179079-131</dd>
+                            <dd class="email pos_03">邮箱：</dd>
+                        </dl>
+                        <dl>
+                            <dt>市场合作（品牌、推广、活动、渠道、硬件车厂、汽车厂商）</dt>
+                            <dd>联系人：王秋月</dd>
+                            <dd>电话：021-50179079-121</dd>
+                            <dd class="email pos_02">邮箱：</dd>
+                        </dl>
+                        <dl>
+                            <dt>投资合作</dt>
+                            <dd>联系人：余先生</dd>
+                            <dd>电话：021-50179079-109</dd>
+                            <dd class="email pos_04">邮箱：</dd>
+                        </dl>
+                        <dl>
+                            <dt>加入我们</dt>
+                            <dd>联系人：张女士</dd>
+                            <dd>电话：021-50179079-112</dd>
+                            <dd class="email pos_05">邮箱：</dd>
+                        </dl>
+                        <dl>
+                            <dt>电台/播主合作</dt>
+                            <dd>联系人：杨先生</dd>
+                            <dd>电话: 400-838-5616</dd>
+                            <dd class="email pos_06">邮箱：</dd>
+                            <dd>QQ: 4008385616</dd>
+                        </dl>
+                        <dl>
+                            <dt>友情链接</dt>
+                            <dd>联系人：dean</dd>
+                            <dd>QQ：1217692875</dd>
+                            <dd>邮箱：dean@ximalaya.com</dd>
+                        </dl>
+
+                    </div>
+                </div>
+            </div>
+            <div class="personalSet-side">
+                <div class="personalSet-side-tit"> <strong>关于我们</strong>
+                </div>
+                <div class="personalSet-side-con">
+                    <ul class="personalSet-side-list">
+                        <li>
+                            <a class="ico_5" href="/help/aboutus/">关于喜马拉雅</a>
+                        </li>
+                        <li class="selectAbout">
+                            <a class="ico_6" href="javascript:;">联系我们</a>
+                        </li>
+                         <li>
+                            <a class="ico_7" href="/help/official_news">公司新闻</a>
+                        </li>
+                        <li>
+                            <a class="ico_9" href="/help/join_us">招纳贤士</a>
+                        </li>
+                    </ul>
+                    <a class="personalSet-apply" href="/verify/"></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div></div>
+</div>
+<!--主体 end-->
+
+  <% content_for :script_own do  %>
+  <script>
+      requirejs(["page/404"], function (page) {
+        page.init();
+      });
+  </script>
+  <% end %>

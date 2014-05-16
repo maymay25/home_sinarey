@@ -160,8 +160,8 @@ class AlbumsController < ApplicationController
       end
     end
 
-    files = (params[:files].is_a?(Array) && params[:files]) || []
-    fileids = (params[:fileids].is_a?(Array) && params[:fileids]) || []
+    files = Array.wrap(params[:files]).take(200)
+    fileids = Array.wrap(params[:fileids]).take(200)
     halt render_json({res: false, errors: [['page', '数据不正确']]}) if files.length != fileids.length
     zipfiles = fileids.zip(files)
 
@@ -189,8 +189,7 @@ class AlbumsController < ApplicationController
       p_transcode_res = Yajl::Parser.parse(transcode_res)
       if !p_transcode_res['success']
         writelog('check transcode state failed')
-        flash[:error_page_info] = '声音转码失败'
-        halt render_json({res: true, redirect_to: "/#/error_page"})
+        halt_error('声音转码失败')
       end
     end
 
@@ -220,17 +219,26 @@ class AlbumsController < ApplicationController
     end
 
     # 定时上传
-    if params[:is_publish] == 'on' and @current_user.isVerified and params[:date] and params[:hour] and params[:minutes]
+    if params[:is_publish] == 'on' and @current_user.isVerified
+      if params[:date] and params[:hour] and params[:minutes]
+        begin
+          year,month,day = params[:date].to_s.split("-")
+          datetime = Time.new(year,month,day,params[:hour],params[:minutes]).strftime('%Y-%m-%d %H:%M:%S')
+        rescue
+          writelog('analysis delay tasks datetime failed')
+        end
+        if datetime
+          delayed_tasks_count = DelayedTrack.where(uid: @current_uid, is_deleted:false).group(:task_count_tag).to_a.size
+          halt render_json({res: false, errors: [['publish', '定时发布任务不能超过10条']]}) if delayed_tasks_count >= 10
 
-      delayed_tasks_count = DelayedTrack.where(uid: @current_uid, is_deleted:false).group(:task_count_tag).to_a.size
-      halt render_json({res: false, errors: [['publish', '定时发布任务不能超过10条']]}) if delayed_tasks_count >= 10
-
-      delayed_create_album_and_tracks(params[:date],params[:hour],params[:minutes],zipfiles,category_id,title,tags,user_source,intro,rich_intro,is_records_desc,music_category,is_finished,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height)
-      halt render_json({res: true, redirect_to: "/#/#{@current_uid}/publish/"})
+          delayed_create_album_and_tracks(datetime,zipfiles,category_id,title,tags,user_source,intro,rich_intro,is_records_desc,music_category,is_finished,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height)
+          halt render_json({res: true, redirect_to: "/#/#{@current_uid}/publish/"})
+        end
+      end
     end
 
     create_album_and_tracks(zipfiles,category_id,title,tags,user_source,intro,rich_intro,is_records_desc,music_category,is_finished,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height)
-    halt render_json({res: true, redirect_to: "/#{@current_uid}/album"})
+    halt render_json({res: true, redirect_to: "/#/#{@current_uid}/album"})
   end
 
   #编辑专辑 表单页
@@ -243,7 +251,7 @@ class AlbumsController < ApplicationController
     redirect_to_login unless @current_uid
 
     @album = Album.stn(@current_uid).where(uid: @current_uid, id: params[:id], is_deleted: false).first
-    redirect '/' if @album.nil?
+    halt_error("专辑已删除或者不存在") if @album.nil?
 
     @album_rich = TrackSetRich.stn(@album.id).where(track_set_id: @album.id).first
     if @album.is_crawler || @album.tracks_order.nil? || @album.tracks_order.empty? 
@@ -252,8 +260,8 @@ class AlbumsController < ApplicationController
     else
       @tracks = TrackRecord.stn(@current_uid).where(uid: @current_uid, album_id: @album.id, is_public: true, is_deleted: false, status: [0, 1]).order("field(id,#{@album.tracks_order})")
     end
-    @category = Category.where(id:@album.category_id).first
-    @categories = Category.where('id != 0 and is_display = 1').order('order_num asc')
+
+    @category = CATEGORIES[@album.category_id]
     
     @checkCaptcha = true
     if !@current_user.isVerified and !@current_user.isVMobile
@@ -279,7 +287,7 @@ class AlbumsController < ApplicationController
     halt_400 unless @current_uid
 
     album = Album.stn(@current_uid).where(uid: @current_uid, id: params[:id], is_deleted: false).first
-    halt render_json({res: false, errors: [['page', '专辑已删除或者不存在']]}) unless album
+    halt_error("专辑已删除或者不存在") unless album
 
     if params[:codeid] and !@current_user.isVerified
       if Net::HTTP.get(URI(File.join(Settings.check_root, "/validateAction?codeId=#{params[:codeid]}&userCode=#{CGI.escape(params[:validcode] || '')}"))) == 'false'
@@ -289,8 +297,8 @@ class AlbumsController < ApplicationController
       end
     end
 
-    files = (params[:files].is_a?(Array) && params[:files]) || []
-    fileids = (params[:fileids].is_a?(Array) && params[:fileids]) || []
+    files = Array.wrap(params[:files]).take(200)
+    fileids = Array.wrap(params[:fileids]).take(200)
     halt render_json({res: false, errors: [['page', '数据不正确']]}) if files.length != fileids.length
     zipfiles = fileids.zip(files)
 
@@ -332,14 +340,15 @@ class AlbumsController < ApplicationController
 
     if image.present?
       begin
-      image = Yajl::Parser.parse(image)
+      img_data = Yajl::Parser.parse(image)
       if img_data and img_data['status']
         pic = img_data['data'][0]['processResult']
         default_cover_path = pic['origin']
         default_cover_exlore_height = pic['180n_height']
+        is_image_change = true
       end
       rescue
-        #
+        writelog('check image form data failed')
       end
     end
 
@@ -349,8 +358,7 @@ class AlbumsController < ApplicationController
 
       if !p_transcode_res['success']
         writelog('check transcode state failed')
-        flash[:error_page_info] = '声音转码失败'
-        halt render_json({res: true, redirect_to: "/#/error_page"})
+        halt_error('声音转码失败')
       end
 
       if default_cover_path.nil? and album.cover_path  # 把专辑封面用作声音默认封面
@@ -359,19 +367,28 @@ class AlbumsController < ApplicationController
         default_cover_exlore_height = pic['180n_height']
       end
 
-      if params[:is_publish]=='on' and @current_user.isVerified and params[:date] and params[:hour] and params[:minutes]
-
-        delayed_tasks_count = DelayedTrack.where(uid: @current_uid, is_deleted:false).group(:task_count_tag).to_a.size
-        halt render_json({res: false, errors: [['publish', '定时发布任务不能超过10条']]}) if delayed_tasks_count >= 10
-
-        delay_options = {date:params[:date], hour:params[:hour],munites:params[:munites]}
-        rdt_url = "/#{@current_uid}/publish/"
+      #定时上传配置
+      if params[:is_publish]=='on' and @current_user.isVerified
+        if params[:date] and params[:hour] and params[:minutes]
+          begin
+            year,month,day = params[:date].to_s.split("-")
+            datetime = Time.new(year,month,day,params[:hour],params[:minutes]).strftime('%Y-%m-%d %H:%M:%S')
+          rescue
+            writelog('analysis delay tasks datetime failed')
+          end
+          if datetime
+            delayed_tasks_count = DelayedTrack.where(uid: @current_uid, is_deleted:false).group(:task_count_tag).to_a.size
+            halt render_json({res: false, errors: [['publish', '定时发布任务不能超过10条']]}) if delayed_tasks_count >= 10
+            rdt_url = "/#/#{@current_uid}/publish/"
+          end
+        end
       end
+
     end
 
-    update_album_and_tracks(album,title,intro,rich_intro,category_id,music_category,is_records_desc,is_finished,zipfiles,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height,delay_options)
+    update_album_and_tracks(album,title,intro,rich_intro,category_id,music_category,is_records_desc,is_finished,zipfiles,sharing_to,share_content,p_transcode_res,is_image_change,default_cover_path,default_cover_exlore_height,datetime)
     
-    rdt_url ||= "/#{@current_uid}/album/"
+    rdt_url ||= "/#/#{@current_uid}/album/"
 
     halt render_json({res: true, redirect_to: rdt_url})
   end
@@ -382,22 +399,18 @@ class AlbumsController < ApplicationController
     halt_400 unless @current_uid
 
     album = Album.stn(@current_uid).where(uid: @current_uid, id: params[:id], is_deleted: false).first
-    halt render_json: ({}) unless album
+    halt render_json({}) unless album
 
-    old_is_deleted = album.is_deleted
-    album.update_attribute("is_deleted",true)
+    album.update_attribute(:is_deleted,true)
 
-    $rabbitmq_channel.fanout(Settings.topic.album.destroyed, durable: true).publish(Yajl::Encoder.encode(album.to_topic_hash.merge(is_feed: true)), content_type: 'text/plain', persistent: true)
-    
     # params[:removeSound] 是否删除专辑下的声音
-    op_type = (params[:removeSound] && params[:removeSound] != "false") ? 1 : 2
-    # $rabbitmq_channel.queue('album.off', durable: true).publish(Yajl::Encoder.encode({ id: album.id,  op_type: op_type }), content_type: 'text/plain')
-    topic = album.to_topic_hash.merge(op_type: op_type, is_off: (!old_is_deleted && album.is_public && album.status == 1))
+    removeSound = (params[:removeSound].to_s != "false") ? 1 : 2
+    topic = album.to_topic_hash.merge(op_type: removeSound, is_off: (album.is_public && album.status == 1))
     $rabbitmq_channel.fanout(Settings.topic.album.destroyed, durable: true).publish(Oj.dump(topic, mode: :compat), content_type: 'text/plain', persistent: true)
-    bunny_logger ||= ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
+    bunny_logger = ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
     bunny_logger.info "album.destroyed.topic #{album.id} #{album.title} #{album.nickname} #{album.updated_at.strftime('%R')}"
 
-    halt render_json: ({})
+    halt render_json({})
   end
 
 

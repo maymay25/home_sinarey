@@ -131,7 +131,7 @@ class ExploreController < ApplicationController
     this_category = Category.where(name: @init_category_name).first
     @init_category_title = this_category.title
     params[:category] = this_category.id
-    params[:condition] = 'zuixinshangchuan'
+    params[:condition] = 'recent'
 
     halt erb_js(:sound_page_js) if request.xhr?
     erb :sound_page

@@ -3,6 +3,11 @@ module Sinarey
 
   class Application < Sinatra::SinareyBase
 
+    use Rack::Session::Cookie, { path:'/', expire_after:nil, key:Sinarey.session_key, secret:Sinarey.secret }
+
+    helpers Sinatra::Cookies
+    set :cookie_options, {path:'/',expires:1.year.from_now,httponly:false}
+
     set :default_encoding, 'utf-8'
 
     helpers Sinatra::ContentFor
@@ -10,12 +15,6 @@ module Sinarey
     register WillPaginate::Sinatra
     register Sinatra::MultiRoute
 
-    helpers Sinatra::Cookies
-    set :cookie_options, {path:'/',expires:1.year.from_now,httponly:false}
-
-    use Rack::Session::Cookie, { path:'/', expire_after:nil, key:Sinarey.session_key, secret:Sinarey.secret }
-
-    use Rack::Flash
 
     set :static, false
 
@@ -54,12 +53,14 @@ module Sinarey
         end
       end
 
-      def flash
-        env['x-rack.flash'] || {}
-      end
-
-      def writelog(msg)
-        $app_logger << (msg.to_s + "\n")
+      if Sinarey.env=='development'
+        def writelog(msg)
+          puts msg.to_s
+        end
+      else
+        def writelog(msg)
+          $app_logger << (msg.to_s + "\n")
+        end
       end
 
       def dump_errors

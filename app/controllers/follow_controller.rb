@@ -235,7 +235,7 @@ class FollowController < ApplicationController
   # params: id
   def xhr_destroy_following_group
 
-    halt render_json ({res: false, error: "unlogin", msg: print_message(:params_missing, "current uid")}) unless @current_uid
+    halt render_json({res: false, error: "unlogin", msg: print_message(:params_missing, "current uid")}) unless @current_uid
 
     following_ids = []
 

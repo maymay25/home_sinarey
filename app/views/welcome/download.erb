@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset=utf-8 />
+    <link href="<%= css_url '/css/web.css' %>" rel="stylesheet" type="text/css">
+    <title>喜马拉雅客户端APP下载，随时随地听好声音 - 喜马拉雅官网</title>
+    <meta name="keywords" content="喜马拉雅app,手机app,app下载" />
+    <meta name="description" content="喜马拉雅，随心录制上传我的好声音，轻松创建个人电台！喜马拉雅手机app下载，支持ios,android等手机下载安装。" />
+</head>
+
+<body>
+
+    <!-- download -->
+    <div class="download_hd">
+        <div class="download_wrap">
+            <a class="download_logo" href="/explore"></a>
+            <div class="download_tag">
+            <% if @current_user && @current_user.isVerified %>
+                <a href='javascript:;' class="on">移动版</a>
+                <a href='/download_pc'>PC版</a>
+            <% end %>
+            </div>
+            <div>
+                <a target="_blank" href="http://blog.ximalaya.com/archives/249" class="vehicleMounted">车载喜马拉雅</a>
+            </div>
+        </div>
+    </div>
+    <div class="download_panel">
+        <img class="download_panelBg" src="<%= static_url '/css/img/appshome/download_bgtop.jpg' %>" alt="">
+        <div class="download_innershadow">
+            <div class="download_wrap">
+                <div class="download_slogan"></div>
+                <div class="download_lionkingW"></div>
+                <div class="download_phonea"></div>
+                <div class="download_img_rolling"> 
+                    <img src="<%= static_url '/css/img/appshome/320-1.jpg' %>" style="z-index:3;"/>
+                    <img src="<%= static_url '/css/img/appshome/320-2.jpg' %>"/>
+                    <img src="<%= static_url '/css/img/appshome/320-3.jpg' %>"/>
+                    <img src="<%= static_url '/css/img/appshome/320-4.jpg' %>"/>
+                    <img src="<%= static_url '/css/img/appshome/320-5.jpg' %>"/>
+                </div>
+                <div class="download_phoneb"></div>
+
+                <style type="text/css">
+                    .download_360Btn {
+                    position: absolute;
+                    top: 80px;
+                    left: 280px;
+                    }
+                </style>
+
+                <div class="download_operate">
+                    <a target="_blank" href="<%= File.join(Settings.home_root, '/down?tag=web&client=ios') %>" class="download_iphoneBtn2"></a>
+                    <a target="_blank" href="<%= File.join(Settings.home_root, '/down?tag=web&client=android') %>" class="download_androidBtn2"></a>
+                    <a target="_blank" href="<%= File.join(Settings.home_root, '/down?tag=web&client=wp') %>" class="download_wpBtn2"></a>
+                    <a href="<%= REDIS.get('app_url.ximalaya_web') || Settings.app_url.ximalaya_web %>" style="position: absolute;right: -126px;top: 22px;"  name="喜马拉雅" onclick="return wdapi_apkdl_m(this, 'source');" title="通过豌豆荚下载">
+                        <img alt="豌豆荚一键安装" src="http://img.wdjimg.com/logo/oneclick-3.png"/>
+                    </a>
+                    <a href="javascript:;" class="download_code">
+                        <img src="<%= static_url '/css/img/code.png' %>" />
+                    </a>
+                    <div class="download_pop">
+                        <div class="left"> <strong>扫描二维码下载</strong>
+                            <p>使用手机上的二维码扫描软件拍摄以下二维码即可立即下载。</p>
+                        </div>
+                        <div class="right">
+                            <div class="download_codetop">
+                                <img src="<%= static_url '/css/img/code.png' %>" />
+                            </div>
+                        </div>
+                        <span class="arrow_pop"> <i></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="download_line">
+            <div class="download_wrap">
+                <div class="fr" id="btnContainer">
+                    <a class="download_selectBtn on"></a>
+                    <a class="download_selectBtn"></a>
+                    <a class="download_selectBtn"></a>
+                    <a class="download_selectBtn"></a>
+                    <a class="download_selectBtn"></a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="download_bd">
+        <div class="download_wrap">
+            <div class="download_con">
+                <div class="download_line">
+                    <div class="download_wordA"></div>
+                    <div class="download_infoA"></div>
+                </div>
+                <div class="download_line">
+                    <div class="download_wordB"></div>
+                    <div class="download_infoB"></div>
+                    <div class="download_infoB_love"></div>
+                </div>
+                <div class="download_line">
+                    <div class="download_wordC"></div>
+                    <div class="download_infoC"></div>
+                </div>
+                <div class="download_line">
+                    <div class="download_wordD"></div>
+                    <div class="download_infoD"></div>
+                </div>
+                <div class="download_line">
+                    <div class="download_wordE"></div>
+                    <div class="download_infoE"></div>
+                    <div class="download_infoE_wave"></div>
+                </div>
+            </div>
+
+        <div class="download_btm">
+            <a class="download_iphoneBtn2" target="_blank" href="<%= File.join(Settings.home_root, '/down?tag=web&client=ios') %>"></a>
+            <a class="download_androidBtn2" target="_blank" href="<%= File.join(Settings.home_root, '/down?tag=web&client=android') %>"></a>
+            <a class="download_wpBtn2" target="_blank" href="<%= File.join(Settings.home_root, '/down?tag=web&client=wp') %>"></a>
+            <div class="download_codebtm"><img src="<%= static_url '/css/img/code.png' %>"></div> 
+        </div>
+
+        </div>
+    </div>
+
+    <%== erb :_footer %>    
+
+    <%== erb :_script %>
+
+    <script type="text/javascript">
+        require(["page/download"], function(page){
+            page.init();
+        });
+    </script>
+
+    <script src="http://zhushou.360.cn/script/360mobilemgrdownload.js"></script>
+    <script src="http://wandoujia.com/api/wdapi.js" type="text/javascript"></script>
+    <script type="text/javascript" src="http://zs.91.com/script/api/key121121.js" charset="utf-8"></script>
+
+    <!--[if IE 6]>
+    <script src="http://static2.test.ximalaya.com/js/plugin/belatedpng.js"></script>
+    <script type="text/javascript">
+    document.execCommand("BackgroundImageCache",false,true);
+    DD_belatedPNG.fix("div, a, span, li");
+    </script>
+    <![endif]-->
+
+    <%== erb :_bdhm %>
+</body>
+</html>

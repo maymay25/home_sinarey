@@ -2,27 +2,409 @@ module UploadsHelper
   include Inet
 
   #上传单条声音 [ 可选 添加到指定专辑 ]
-  def upload_track()
-    
-  end
+  def upload_single_track(fileid,transcode_data,title,user_source,category_id,is_public,images,intro,rich_intro,tags,music_category,singer,singer_category,author,composer,arrangement,post_production,lyric,resinger,announcer,sharing_to,share_content,album)
 
-  #上传多条声音·添加到指定专辑
-  def upload_tracks_into_album(album,is_records_desc,zipfiles,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height,delay_options)
-    cleaned_rich_intro = clean_html(rich_intro)
-    if delay_options
-      uploadzipfiles = []
-      zipfiles.each_with_index do |fid,title|
-        if !['r','m'].include?(fid[0])
-          uploadzipfiles << [fid,title]
+    current_now = Time.now
+    default_status = get_default_status(@current_user)
+
+    track = Track.new
+    track.upload_source = 2 # 网站
+    track.is_crawler = false
+    track.uid = @current_uid # 源发布者
+    track.nickname = @current_user.nickname
+    track.avatar_path = @current_user.logoPic
+    track.is_v = @current_user.isVerified
+    track.dig_status = (@current_user.isVerified || @current_user.isRobot) ? 1 : 0
+    track.human_category_id = @current_user.vCategoryId
+    track.approved_at = current_now if default_status == 1
+    track.title = title
+    track.user_source = user_source
+    track.category_id = category_id
+    track.music_category = music_category
+    track.tags = tags
+    track.intro = intro
+    track.short_intro = intro[0, 100]
+    track.rich_intro = cut_intro(intro)
+    track.singer = singer
+    track.singer_category = singer_category
+    track.author = author
+    track.arrangement = arrangement
+    track.post_production = post_production
+    track.resinger = resinger
+    track.announcer = announcer
+    track.composer = composer
+    track.is_publish = true
+    track.is_public = is_public
+    track.allow_download =  true
+    track.allow_comment = true
+    track.transcode_state = transcode_data['transcode_state']
+    track.mp3size = transcode_data['paths']['origin_size']
+    track.upload_id = transcode_data['upload_id']
+    track.download_path = transcode_data['paths']['aacplus32']
+    track.download_size = transcode_data['paths']['aacplus32_size']
+    track.play_path = transcode_data['paths']['origin_path']
+    track.play_path_32 = transcode_data['paths']['mp332']
+    track.mp3size_32 = transcode_data['paths']['mp332_size']
+    track.play_path_64 = transcode_data['paths']['mp364']
+    track.mp3size_64 = transcode_data['paths']['mp364_size']
+    track.duration = transcode_data['duration']
+    track.waveform = transcode_data['waveform']
+
+    if images.present?
+      create_images,image_index = [],0
+      images.each do |image|
+        begin
+        covers = Yajl::Parser.parse(image)
+        if covers['status'] and covers['status']!=false and covers['data'] and cover=covers['data'].first and cover_track=cover['uploadTrack'] and paths = cover['processResult']
+          create_images << [cover_track['id'].to_i, image_index+1, paths["origin"], paths["180n_height"]]
+          if image_index.zero?
+            track.cover_path = paths["origin"]
+            track.explore_height = paths["180n_height"]
+          end
+          image_index += 1
+        end
+        rescue
+          next
         end
       end
-      delayed_create_album_tracks(delay_options[:date],delay_options[:hour],delay_options[:minutes],album,uploadzipfiles,is_records_desc,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height,cleaned_rich_intro)
+    end
+
+    if album
+      track.album_id = album.id
+      track.album_title = album.title
+      track.album_cover_path = album.cover_path
+    end
+
+    track.inet_aton_ip = inet_aton(get_client_ip)
+    track.status = default_status
+    track.save
+
+    image_ids = []
+    if create_images.present?
+      create_images.each do |image_id,order_num,picture_path,explore_height|
+        TrackPicture.create(track_id:track.id,uid:@current_uid,picture_path:picture_path,explore_height:explore_height,order_num:order_num)
+        image_ids << image_id
+      end
+    end
+
+    #声音文件被使用 
+    UPLOAD_SERVICE.updateTrackUsed(track.id, track.transcode_state, image_ids, fileid.to_i, track.play_path_64.present? && track.waveform.present?)
+    
+    # 声音富文本
+    cleaned_rich_intro = clean_html(rich_intro) if rich_intro.present?
+    cleaned_lyric = CGI.escapeHTML(Sanitize.clean(lyric, { elements: %w(br) }))[0, 5000] if lyric.present?
+
+    track_rich = TrackRich.stn(track.id).where(track_id: track.id).first
+    if track_rich
+      track_rich.update_attributes(rich_intro: cleaned_rich_intro, lyric: cleaned_lyric)
     else
-      create_album_tracks(album,uploadzipfiles,is_records_desc,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height,cleaned_rich_intro)
+      TrackRich.create(track_id: track.id, rich_intro: cleaned_rich_intro, lyric: cleaned_lyric)
+    end
+
+    # 块记录
+    TrackBlock.create(track_id: track.id, duration: track.duration) if track.duration
+    # 声音记录
+    track_record = TrackRecord.create(
+      track_id: track.id,
+      track_uid: @current_uid, # 原声音发布者
+      track_upload_source: track.upload_source,
+      uid: @current_uid,  
+      nickname: @current_user.nickname,
+      avatar_path: @current_user.logoPic,
+      is_v: @current_user.isVerified,
+      dig_status: track.dig_status,
+      human_category_id: @current_user.vCategoryId,
+      approved_at: track.approved_at,
+      op_type: 1,
+      is_crawler: track.is_crawler,
+      upload_source: track.upload_source,
+      user_source: track.user_source,
+      category_id: track.category_id,
+      music_category: track.music_category,
+      download_path: track.download_path,
+      duration: track.duration,
+      play_path: track.play_path,
+      play_path_32: track.play_path_32,
+      play_path_64: track.play_path_64,
+      play_path_128: track.play_path_128,
+      transcode_state: track.transcode_state,
+      mp3size: track.mp3size,
+      mp3size_32: track.mp3size_32,
+      mp3size_64: track.mp3size_64,
+      tags: track.tags,
+      title: track.title,
+      intro: track.intro,
+      short_intro: track.short_intro,
+      rich_intro: track.rich_intro,
+      is_public: track.is_public,
+      is_publish: track.is_publish,
+      singer: track.singer,
+      singer_category: track.singer_category,
+      author: track.author,
+      arrangement: track.arrangement,
+      post_production: track.post_production,
+      resinger: track.resinger,
+      announcer: track.announcer,
+      composer: track.composer,
+      allow_download: track.allow_download,
+      allow_comment: track.allow_comment,
+      cover_path: track.cover_path,
+      album_id: track.album_id,
+      album_title: track.album_title,
+      album_cover_path: track.album_cover_path,
+      waveform: track.waveform,
+      upload_id: track.upload_id,
+      inet_aton_ip: track.inet_aton_ip,
+      status: track.status,
+      explore_height: track.explore_height
+    )
+
+    # 如果添加到专辑，更新专辑排序
+    if album
+      if album.tracks_order
+        if album.is_records_desc
+          album.tracks_order = ( [track_record.id] + album.tracks_order.split(",") ).join(",")
+        else
+          album.tracks_order = album.tracks_order.split(",").push(track_record.id).join(",")
+        end
+      end
+      album.save
+
+      mqMessage = {
+        id: album.id,
+        is_new: false,
+        user_agent: request.user_agent,
+        created_record_ids: [track_record.id],
+        share: [sharing_to, share_content],
+        share_config: 'sound'
+      }
+      $rabbitmq_channel.queue('album.updated.dj', durable: true).publish(Yajl::Encoder.encode(mqMessage), content_type: 'text/plain')
+    else
+      $rabbitmq_channel.queue('track.on', durable: true).publish(Yajl::Encoder.encode({
+        id: track.id,
+        share: [sharing_to, share_content],
+        is_new: true
+      }), content_type: 'text/plain')
+
+      if track.is_public && track.status == 1 && track.play_path_64 && track.waveform
+        $rabbitmq_channel.fanout(Settings.topic.track.created, durable: true).publish(Yajl::Encoder.encode(track.to_topic_hash.merge(user_agent: request.user_agent, is_feed: true)), content_type: 'text/plain', persistent: true)
+        bunny_logger = ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
+        bunny_logger.info "track.created.topic #{track.id} #{track.title} #{track.nickname} #{track.updated_at.strftime('%R')}"
+      end
+
     end
   end
 
-  #上传专辑
+  #定时上传单条声音 [ 可选 添加到指定专辑 ]
+  def delayed_upload_single_track(datetime,fileid,transcode_data,title,user_source,category_id,is_public,images,intro,rich_intro,tags,music_category,singer,singer_category,author,composer,arrangement,post_production,lyric,resinger,announcer,sharing_to,share_content,album)
+    
+    current_now = Time.now
+    task_count_tag = current_now.to_i
+    default_status = get_default_status(@current_user)
+    cleaned_rich_intro = clean_html(rich_intro) if rich_intro.present?
+    cleaned_lyric = CGI.escapeHTML(Sanitize.clean(lyric, { elements: %w(br) }))[0, 5000] if lyric.present?
+
+    track_origin = Track.new
+    track_origin.upload_source = 2 # 网站
+    track_origin.is_crawler = false
+    track_origin.uid = @current_uid # 源发布者
+    track_origin.nickname = @current_user.nickname
+    track_origin.avatar_path = @current_user.logoPic
+    track_origin.is_v = @current_user.isVerified
+    track_origin.dig_status = (@current_user.isVerified || @current_user.isRobot) ? 1 : 0
+    track_origin.human_category_id = @current_user.vCategoryId
+    track_origin.approved_at = current_now if default_status == 1
+    track_origin.title = title
+    track_origin.user_source = user_source
+    track_origin.category_id = category_id
+    track_origin.music_category = music_category
+    track_origin.tags = tags
+    track_origin.intro = intro
+    track_origin.short_intro = intro[0, 100]
+    track_origin.rich_intro = cut_intro(intro)
+    track_origin.singer = singer
+    track_origin.singer_category = singer_category
+    track_origin.author = author
+    track_origin.arrangement = arrangement
+    track_origin.post_production = post_production
+    track_origin.resinger = resinger
+    track_origin.announcer = announcer
+    track_origin.composer = composer
+    track_origin.is_publish = true
+    track_origin.is_public = is_public
+    track_origin.allow_download =  true
+    track_origin.allow_comment = true
+    track_origin.transcode_state = transcode_data['transcode_state']
+    track_origin.mp3size = transcode_data['paths']['origin_size']
+    track_origin.upload_id = transcode_data['upload_id']
+    track_origin.download_path = transcode_data['paths']['aacplus32']
+    track_origin.download_size = transcode_data['paths']['aacplus32_size']
+    track_origin.play_path = transcode_data['paths']['origin_path']
+    track_origin.play_path_32 = transcode_data['paths']['mp332']
+    track_origin.mp3size_32 = transcode_data['paths']['mp332_size']
+    track_origin.play_path_64 = transcode_data['paths']['mp364']
+    track_origin.mp3size_64 = transcode_data['paths']['mp364_size']
+    track_origin.duration = transcode_data['duration']
+    track_origin.waveform = transcode_data['waveform']
+    track_origin.inet_aton_ip = inet_aton(get_client_ip)
+    track_origin.status = 2
+
+    if album
+      if album.cover_path
+        # 把专辑封面用作声音默认封面
+        pic = UPLOAD_SERVICE2.uploadCoverFromExistPic(album.cover_path, 3)
+        default_cover_path = pic['origin']
+        default_cover_exlore_height = pic['180n_height']
+      end
+
+      track_origin.album_id = album.id
+      track_origin.album_title = album.title
+      track_origin.album_cover_path = album.cover_path
+      track_origin.cover_path = default_cover_path
+      track_origin.explore_height = default_cover_exlore_height
+    end
+
+    if images.present?
+      create_images,image_index = [],0
+      images.each do |image|
+        begin
+        covers = Yajl::Parser.parse(image)
+        if covers['status'] and covers['status']!=false and covers['data'] and cover=covers['data'].first and cover_track=cover['uploadTrack'] and paths = cover['processResult']
+          create_images << [cover_track['id'].to_i, image_index+1, paths["origin"], paths["180n_height"]]
+          if image_index.zero?
+            track_origin.cover_path = paths["origin"]
+            track_origin.explore_height = paths["180n_height"]
+          end
+          image_index += 1
+        end
+        rescue
+          next
+        end
+      end
+    end
+
+    track_origin.save
+
+    if create_images.present?
+      image_ids = []
+      create_images.each do |image_id,order_num,picture_path,explore_height|
+        TrackPicture.create(track_id:track_origin.id,uid:@current_uid,picture_path:picture_path,explore_height:explore_height,order_num:order_num)
+        image_ids << image_id
+      end
+    end
+
+    UPLOAD_SERVICE.updateTrackUsed(track_origin.id, track_origin.transcode_state, image_ids, fileid.to_i, track_origin.play_path_64.present? && track_origin.waveform.present?)
+
+    track = DelayedTrack.new
+    track.track_id = track_origin.id
+    track.fileid = fileid
+    track.status = default_status
+    track.publish_at = datetime
+    track.task_count_tag = task_count_tag
+    track.upload_source = track_origin.upload_source
+    track.is_crawler = track_origin.is_crawler
+    track.uid = track_origin.uid
+    track.nickname = track_origin.nickname
+    track.avatar_path = track_origin.avatar_path
+    track.is_v = track_origin.is_v
+    track.dig_status = track_origin.dig_status
+    track.human_category_id = track_origin.human_category_id
+    track.approved_at = track_origin.approved_at
+    track.title = track_origin.title
+    track.user_source = track_origin.user_source
+    track.category_id = track_origin.category_id
+    track.music_category = track_origin.music_category
+    track.tags = track_origin.tags
+    track.intro = track_origin.intro
+    track.short_intro = track_origin.short_intro
+    track.rich_intro = track_origin.rich_intro
+    track.singer = track_origin.singer
+    track.singer_category = track_origin.singer_category
+    track.author = track_origin.author
+    track.arrangement = track_origin.arrangement
+    track.post_production = track_origin.post_production
+    track.resinger = track_origin.resinger
+    track.announcer = track_origin.announcer
+    track.composer = track_origin.composer
+    track.is_publish = track_origin.is_publish
+    track.is_public = track_origin.is_public
+    track.lyric = track_origin.lyric
+    track.allow_download =  track_origin.allow_download
+    track.allow_comment = track_origin.allow_comment
+    track.transcode_state = track_origin.transcode_state
+    track.mp3size = track_origin.mp3size
+    track.upload_id = track_origin.upload_id
+    track.download_path = track_origin.download_path
+    track.download_size = track_origin.download_size
+    track.play_path = track_origin.play_path
+    track.play_path_32 = track_origin.play_path_32
+    track.mp3size_32 = track_origin.mp3size_32
+    track.play_path_64 = track_origin.play_path_64
+    track.mp3size_64 = track_origin.mp3size_64
+    track.duration = track_origin.duration
+    track.waveform = track_origin.waveform
+    track.inet_aton_ip = track_origin.inet_aton_ip
+
+    if album
+      dalbum = DelayedAlbum.new
+      dalbum.uid = @current_uid
+      dalbum.nickname = album.nickname
+      dalbum.avatar_path = album.avatar_path
+      dalbum.is_v = album.is_v
+      dalbum.dig_status = album.dig_status
+      dalbum.human_category_id = album.human_category_id
+      dalbum.title = album.title
+      dalbum.intro = album.intro
+      dalbum.short_intro = album.short_intro
+      dalbum.tags = album.tags
+      dalbum.user_source = album.user_source
+      dalbum.category_id = album.category_id
+      dalbum.music_category  = album.music_category
+      dalbum.is_finished = album.is_finished
+      dalbum.cover_path = album.cover_path
+      dalbum.is_records_desc = album.is_records_desc
+      dalbum.is_public = album.is_public
+      dalbum.is_publish = true
+      dalbum.publish_at = datetime
+      dalbum.status = default_status
+      dalbum.rich_intro = cut_intro(rich_intro)
+      dalbum.save
+
+      track.delayed_album_id = dalbum.id # 临时专辑id
+    end
+
+    track.save
+
+    mqMessage = {
+      track_id: track_origin.id,
+      delayed_track_ids: [track.id],
+      delete_delayed_album_id: dalbum && dalbum.id,
+      delayed_publish_at: datetime,
+      share: [sharing_to, share_content],
+      user_agent: request.user_agent,
+      rich_intro: cleaned_rich_intro
+    }
+    $rabbitmq_channel.queue('timing.publish.queue', durable: true).publish(Yajl::Encoder.encode(mqMessage), content_type: 'text/plain', persistent: true)
+  end
+
+  #上传多条声音·添加到指定专辑
+  def upload_tracks_into_album(album,zipfiles,is_records_desc,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height,datetime)
+    album_rich = TrackSetRich.stn(album.id).where(track_set_id: album.id).first
+    cleaned_rich_intro = (album_rich && album.rich_intro.to_s) || ''
+    if datetime
+      delayedzipfiles = []
+      zipfiles.each do |fid,title|
+        if !['r','m'].include?(fid[0])
+          delayedzipfiles << [fid,title]
+        end
+      end
+      delayed_create_album_tracks(datetime,album,delayedzipfiles,is_records_desc,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height,cleaned_rich_intro)
+    else
+      create_album_tracks(album,zipfiles,is_records_desc,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height,cleaned_rich_intro)
+    end
+  end
+
+  #上传单张专辑·多条声音
   def create_album_and_tracks(zipfiles,category_id,title,tags,user_source,intro,rich_intro,is_records_desc,music_category,is_finished,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height)
     album = Album.new
     album.uid = @current_uid
@@ -48,7 +430,7 @@ module UploadsHelper
     album.save
 
     # 专辑富文本
-    cleaned_rich_intro = clean_html(rich_intro)
+    cleaned_rich_intro = clean_html(rich_intro) if rich_intro.present?
 
     setrich = TrackSetRich.stn(album.id).where(track_set_id: album.id).first
     if setrich
@@ -75,11 +457,8 @@ module UploadsHelper
     true
   end
 
-  #定时上传专辑
-  def delayed_create_album_and_tracks(date,hour,minutes,zipfiles,category_id,title,tags,user_source,intro,rich_intro,is_records_desc,music_category,is_finished,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height)
-
-    year,month,day = date.to_s.split("-")
-    datetime = Time.new(year,month,day,hour,minutes).strftime('%Y-%m-%d %H:%M:%S')
+  #定时上传专辑·多条声音
+  def delayed_create_album_and_tracks(datetime,zipfiles,category_id,title,tags,user_source,intro,rich_intro,is_records_desc,music_category,is_finished,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height)
 
     album = DelayedAlbum.new
     album.uid = @current_uid
@@ -165,10 +544,10 @@ module UploadsHelper
       delayed_track_ids << track.id
     end
 
-    cleaned_rich_intro = clean_html(rich_intro)
+    cleaned_rich_intro = clean_html(rich_intro) if rich_intro.present?
 
     # 定时发布queue
-    $rabbitmq_channel.queue('timing.publish.queue', durable: true).publish(Yajl::Encoder.encode({
+    mqMessage = {
       delayed_track_ids: delayed_track_ids,
       delayed_album_id: album.id.to_s,
       delayed_publish_at: datetime,
@@ -176,30 +555,158 @@ module UploadsHelper
       user_agent: request.user_agent,
       is_records_desc: is_records_desc,
       rich_intro: cleaned_rich_intro
-    }), content_type: 'text/plain', persistent: true)
+    }
+    $rabbitmq_channel.queue('timing.publish.queue', durable: true).publish(Yajl::Encoder.encode(mqMessage), content_type: 'text/plain', persistent: true)
 
     true
   end
 
-  #修改专辑
-  def update_album_and_tracks(album,title,intro,rich_intro,image,category_id,music_category,is_records_desc,is_finished,zipfiles,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height,delay_options)
-    
-    cleaned_rich_intro = clean_html(rich_intro)
+  #修改单条声音 [ 可选 添加进专辑,转移到另一个专辑,转出当前专辑 ]
+  def update_single_track(track,record,album,title,intro,is_public,rich_intro,lyric,singer,singer_category,author,composer,arrangement,post_production,resinger,announcer,music_category,images,destroy_images)
+    cache_is_public  = track.is_public
+    cache_album_id = track.album_id
 
-    update_album_columns(album,title,intro,rich_intro,cleaned_rich_intro,image,category_id,music_category,is_records_desc,is_finished)
-    
-    if delay_options
-      delayedzipfiles,zipfiles2 = [],[]
-      zipfiles.each_with_index do |fid,title|
-        if ['r','m'].include?(fid[0])
-          zipfiles2 << [fid,title]
+    cleaned_rich_intro = clean_html(rich_intro)
+    cleaned_lyric = CGI.escapeHTML(Sanitize.clean(lyric, { elements: %w(br) }))[0, 5000] if lyric.present?
+
+    temp = {
+      title: title,
+      intro: intro,
+      short_intro: intro && intro[0, 100],
+      rich_intro: cut_intro(rich_intro),
+      singer: singer,
+      singer_category: singer_category,
+      author: author,
+      composer: composer,
+      arrangement: arrangement,
+      post_production: post_production,
+      resinger: resinger,
+      announcer: announcer,
+      music_category: music_category,
+      is_public: cache_is_public || is_public
+    }
+
+    #更新声音图片信息
+    destroy_images.each do |picture_id|
+      picture_id = picture_id.to_i
+      track_picture = TrackPicture.stn(track.id).where(id:picture_id,track_id:track.id).first
+      track_picture.destroy if track_picture
+    end if destroy_images.present?
+
+    if images.present?
+      create_images,image_index = [],0
+      images.each do |image|
+        next if image.to_s=="0"
+        if (picture_id=image.to_i)>0
+          track_picture = TrackPicture.stn(track.id).where(id:picture_id,track_id:track.id).first
+          if track_picture
+            track_picture.update_attribute('order_num',image_index+1)
+            if image_index.zero?
+              temp[:cover_path] = track_picture.picture_path
+              temp[:explore_height] = track_picture.explore_height
+            end
+            image_index += 1
+          end
         else
-          if (tmp=fid.to_i) > 0
-            delayedzipfiles << [tmp,title]
+          begin
+          covers = Yajl::Parser.parse(image)
+          if covers['status'] and covers['status']!=false and covers['data'] and cover=covers['data'].first and cover_track=cover['uploadTrack'] and paths = cover['processResult']
+            create_images << [cover_track['id'].to_i, image_index+1, paths["origin"], paths["180n_height"]]
+            if image_index.zero?
+              temp[:cover_path] = paths["origin"]
+              temp[:explore_height] = paths["180n_height"]
+            end
+            image_index += 1
+          end
+          rescue
+            next
           end
         end
       end
-      delayed_create_album_tracks(delay_options[:date],delay_options[:hour],delay_options[:minutes],album,delayedzipfiles,is_records_desc,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height,cleaned_rich_intro)
+    else
+      temp[:cover_path] = nil
+    end
+
+    if album # 更新专辑信息
+      temp[:album_id] = album.id
+      temp[:album_title] = album.title
+      temp[:album_cover_path] = album.cover_path
+    elsif cache_album_id
+      temp[:album_id] = nil
+      temp[:album_title] = nil
+      temp[:album_cover_path] = nil
+    end
+
+    track.update_attributes(temp)
+    record.update_attributes(temp)
+
+    if create_images.present?
+      image_ids = []
+      create_images.each do |image_id,order_num,picture_path,explore_height|
+        TrackPicture.create(track_id:track.id,uid:@current_uid,picture_path:picture_path,explore_height:explore_height,order_num:order_num)
+        image_ids << image_id
+      end
+      UPLOAD_SERVICE.updateTrackUsed(track.id, track.transcode_state, image_ids, nil, nil)
+    end
+
+    track_rich = TrackRich.stn(track.id).where(track_id: track.id).first
+    if track_rich
+      track_rich.update_attributes(rich_intro: cleaned_rich_intro, lyric: cleaned_lyric)
+    else
+      TrackRich.create(track_id: track.id, rich_intro: cleaned_rich_intro, lyric: cleaned_lyric)
+    end
+    
+    if album
+      if album.tracks_order
+        if album.is_records_desc
+          album.tracks_order = ( [record.id] + album.tracks_order.split(",") ).join(",")
+        else
+          album.tracks_order = album.tracks_order.split(",").push(record.id).join(",")
+        end
+        album.save
+      end
+      mqMessage = { id: album.id,user_agent: request.user_agent,moved_record_id_old_album_ids: [[record.id, cache_album_id]] }
+      $rabbitmq_channel.queue('album.updated.dj', durable: true).publish(Yajl::Encoder.encode(mqMessage), content_type: 'text/plain')
+    elsif cache_album_id
+      past_album = Album.stn(@current_uid).where(id: cache_album_id, uid: @current_uid).first
+      if past_album
+        past_album.tracks_order &&= past_album.tracks_order.split(',').delete_if{ |id| id == record.id }.join(",")
+        past_album.save
+        $counter_client.decr(Settings.counter.album.tracks, past_album.id, 1) if track and track.is_public
+        mqMessage = { id: past_album.id, user_agent: request.user_agent }
+        $rabbitmq_channel.queue('album.updated.dj', durable: true).publish(Yajl::Encoder.encode(mqMessage), content_type: 'text/plain')
+      end
+    end
+
+    if cache_is_public
+      $rabbitmq_channel.fanout(Settings.topic.track.updated, durable: true).publish(Yajl::Encoder.encode(track.to_topic_hash), content_type: 'text/plain', persistent: true)
+      bunny_logger = ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
+      bunny_logger.info "track.updated.topic #{track.id} #{track.title} #{track.nickname} #{track.updated_at.strftime('%R')}"
+    elsif track.is_public
+      $rabbitmq_channel.fanout(Settings.topic.track.created, durable: true).publish(Yajl::Encoder.encode(track.to_topic_hash.merge(user_agent: request.headers['user_agent'], is_feed: true)), content_type: 'text/plain', persistent: true)
+      bunny_logger = ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
+      bunny_logger.info "track.created.topic #{track.id} #{track.title} #{track.nickname} #{track.updated_at.strftime('%R')}"
+      $rabbitmq_channel.queue('track.on', durable: true).publish(Yajl::Encoder.encode({id: track.id, is_new: true}), content_type: 'text/plain')
+    end   
+  end
+
+  #修改单张专辑·多条声音
+  def update_album_and_tracks(album,title,intro,rich_intro,category_id,music_category,is_records_desc,is_finished,zipfiles,sharing_to,share_content,p_transcode_res,is_image_change,default_cover_path,default_cover_exlore_height,datetime)
+    
+    cleaned_rich_intro = clean_html(rich_intro) if rich_intro.present?
+
+    update_album_columns(album,title,intro,rich_intro,cleaned_rich_intro,category_id,music_category,is_records_desc,is_finished,is_image_change,default_cover_path)
+    
+    if datetime
+      delayedzipfiles,zipfiles2 = [],[]
+      zipfiles.each do |fid,title|
+        if ['r','m'].include?(fid[0])
+          zipfiles2 << [fid,title]
+        else
+          delayedzipfiles << [fid,title]
+        end
+      end
+      delayed_create_album_tracks(datetime,album,delayedzipfiles,is_records_desc,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height,cleaned_rich_intro)
     else
       zipfiles2 = zipfiles
     end
@@ -279,7 +786,8 @@ module UploadsHelper
   private
 
 
-  def update_album_columns(album,title,intro,rich_intro,cleaned_rich_intro,category_id,music_category,is_records_desc,is_finished,default_cover_path,default_cover_exlore_height)
+  def update_album_columns(album,title,intro,rich_intro,cleaned_rich_intro,category_id,music_category,is_records_desc,is_finished,is_image_change,default_cover_path)
+    
     tmp_attrs = {
       title: title,
       intro: intro,
@@ -288,10 +796,9 @@ module UploadsHelper
       category_id: category_id,
       music_category: music_category,
       is_records_desc: is_records_desc,
-      is_finished: is_finished,
-      cover_path: default_cover_path
+      is_finished: is_finished
     }
-
+    tmp_attrs[:cover_path] = default_cover_path if is_image_change
     album.update_attributes(tmp_attrs)
 
     # 专辑富文本
@@ -309,35 +816,42 @@ module UploadsHelper
 
     return if uploadzipfiles.blank?
 
-    tmp_data = {all_records:[]}
-    response = {create:[]}
+    create_record_ids = []
 
     new_fileid_idx = 0
     uploadzipfiles.each do |fid, title|
       transcode_data = p_transcode_res['data'][new_fileid_idx]
       new_fileid_idx += 1
-      create_album_track(album,fid,title,transcode_data,default_cover_path,default_cover_exlore_height,cleaned_rich_intro,tmp_data,response[:create])
+      if result = create_album_track(album,fid,title,transcode_data,default_cover_path,default_cover_exlore_height,cleaned_rich_intro)
+        create_record_ids << result[:record]
+      end
     end
 
-    records = tmp_data[:all_records]
-    if records.size > 0 and album.tracks_order
+    if new_records.size > 0 and album.tracks_order
       if is_records_desc || album.is_records_desc
-        album.is_records_desc = true
-        album.tracks_order = ( records.map{|r| r.id} + album.tracks_order.split(",") ).join(",")
+        album.tracks_order = ( new_records.map{|r| r.id} + album.tracks_order.split(",") ).join(",")
       else
-        album.tracks_order = ( album.tracks_order.split(",") + records.map{|r| r.id} ).join(",")
+        album.tracks_order = ( album.tracks_order.split(",") + new_records.map{|r| r.id} ).join(",")
       end
       album.save
     end
 
+    $rabbitmq_channel.queue('album.updated.dj', durable: true).publish(Yajl::Encoder.encode({
+      id: album.id,
+      is_new: false,
+      created_record_ids: create_record_ids,
+      updated_track_ids: [],
+      moved_record_id_old_album_ids: [],
+      destroyed_track_ids: [],
+      share: [params[:sharing_to], params[:share_content]],
+      user_agent: request.headers['user_agent']
+    }), content_type: 'text/plain')
+
   end
 
-  def delayed_create_album_tracks(date,hour,minutes,album,delayedzipfiles,is_records_desc,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height,cleaned_rich_intro)
+  def delayed_create_album_tracks(datetime,album,delayedzipfiles,is_records_desc,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height,cleaned_rich_intro)
 
     return if delayedzipfiles.blank?
-
-    year,month,day = date.to_s.split("-")
-    datetime = Time.new(year,month,day,hour,minutes).strftime('%Y-%m-%d %H:%M:%S')
 
     dalbum = DelayedAlbum.new
     dalbum.uid = album.uid
@@ -367,43 +881,24 @@ module UploadsHelper
 
     # 存专辑下的声音
     track_ids,new_fileid_idx = [],0
-    delayedzipfiles.each_with_index do |fid,title|
+    delayedzipfiles.each do |fid,title|
       
-      track_origin = Track.new
-      track_origin.uid = @current_uid
-      track_origin.status = 2
-      track_origin.title = title
-      d = p_transcode_res['data'][new_fileid_idx]
-      track_origin.transcode_state = d['transcode_state']
-      track_origin.mp3size = d['paths']['origin_size']
-      track_origin.upload_id = d['upload_id']
-      track_origin.download_path = d['paths']['aacplus32']
-      track_origin.download_size = d['paths']['aacplus32_size']
-      track_origin.play_path = d['paths']['origin_path']
-      track_origin.play_path_32 = d['paths']['mp332']
-      track_origin.mp3size_32 = d['paths']['mp332_size']
-      track_origin.play_path_64 = d['paths']['mp364']
-      track_origin.mp3size_64 = d['paths']['mp364_size']
-      track_origin.duration = d['duration']
-      track_origin.waveform = d['waveform']
-      track_origin.cover_path = default_cover_path
-      track_origin.explore_height = default_cover_exlore_height
-      track_origin.save
+      transcode_data = p_transcode_res['data'][new_fileid_idx]
 
       track = DelayedTrack.new
       track.task_count_tag = task_count_tag
-      track.transcode_state = track_origin.transcode_state
-      track.mp3size = track_origin.mp3size
-      track.upload_id = track_origin.upload_id
-      track.download_path = track_origin.download_path
-      track.download_size = track_origin.download_size
-      track.play_path = track_origin.play_path
-      track.play_path_32 = track_origin.play_path_32
-      track.mp3size_32 = track_origin.mp3size_32
-      track.play_path_64 = track_origin.play_path_64
-      track.mp3size_64 = track_origin.mp3size_64
-      track.duration = track_origin.duration
-      track.waveform = track_origin.waveform
+      track.transcode_state = transcode_data['transcode_state']
+      track.mp3size = transcode_data['paths']['origin_size']
+      track.upload_id = transcode_data['upload_id']
+      track.download_path = transcode_data['paths']['aacplus32']
+      track.download_size = transcode_data['paths']['aacplus32_size']
+      track.play_path = transcode_data['paths']['origin_path']
+      track.play_path_32 = transcode_data['paths']['mp332']
+      track.mp3size_32 = transcode_data['paths']['mp332_size']
+      track.play_path_64 = transcode_data['paths']['mp364']
+      track.mp3size_64 = transcode_data['paths']['mp364_size']
+      track.duration = transcode_data['duration']
+      track.waveform = transcode_data['waveform']
       track.is_crawler = false
       track.upload_source = 2 # 网站上传
       track.uid = album.uid # 源发布者id
@@ -413,12 +908,11 @@ module UploadsHelper
       track.dig_status = album.dig_status # 发现页可见
       track.human_category_id = album.human_category_id
       track.approved_at = Time.now
-      track.track_id = track_origin.id
       track.album_id = album.id # 源专辑id
       track.delayed_album_id = dalbum.id # 临时专辑id
       track.album_title = album.title # 源专辑标题
       track.album_cover_path = album.cover_path
-      track.title = newfile[index]
+      track.title = title
       track.category_id = album.category_id
       track.music_category = album.music_category
       track.tags = album.tags || ""
@@ -436,7 +930,7 @@ module UploadsHelper
       track.status = album.status
       track.save
 
-      UPLOAD_SERVICE.updateTrackUsed(track_origin.id, track_origin.transcode_state, [], fid.to_i, true)
+      UPLOAD_SERVICE.updateTrackUsed(nil, track.transcode_state, [], fid.to_i, true)
 
       REDIS.incr("#{Settings.delayedpublishtrackcount}.#{Time.new.strftime('%F')}")
 
@@ -462,29 +956,34 @@ module UploadsHelper
   # fileids对应页面元素： 123: 新上传, m123: (移动的)track_id, r123: (专辑里原有的)record_id
   def manage_album_tracks(album, zipfiles, p_transcode_res, default_cover_path, default_cover_exlore_height, cleaned_rich_intro, record_ids_to_destroy = [])
 
-    tmp_data = {all_records:[]}
+    response = {create:[],update:[],move:[]}
+    response[:destroy] = destroy_album_tracks(album,record_ids_to_destroy)
 
-    response = {create:[],update:[],move:[],destroy:[]}
-
-    destroy_album_tracks(album,record_ids_to_destroy,response[:destroy])
-
-    new_fileid_idx = 0
+    all_records,new_fileid_idx = [],0
     zipfiles.each do |fid, title|
-      if fid[0] == 'r'
+      case fid[0] when 'r'
         next unless (record_id=fid[1..-1].to_i) > 0
-        next unless update_album_track(album,record_id,title,tmp_data,response[:update])
-      elsif fid[0] == 'm'
+        if result = update_album_track(album,record_id,title)
+          response[:update] << result[:update] if result[:update] #maybe not change
+          all_records << result[:record]
+        end
+      when 'm'
         next unless (record_id=fid[1..-1].to_i) > 0
-        next unless move_album_track(album,record_id,title,tmp_data,response[:move])
+        if result = move_album_track(album,record_id,title)
+          response[:move] << result[:move]
+          all_records << result[:record]
+        end
       else
         transcode_data = p_transcode_res['data'][new_fileid_idx]
         new_fileid_idx += 1
-        next unless create_album_track(album,fid,title,transcode_data,default_cover_path,default_cover_exlore_height,cleaned_rich_intro,tmp_data,response[:create])
+        if result = create_album_track(album,fid,title,transcode_data,default_cover_path,default_cover_exlore_height,cleaned_rich_intro)
+          response[:create] << result[:create]
+          all_records << result[:record]
+        end
       end
     end
 
     # 更新专辑声音排序和最新更新声音
-    all_records = tmp_data[:all_records]
     if all_records.size > 0
       album.tracks_order = all_records.map{|r| r.id}.join(',')
       latest_record = all_records.sort{|x, y| y.created_at <=> x.created_at }.first
@@ -504,7 +1003,8 @@ module UploadsHelper
     response
   end
 
-  def destroy_album_tracks(album,record_ids,register_array)
+  def destroy_album_tracks(album,record_ids)
+    destroy_track_ids = []
     record_ids.each do |record_id|
       record = TrackRecord.stn(album.uid).where(uid: album.uid, id: record_id, is_deleted: false, status: 1).first
       if record
@@ -512,20 +1012,21 @@ module UploadsHelper
           track = Track.stn(record.track_id).where(id: record.track_id).first
           if track
             track.update_attribute(:is_deleted, true)
-            register_array << track.id
+            destroy_track_ids << track.id
           end
         end
         record.update_attribute(:is_deleted, true)
       end
     end
     
-    true
+    destroy_track_ids
   end
 
-  def update_album_track(album,record_id,title,tmp_data,register_array)
+  def update_album_track(album,record_id,title)
     record = TrackRecord.stn(album.uid).where(uid: album.uid, id: record_id, is_deleted: false, status: 1).first
     return false unless record
 
+    response = {}
     if record.uid == record.track_uid
       track = Track.stn(record.track_id).where(uid: record.track_uid, id: record.track_id).first
       return false unless track
@@ -542,14 +1043,14 @@ module UploadsHelper
       track.is_public = album.is_public
       if track.changed?
         track.save
-        register_array << track.id
+        response[:update] = track.id
       end
     end
-    tmp_data[:all_records] << record
-    true
+    response[:record] = record
+    response
   end
 
-  def move_album_track(album,record_id,title,tmp_data,register_array)
+  def move_album_track(album,record_id,title)
 
     record = TrackRecord.stn(album.uid).where(uid: album.uid, id: record_id, is_deleted: false, status: 1).first
     return false unless record
@@ -557,7 +1058,9 @@ module UploadsHelper
     track = Track.stn(record.track_id).where(uid: album.uid, id: record.track_id, is_deleted: false, status: 1).first
     return false unless track
 
-    old_album_id = track.album_id
+    response = {}
+
+    cache_album_id = track.album_id
 
     track.title = title
     track.album_id = album.id
@@ -574,13 +1077,15 @@ module UploadsHelper
     track.save
     record.save
 
-    tmp_data[:all_records] << record
-    register_array << [ record.id, old_album_id ]
+    response[:move] = [ record.id, cache_album_id ]
+    response[:record] = record
 
-    true
+    response
   end
 
-  def create_album_track(album,fid,title,transcode_data,default_cover_path,default_cover_exlore_height,cleaned_rich_intro,tmp_data,register_array)
+  def create_album_track(album,fid,title,transcode_data,default_cover_path,default_cover_exlore_height,cleaned_rich_intro)
+
+    response = {}
 
     track = Track.new
     track.transcode_state = transcode_data['transcode_state']
@@ -687,10 +1192,10 @@ module UploadsHelper
       explore_height: track.explore_height
     )
 
-    tmp_data[:all_records] << record
-    register_array << record.id
+    response[:create] = record.id
+    response[:record] = record
 
-    true
+    response
   end
 
 end

@@ -439,7 +439,7 @@ class MsgcenterController < ApplicationController
 
     receive_notice if params[:uid].to_i == 2
 
-    @chats = Chat.stn(@current_uid).where(uid: @current_uid, with_uid: @with_user.uid).order('created_at desc')
+    @chats = Chat.stn(@current_uid).where(uid: @current_uid, with_uid: @with_user.uid).order('created_at desc').limit(200)
     $counter_client.set(Settings.counter.user.new_message, @current_uid, 0)
 
     linkman = Linkman.stn(@current_uid).where(uid: @current_uid, linkman_uid: @with_user.uid).first

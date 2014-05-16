@@ -127,7 +127,7 @@
                     <td colspan="2">
                       <input id="description" type="hidden" name="intro" value="<%= @album.intro if @album %>">        
                       <input type="hidden" name="intro_images" value="">    
-                      <textarea id="" rows="10" cols="30" name="rich_intro"><%= CGI.unescapeHTML(@album_rich.rich_intro) if @album_rich && @album_rich.rich_intro %></textarea>
+                      <textarea id="" rows="10" cols="30" name="rich_intro"><%= CGI.unescapeHTML(@album_rich.rich_intro.to_s) if @album_rich %></textarea>
                     </td>
                   </tr>
                   <tr>
@@ -136,9 +136,9 @@
                     </td>
 
                     <td colspan="2">
-                    <% if @album.user_source==1 %>
+                    <% case @album.user_source when 1 %>
                       原创<input type="hidden" name="user_source" value="1" class="input150" id="origin"></input>
-                    <% elsif @album.user_source==2 %>
+                    <% when 2 %>
                       采集<input type="hidden" name="user_source" value="2" class="input150" id="origin"></input>
                     <% end %>
                     </td>

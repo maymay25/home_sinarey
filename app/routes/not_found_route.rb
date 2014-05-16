@@ -1,33 +1,31 @@
 
 class NotFoundRoute < ApplicationController
 
-  def not_found_response
-    if request.xhr?
-      erb :page_404_js
-    else
-      erb :page_404
-    end
-  end
-
-  def rescue_response
-    if request.xhr?
-      erb :page_500_js
-    else
-      erb :page_500
-    end
-  end
-
   get '*' do
     status 404
-    not_found_response
+    if request.xhr?
+      halt erb_js(:page_404_js)
+    else
+      halt erb(:page_404)
+    end
   end
 
   not_found {
-    not_found_response
+    status 404
+    if request.xhr?
+      halt '404'
+    else
+      halt erb(:page_404)
+    end
   }
 
   errors {
-    rescue_response
+    status 500
+    if request.xhr?
+      halt erb_js(:page_500_js)
+    else
+      halt erb :page_500
+    end
   }
 
 end

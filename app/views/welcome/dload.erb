@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset=utf-8 />
+    <link href="<%= static_url '/css/web.css' %>" rel="stylesheet" type="text/css">
+    <title>喜马拉雅客户端APP下载，随时随地听好声音 - 喜马拉雅官网</title>
+    <meta name="keywords" content="喜马拉雅app,手机app,app下载" />
+    <meta name="description" content="喜马拉雅，随心录制上传我的好声音，轻松创建个人电台！喜马拉雅手机app下载，支持ios,android等手机下载安装。" />
+</head>
+
+<body>
+
+    <!--页面内容 start-->
+    <div class="download_hd">
+        <div class="download_wrap">
+            <a class="download_logo" href="/explore"></a>
+            <div>
+                <a target="_blank" href="https://ximalaya.zendesk.com/entries/22813503-app" class="vehicleMounted">车载喜马拉雅</a>
+            </div>
+        </div>
+    </div>
+    <div class="download_panel">
+        <img class="download_panelBg" src="<%= static_url '/css/img/appshome/download_bgtop.png' %>" alt="">
+        <div class="download_innershadow">
+            <div class="download_wrap">
+                <div class="download_slogan"></div>
+                <div class="download_lionkingW"></div>
+                <div class="download_phonea"></div>
+                <div class="download_img_rolling"> 
+                    <img src="<%= static_url '/css/img/appshome/320-2.jpg' %>" style="z-index:3;"/>
+                    <img src="<%= static_url '/css/img/appshome/320-3.jpg' %>"/>
+                    <img src="<%= static_url '/css/img/appshome/320-4.jpg' %>"/>
+                    <img src="<%= static_url '/css/img/appshome/320-5.jpg' %>"/>
+                </div>
+                <div class="download_phoneb"></div>
+                <div class="download_operate">
+                    <a target="_blank" href="http://www.ximalaya.com/jt?&tag=tf_wbfst_ios&jt=https%3A%2F%2Fitunes.apple.com%2Fcn%2Fapp%2Fid580092746%3Fmt%3D8" class="download_iphoneBtn"></a>
+                    <a target="_blank" href="http://www.ximalaya.com/jt?&tag=tf_wb_fst&jt=http%3A%2F%2Fs1.xmcdn.com%2Fapk%2Fximalaya-weibo0808-1.4.16.1.apk-zipaligned.apk" class="download_androidBtn"></a>
+                </div>
+            </div>
+        </div>
+        <div class="download_line">
+            <div class="download_wrap">
+                <div class="fr" id="btnContainer">
+                    <a class="download_selectBtn on"></a>
+                    <a class="download_selectBtn"></a>
+                    <a class="download_selectBtn"></a>
+                    <a class="download_selectBtn"></a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="download_bd">
+        <div class="download_wrap">
+            <div class="download_con">
+                <div class="download_line">
+                    <div class="download_wordA"></div>
+                    <div class="download_infoA"></div>
+                </div>
+                <div class="download_line">
+                    <div class="download_wordB"></div>
+                    <div class="download_infoB"></div>
+                    <div class="download_infoB_love"></div>
+                </div>
+                <div class="download_line">
+                    <div class="download_wordC"></div>
+                    <div class="download_infoC"></div>
+                </div>
+                <div class="download_line">
+                    <div class="download_wordD"></div>
+                    <div class="download_infoD"></div>
+                </div>
+                <div class="download_line">
+                    <div class="download_wordE"></div>
+                    <div class="download_infoE"></div>
+                    <div class="download_infoE_wave"></div>
+                </div>
+            </div>
+            <div class="download_btm">
+                <div class="download_lionkingB"></div>
+
+            </div>
+        </div>
+    </div>
+    <!--页面内容 end-->
+
+    <%== erb :_footer %>    
+
+    <%== erb :_script %>
+
+    <script type="text/javascript">
+        require(["page/download"], function(page){
+            page.init();
+        });
+    </script>
+
+    <!--[if IE 6]>
+    <script src="http://static2.test.ximalaya.com/js/plugin/belatedpng.js"></script>
+    <script type="text/javascript">
+    document.execCommand("BackgroundImageCache",false,true);
+    DD_belatedPNG.fix("div, a, span, li");
+    </script>
+    <![endif]-->
+
+    <%== erb :_bdhm %>
+</body>
+</html>

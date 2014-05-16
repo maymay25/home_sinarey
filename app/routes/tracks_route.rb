@@ -42,8 +42,8 @@ class TracksRoute < TracksController
   route :post,       '/handle_track/join_album'              do dispatch(:do_join_album) end # 添加到专辑
   route :post,       '/handle_track/album_list'              do dispatch(:get_album_list) end # 可选专辑列表
 
-  route :get, :post, %r{^/edit_track/([\d]+)$}               do |id| dispatch(:track_edit_page,id:id) end
-  route :post,       %r{^/edit_track/([\d]+)$/update}        do |id| dispatch(:do_update_track,id:id) end
+  route :get, :post, %r{^/edit_track/([\d]+)$}               do |id| dispatch(:edit_page,id:id) end
+  route :post,       %r{^/edit_track/([\d]+)/update$}        do |id| dispatch(:do_update_track,id:id) end
 
   #上传声音相关
   route :get, :post, '/upload'                               do dispatch(:upload_page) end

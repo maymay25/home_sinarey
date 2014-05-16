@@ -12,7 +12,7 @@
       });
   </script>
   <script type="text/javascript">
-    var bds_config = {'bdText':"我觉得<%= escape_javascript @u.nickname %>的声音很好听。（分享自 @喜马拉雅好声音 ）"};
+    var bds_config = {'snsKey':{'tsina':'1371363673','tqq':'100261563','renren':'4aca8c00f63648208a0c9dd5ca74d348'},'bdText':"我觉得<%= escape_javascript @u.nickname %>的声音很好听。（分享自 @喜马拉雅好声音 ）"};
     if(document.getElementById("bdshell_js"))document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + new Date().getHours();
   </script>
 <% end %>

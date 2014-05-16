@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="<%= static_url "/css/web.css" %>" rel="stylesheet" type="text/css">
+<link href="<%= static_url "/poster/css/poster.css" %>" rel="stylesheet" type="text/css">
+<title>喜马拉雅</title>
+<%== erb :_check_redirect %>
+</head>
+
+<body>	
+	<div class="dubWrap">
+		<div class="dubHd">
+			<a class="dubHd_logo" href="http://www.ximalaya.com"></a>			
+			<a class="dubHdBtn on" href="/xposter/dub_works">展示区</a><a class="dubHdBtn" href="/xposter/dub_dub">配音首页</a><a class="dubHdBtn" href="/xposter/dub_translate">翻译首页</a>
+		</div>
+		<div class="dubWorks" style='padding-top:10px;'>
+			<div class="dubWorksTab" style="display:none;">
+				<div><a class="on">配音作品展示</a></div>
+				<div><a>翻译选手介绍</a></div>
+			</div>
+			<div class="dubWorksFilterBar">
+				<div class="tit">参赛作品</div><div class="bd"><span class="dubArrow"></span></div>
+				<div class="bar">
+          <a class="<%= 'on' if params[:sort]!='new' %>" href="/xposter/dub_works">热门作品</a>
+          <a class="<%= 'on' if params[:sort]=='new' %>" href="/xposter/dub_works?sort=new">最新作品</a>
+        </div>
+			</div>
+			<div class="dubWorksList">
+
+        <% @tirs.each_with_index do |tir,index| %>
+        <% user = @user_list[index] %>
+				<div style="width:248px;padding-right:10px;" class="dubWorksItem <%= 'noMg' if (index+1)%3==0 %>" sound_id="<%= tir.track_id %>">
+					<div class="left">
+						<img src="<%= picture_url('track', tir.cover_path, '100') %>" style="background:#ccc;">
+					</div>
+					<div class="right" style="width:130px;">
+						<div class="tit" style="font-size:14px;max-height: 36px;"><%= tir.title %></div>
+						<div class="username"><%= user && user.nickname %></div>
+						<div class="btm" style="width:130px;">
+							<a class="dubPlayBtn playBtn" ></a>
+							<span style="margin-left:0;font-size:14px;" class="dubPlaycountIcon"><%= @plays_counts[index] %></span>
+							<span style="cursor:pointer;margin-top:7px;padding-left:18px;" class="dubLikeBtn <%= 'liked' if @is_favorited[tir.track_id] %>"><%= @favorites_counts[index] %></span>
+						</div>
+					</div>
+				</div>
+				<% end %>
+
+			</div>
+			<div class="pagingBar">
+        <%== paginate CustomPagination.new(@all_tirs_count,@page,@per_page), {outer_window: 1} %>
+			</div>
+		</div>
+		<div class="dubFooter">网络文化经营许可证-文网文[2010]150号     北京那里汇聚网络科技有限公司 京ICP备12017437号-1 网络110报警服务<br/>
+		Copyright © 2011-2012 www.ximalaya.com lnc.ALL Rights Reserved     请使用者仔细阅读喜马拉雅网 使用协议 和 版权声明
+		</div>
+	</div>
+
+<%== erb :_script %>
+
+<script type="text/javascript">
+	require(["page/page_base", 'model/sound'], function(Page, SoundModel){
+		var page = new Page();
+		page.init();
+		$(".dubLikeBtn").on("click", function(){
+			var $el = $(this);
+			var $sound = $el.closest("[sound_id]");
+			var soundId = $sound.attr("sound_id");
+			var soundModel;
+			var num = $el.text();
+			if($el.is(".liked")){
+				soundModel = new SoundModel({
+                    id: soundId,
+                    isFavorited: true
+                });
+                soundModel.unlike(function(){
+                	$el.removeClass("liked");
+                	$el.text(parseInt(num)-1);
+                });
+			}else{
+				soundModel = new SoundModel({
+                    id: soundId,
+                    isFavorited: false
+                });
+                soundModel.like(function(){
+                	$el.addClass("liked");
+                	$el.text(parseInt(num)+1);
+                });
+			}
+		});
+	})
+</script>
+
+</body>
+
+</html>

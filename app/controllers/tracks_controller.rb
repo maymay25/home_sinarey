@@ -438,11 +438,15 @@ class TracksController < ApplicationController
     halt render_json({res: false,  error: 'track not exsit'}) unless track
 
     if params[:album_id] # 选择已存在的专辑
-      count = TrackRecord.stn(@current_uid).where(uid: @current_uid, album_id: params[:album_id], is_public: true, is_deleted: false, status: 1).count
-      halt render_json({res: false, error: "album_full"}) if count >= 200
 
       album = Album.stn(@current_uid).where(uid: @current_uid, id: params[:album_id], is_deleted: false, status: 1).first
       halt render_json({res: false, error: "failure"}) if album.nil?
+
+      album_track_count = TrackRecord.stn(@current_uid).where(uid: @current_uid, album_id: album.id, is_deleted: false, status: [0,1]).count
+      delayed_track_count = DelayedTrack.where(uid: @current_uid, is_deleted: false, album_id: album.id).count
+      temp_track_count = TempAlbumForm.where(uid: @current_uid, state: 0, album_id: album.id).sum('add_tracks') # 专辑缓存表中的数据也算上
+      allcount = album_track_count + delayed_track_count + temp_track_count + 1
+      halt render_json({res: false, error: "album_full"}) if allcount > 200
 
       unless album.id == old_album_id
         track.update_attributes(album_id: album.id, album_title: album.title, album_cover_path: album.cover_path) if record.op_type == 1
@@ -758,7 +762,7 @@ class TracksController < ApplicationController
 
     uid = @current_uid || params[:uid]
 
-    category_name, category_title = CATEGORIES[tir.category_id]
+    this_category = CATEGORIES[tir.category_id]
 
     play_count, comments_count, shares_count, favorites_count = $counter_client.getByNames([
         Settings.counter.track.plays,
@@ -793,8 +797,8 @@ class TracksController < ApplicationController
       short_intro: tir.short_intro ? CGI::escapeHTML(tir.short_intro) : '',
       have_more_intro: tir.intro ? tir.intro.length > 100 : false,
       time_until_now: parse_time_until_now(tir.created_at),
-      category_name: category_name,
-      category_title: category_title,
+      category_name: this_category.name,
+      category_title: this_category.title,
       played_secs: nil
     }
 
@@ -841,12 +845,48 @@ class TracksController < ApplicationController
     render_json(arr)
   end
 
+  #编辑声音 表单页
+  def edit_page
+
+    halt_404 if request.xhr?
+
+    return redirect_to_login unless @current_uid
+
+    @record = TrackRecord.stn(@current_uid).where(uid: @current_uid, id: params[:id], is_deleted: false).first
+
+    halt_error('声音已删除或者不存在') if @record.nil? or @record.op_type != TrackRecordOrigin::OP_TYPE[:UPLOAD]
+
+    set_no_cache_header
+
+    trackrich = TrackRich.stn(@record.track_id).where(track_id: @record.track_id).first
+    if trackrich
+      @lyric = Sanitize.clean(CGI.unescapeHTML(trackrich.lyric), { elements: %w(br) }) if trackrich.lyric.presence
+      @rich_intro = CGI.unescapeHTML(trackrich.rich_intro)
+    end
+
+    @category = CATEGORIES[@record.category_id]
+
+    @track_pictures = TrackPicture.stn(@record.track_id).where(track_id:@record.track_id).order("order_num asc")
+
+    @album_list = Album.stn(@current_uid).where(uid: @current_uid, is_deleted: false, status: 1)
+
+    @this_title = "编辑声音 喜马拉雅-听我想听"
+
+    erb :edit_page
+  end
+
+
+
   #上传声音 表单页
   def upload_page
+
+    halt_404 if request.xhr?
 
     halt_400 unless @current_uid
 
     halt_403 if @current_user.isLoginBan or is_user_banned?(@current_uid)
+
+    set_no_cache_header
 
     @user_tags = UserTag.stn(@current_uid).where(uid: @current_uid).order("num desc").limit(15)
 
@@ -899,9 +939,71 @@ class TracksController < ApplicationController
     erb(:_valid_code_partial,layout:false)
   end
 
-  #上传声音 action  包括单个声音, 多个声音·创建专辑, 多个声音·选择专辑
-  def do_dispatch_upload
+  #编辑声音 action
+  def do_update_track
+
+    halt_400 unless @current_uid
+
+    #判断图片是否全部上传完成
+    images = Array.wrap(params[:image].presence).take(4)
+    images.each do |img|
+      halt render_json({res: false, errors: [['page', '图片正在上传中，请稍侯']]}) if img.blank?
+    end
+
+    record = TrackRecord.stn(@current_uid).where(uid: @current_uid, id: params[:id], is_deleted: false).first
+    halt_error("声音已删除或者不存在") unless record or record.op_type != TrackRecordOrigin::OP_TYPE[:UPLOAD]
+
+    track = Track.stn(record.track_id).where(id: record.track_id, is_deleted: false).first
+    halt_error("声音源数据不存在") unless track
+
+    #参数整理
+    title = params[:title].to_s.chomp
+    intro = params[:intro].to_s
+    rich_intro = params[:rich_intro].to_s
+    is_public = params[:is_public].to_s!="0"
+    album_id = (tmp=params[:album_id].to_i)>0 && tmp
+    destroy_images = params[:destroy_images].to_s.split(",")
+    music_category = params[:categories_music]
+    singer = params[:singer].to_s
+    singer_category = params[:singer_category].to_s
+    author = params[:author].to_s
+    composer = params[:composer].to_s
+    arrangement = params[:arrangement].to_s
+    post_production = params[:post_production].to_s
+    lyric = params[:lyric].to_s
+    resinger = params[:resinger].to_s
+    announcer = params[:announcer].to_s
     
+    catch_errors = catch_upload_basic_errors(title, 1, 1, intro, '')
+    halt render_json({res: false, errors: catch_errors}) if catch_errors.size > 0
+    
+    # 声音信息敏感词验证
+    track_dirts = filter_hash(2, @current_user, get_client_ip, {
+      title: title,
+      intro: intro,
+      lyric: lyric
+    })
+    halt render_json({res: false, errors: [['dirty_words', track_dirts]]}) if track_dirts.size > 0
+
+    if album_id and track.album_id != album_id
+      album = Album.stn(@current_uid).where(uid: @current_uid, id: album_id, is_deleted: false).first
+      if album
+        album_track_count = TrackRecord.stn(@current_uid).where(uid: @current_uid, album_id: album.id, is_deleted: false, status: [0,1]).count
+        delayed_track_count = DelayedTrack.where(uid: @current_uid, is_deleted: false, album_id: album.id).count
+        temp_track_count = TempAlbumForm.where(uid: @current_uid, state: 0, album_id: album.id).sum('add_tracks') # 专辑缓存表中的数据也算上
+        allcount = album_track_count + delayed_track_count + temp_track_count + 1
+        halt render_json({res: false, errors: [['add_to_album', '专辑声音数已满']]}) if allcount > 200
+      end
+    end
+
+    update_single_track(track,record,album,title,intro,is_public,rich_intro,lyric,singer,singer_category,author,composer,arrangement,post_production,resinger,announcer,music_category,images,destroy_images)
+
+    halt render_json({res: true, redirect_to: "/#{@current_uid}/sound/"})
+  end
+
+  #上传声音 action  包括单个声音[可选 添加进专辑], 多个声音·创建专辑, 多个声音·选择专辑
+  def do_dispatch_upload
+
     halt_400 unless @current_uid
     
     halt_403({res: false, errors: [['page', '对不起，您已被暂时禁止发布声音']]}) if @current_user.isLoginBan or is_user_banned?(@current_uid)
@@ -914,43 +1016,123 @@ class TracksController < ApplicationController
       end
     end
 
-    if params[:is_album].present?
-      if params[:choose_album].present?
-        upload_choose_album_action
+    if params[:is_album].to_s=='true'
+      if (album_id=params[:choose_album]).present?
+        upload_choose_album_action(album_id)
       else
         upload_create_album_action
       end
     else
       upload_create_track_action
     end
-
   end
 
   private
 
   def upload_create_track_action
 
-    image = params[:image] #判断图片是否全部上传完成
-    if image.is_a(Array)
-      image.each do |img|
-        halt render_json({res: false, errors: [['page', '图片正在上传中，请稍侯']]}) if image.blank?
-      end
+    #判断图片是否全部上传完成
+    images = Array.wrap(params[:image].presence).take(4)
+    images.each do |img|
+      halt render_json({res: false, errors: [['page', '图片正在上传中，请稍侯']]}) if img.blank?
     end
+
+    fileid = Array.wrap(params[:fileids]).select{|fid| !%w(r m).include?(fid[0]) }.first
+    halt render_json({res: false, errors: [['page', '数据不正确']]}) if fileid.blank?
 
     #参数整理
     title, user_source = params[:title].to_s.chomp, params[:user_source].to_i, 
     category_id = params[:categories].to_i
     tags = params[:tags].to_s.chomp.squeeze(" ")
     intro, rich_intro = params[:intro].to_s, params[:rich_intro].to_s
-    is_records_desc = params[:is_records_desc]=='on'
-    is_finished = params[:is_finished].to_i
     music_category = params[:categories_music]
+    singer = params[:singer].to_s
+    singer_category = params[:singer_category].to_s
+    author = params[:author].to_s
+    composer = params[:composer].to_s
+    arrangement = params[:arrangement].to_s
+    post_production = params[:post_production].to_s
+    lyric = params[:lyric].to_s
+    resinger = params[:resinger].to_s
+    announcer = params[:announcer].to_s
     is_public = params[:is_public].to_s!='0'
     sharing_to = params[:sharing_to]
     share_content = params[:share_content]
+    album_id = (tmp=params[:album_id].to_i)>0 && tmp
+
+    # 为空验证
+    catch_errors = catch_upload_basic_errors(title, user_source, category_id, intro, tags)
+    halt render_json({res: false, errors: catch_errors}) if catch_errors.size > 0
+
+    # 声音信息敏感词验证
+    track_dirts = filter_hash(2, @current_user, get_client_ip, {
+      title: title,
+      intro: intro,
+      tags: tags,
+      singer: singer,
+      singer_category: singer_category,
+      author: author,
+      composer: composer,
+      arrangement: arrangement,
+      post_production: post_production,
+      lyric: lyric,
+      resinger: resinger,
+      announcer: announcer
+    }, true)
+    return render_json({res: false, errors: [['dirty_words', track_dirts]]}) if track_dirts.size > 0
+
+    if is_public and album_id
+      album = Album.stn(@current_uid).where(uid: @current_uid, id: album_id, is_deleted: false).first
+      halt render_json({res: false, errors: [['page', '所选专辑已删除或者不存在']]}) if album.nil?
+      album_track_count = TrackRecord.stn(@current_uid).where(uid: @current_uid, album_id: params[:album_id], is_deleted: false, status: [0,1]).count
+      delayed_track_count = DelayedTrack.where(uid: @current_uid, is_deleted: false, album_id: album.id).count
+      temp_track_count = TempAlbumForm.where(uid: @current_uid, state: 0, album_id: album.id).sum('add_tracks')
+      allcount = album_track_count + delayed_track_count + temp_track_count
+      halt render_json({res: false, errors: [['add_to_album', '专辑声音数已满']]}) if allcount >= 200
+    end
+
+    # 检查新上传的声音转码状态
+    transcode_res = TRANSCODE_SERVICE.checkTranscodeState(@current_uid, [Hessian2::TypeWrapper.new(:long, fileid)] )
+    begin
+      p_transcode_res = Yajl::Parser.parse(transcode_res)
+    rescue
+      #
+    end
+    if p_transcode_res.nil? || !p_transcode_res['success']
+      writelog('check transcode state failed')
+      halt_error('声音转码失败')
+    else
+      transcode_data = p_transcode_res['data'][0]
+    end
+
+    # 定时上传
+    if params[:is_publish] == 'on' and @current_user.isVerified
+      if params[:date] and params[:hour] and params[:minutes]
+        begin
+          year,month,day = params[:date].to_s.split("-")
+          datetime = Time.new(year,month,day,params[:hour],params[:minutes]).strftime('%Y-%m-%d %H:%M:%S')
+        rescue
+          writelog('analysis delay tasks datetime failed')
+        end
+        if datetime
+          delayed_tasks_count = DelayedTrack.where(uid: @current_uid, is_deleted:false).group(:task_count_tag).to_a.size
+          halt render_json({res: false, errors: [['publish', '定时发布任务不能超过10条']]}) if delayed_tasks_count >= 10
+
+          delayed_upload_single_track(datetime,fileid,transcode_data,title,user_source,category_id,is_public,images,intro,rich_intro,tags,music_category,singer,singer_category,author,composer,arrangement,post_production,lyric,resinger,announcer,sharing_to,share_content,album)
+          halt render_json({res: true, redirect_to: "/#/#{@current_uid}/publish/"})
+        end
+      end
+    end
+
+    upload_single_track(fileid,transcode_data,title,user_source,category_id,is_public,images,intro,rich_intro,tags,music_category,singer,singer_category,author,composer,arrangement,post_production,lyric,resinger,announcer,sharing_to,share_content,album)
+    render_json({res: true, redirect_to: "/#/#{@current_uid}/sound/"})
   end
 
   def upload_create_album_action
+
+    files = Array.wrap(params[:files]).take(200)
+    fileids = Array.wrap(params[:fileids]).take(200)
+    halt render_json({res: false, errors: [['page', '数据不正确']]}) if files.length != fileids.length
 
     #参数整理
     title, user_source = params[:title].to_s.chomp, params[:user_source].to_i, 
@@ -967,11 +1149,6 @@ class TracksController < ApplicationController
     catch_errors = catch_upload_basic_errors(title, user_source, category_id, intro, tags)
     halt render_json({res: false, errors: catch_errors}) if catch_errors.size > 0
 
-    files = (params[:files].is_a?(Array) && params[:files]) || []
-    fileids = (params[:fileids].is_a?(Array) && params[:fileids]) || []
-    halt render_json({res: false, errors: [['page', '数据不正确']]}) if files.length != fileids.length
-    zipfiles = fileids.zip(files)
-
     new_fileids = fileids.select{|fid| !%w(r m).include?(fid[0]) }
     new_fileids_size = new_fileids.size
     halt render_json({res: false, errors: [['page', '哎呀，专辑已经塞满啦']]}) if new_fileids_size > 50
@@ -982,8 +1159,7 @@ class TracksController < ApplicationController
 
       if !p_transcode_res['success']
         writelog('check transcode state failed')
-        flash[:error_page_info] = '声音转码失败'
-        halt render_json({res: true, redirect_to: "/#/error_page"})
+        halt_error('声音转码失败')
       end
     end
 
@@ -1004,7 +1180,7 @@ class TracksController < ApplicationController
     album_dirts = filter_hash( 2, @current_user, get_client_ip, {title:title,intro:intro,tags:tags} )
     halt render_json({res: false, errors: [['files_dirty_words', album_dirts]]}) if album_dirts.size > 0
 
-    # 声音标题敏感词验证
+    # 声音信息敏感词验证
     words = {}
     fileids.each_with_index do |fileid, i|
       words[fileid.to_s] = files[i]
@@ -1014,40 +1190,54 @@ class TracksController < ApplicationController
       halt render_json({res: false, errors: [['files_dirty_words', files_dirts]]}) if files_dirts.size > 0
     end
 
+    zipfiles = fileids.zip(files)
+
     # 定时上传
-    if params[:is_publish] == 'on' and @current_user.isVerified and params[:date] and params[:hour] and params[:minutes]
+    if params[:is_publish] == 'on' and @current_user.isVerified
+      if params[:date] and params[:hour] and params[:minutes]
+        begin
+          year,month,day = params[:date].to_s.split("-")
+          datetime = Time.new(year,month,day,params[:hour],params[:minutes]).strftime('%Y-%m-%d %H:%M:%S')
+        rescue
+          writelog('analysis delay tasks datetime failed')
+        end
+        if datetime
+          delayed_tasks_count = DelayedTrack.where(uid: @current_uid, is_deleted:false).group(:task_count_tag).to_a.size
+          halt render_json({res: false, errors: [['publish', '定时发布任务不能超过10条']]}) if delayed_tasks_count >= 10
 
-      delayed_tasks_count = DelayedTrack.where(uid: @current_uid, is_deleted:false).group(:task_count_tag).to_a.size
-      halt render_json({res: false, errors: [['publish', '定时发布任务不能超过10条']]}) if delayed_tasks_count >= 10
-
-      delayed_create_album_and_tracks(params[:date],params[:hour],params[:minutes],zipfiles,category_id,title,tags,user_source,intro,rich_intro,is_records_desc,music_category,is_finished,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height)
-      halt render_json({res: true, redirect_to: "/#/#{@current_uid}/publish/"})
+          delayed_create_album_and_tracks(datetime,zipfiles,category_id,title,tags,user_source,intro,rich_intro,is_records_desc,music_category,is_finished,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height)
+          halt render_json({res: true, redirect_to: "/#/#{@current_uid}/publish/"})
+        end
+      end
     end
 
     create_album_and_tracks(zipfiles,category_id,title,tags,user_source,intro,rich_intro,is_records_desc,music_category,is_finished,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height)
-    halt render_json({res: true, redirect_to: "/#{@current_uid}/album"})
+    halt render_json({res: true, redirect_to: "/#/#{@current_uid}/album"})
   end
 
   def upload_choose_album_action(album_id)
-    album = Album.stn(@current_uid).where(uid: @current_uid, id: params[:choose_album].to_i, is_deleted: false).first
+    album = Album.stn(@current_uid).where(uid: @current_uid, id: album_id, is_deleted: false).first
     halt render_json({res: false, errors: [['page', '抱歉,无法添加到该专辑']]}) unless album
     
-    files = (params[:files].is_a?(Array) && params[:files]) || []
-    fileids = (params[:fileids].is_a?(Array) && params[:fileids]) || []
+    files = Array.wrap(params[:files]).take(200)
+    fileids = Array.wrap(params[:fileids]).take(200)
     halt render_json({res: false, errors: [['page', '数据不正确']]}) if files.length != fileids.length
-    zipfiles = fileids.zip(files)
+    
+    is_records_desc = params[:is_records_desc]=='on'
+    sharing_to = params[:sharing_to]
+    share_content = params[:share_content]
 
     new_fileids = fileids.select{|fid| !%w(r m).include?(fid[0]) }
     new_fileids_size = new_fileids.size
     halt_403({res: false, errors: [['page', '对不起，您已被暂时禁止发布声音']]}) if new_fileids_size>0 and ( @current_user.isLoginBan or is_user_banned?(@current_uid) )
 
-    album_track_count = TrackRecord.stn(@current_uid).where(uid: @current_uid, album_id: album.id, is_deleted: false).count
+    album_track_count = TrackRecord.stn(@current_uid).where(uid: @current_uid, album_id: album.id, is_deleted: false, status: [0,1]).count
     delayed_track_count = DelayedTrack.where(uid: @current_uid, is_deleted: false, album_id: album.id).count
     temp_track_count = TempAlbumForm.where(uid: @current_uid, state: 0, album_id: album.id).sum('add_tracks') # 专辑缓存表中的数据也算上
     allcount = delayed_track_count + new_fileids_size + album_track_count + temp_track_count
     halt render_json({res: false, errors: [['page', '哎呀，专辑已经塞满啦']]}) if new_fileids_size > 50 or (allcount >= 200 and new_fileids_size > 0)
 
-    # 声音标题敏感词验证
+    # 声音信息敏感词验证
     words = {}
     fileids.each_with_index {|fileid, i| words[fileid.to_s] = files[i] }
     if words.size > 0
@@ -1061,8 +1251,7 @@ class TracksController < ApplicationController
 
       if !p_transcode_res['success']
         writelog('check transcode state failed')
-        flash[:error_page_info] = '声音转码失败'
-        halt render_json({res: true, redirect_to: "/#/error_page"})
+        halt_error('声音转码失败')
       end
 
       if album.cover_path  # 把专辑封面用作声音默认封面
@@ -1071,17 +1260,28 @@ class TracksController < ApplicationController
         default_cover_exlore_height = pic['180n_height']
       end
 
-      if params[:is_publish]=='on' and @current_user.isVerified and params[:date] and params[:hour] and params[:minutes]
-        delayed_tasks_count = DelayedTrack.where(uid: @current_uid, is_deleted:false).group(:task_count_tag).to_a.size
-        halt render_json({res: false, errors: [['publish', '定时发布任务不能超过10条']]}) if delayed_tasks_count >= 10
-
-        delay_options = {date:params[:date], hour:params[:hour],munites:params[:munites]}
-        rdt_url = "/#{@current_uid}/publish/"
+      #定时上传配置
+      if params[:is_publish]=='on' and @current_user.isVerified
+        if params[:date] and params[:hour] and params[:minutes]
+          begin
+            year,month,day = params[:date].to_s.split("-")
+            datetime = Time.new(year,month,day,params[:hour],params[:minutes]).strftime('%Y-%m-%d %H:%M:%S')
+          rescue
+            writelog('analysis delay tasks datetime failed')
+          end
+          if datetime
+            delayed_tasks_count = DelayedTrack.where(uid: @current_uid, is_deleted:false).group(:task_count_tag).to_a.size
+            halt render_json({res: false, errors: [['publish', '定时发布任务不能超过10条']]}) if delayed_tasks_count >= 10
+            rdt_url = "/#/#{@current_uid}/publish/"
+          end
+        end
       end
+
     end
 
-    upload_tracks_into_album(album,is_records_desc,zipfiles,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height,delay_options)
-    rdt_url ||= "/#{@current_uid}/album/"
+    zipfiles = fileids.zip(files)
+    upload_tracks_into_album(album,zipfiles,is_records_desc,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height,datetime)
+    rdt_url ||= "/#/#{@current_uid}/album/"
 
     halt render_json({res: true, redirect_to: rdt_url})
   end

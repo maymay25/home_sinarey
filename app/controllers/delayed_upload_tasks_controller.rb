@@ -1,6 +1,7 @@
 class DelayedUploadTasksController < ApplicationController
 
-  def dispatch(action)
+  def dispatch(action,params_options={})
+    params_options.each {|k,v| params[k] = v }
     super(:delayed_upload_tasks,action)
     method(action).call
   end

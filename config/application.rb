@@ -46,6 +46,8 @@ HomeRouter = Sinarey::Router.new do
   mount FollowRoute
   mount PersonalSettingsRoute
   mount DelayedUploadTasksRoute
+  mount WelcomeRoute
+  mount XposterRoute
   notfound NotFoundRoute
 end
 

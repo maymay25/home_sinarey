@@ -40,8 +40,6 @@ GEM
     oj (2.8.1)
     passport_thrift_client (0.1.1)
     rack (1.5.2)
-    rack-flash3 (1.0.5)
-      rack
     rack-protection (1.5.3)
       rack
     rack-test (0.6.2)
@@ -108,7 +106,6 @@ DEPENDENCIES
   mysql2
   oj
   passport_thrift_client
-  rack-flash3
   rake
   redis (= 3.0.5)
   sanitize

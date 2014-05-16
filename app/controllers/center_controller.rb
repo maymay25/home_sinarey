@@ -394,7 +394,7 @@ class CenterController < ApplicationController
     order = "publish_at desc"
     orderhash = []
 
-    @track_records = DelayedTrack.where(cond1).order(order)
+    @track_records = DelayedTrack.where(cond1).where(delayed_album_id:nil).order(order)
 
     @albums_records = DelayedAlbum.where(uid: @current_uid, status: [0, 1], is_deleted: false).order(order)
 
@@ -537,7 +537,7 @@ class CenterController < ApplicationController
   end
 
   #清楚消息数量
-  def xhr_clear_msg_notices
+  def do_clear_msg_notices
 
     halt render_json({res: nil, msg: print_message(:params_missing, "current uid")}) unless @current_uid
 
@@ -553,6 +553,60 @@ class CenterController < ApplicationController
     end
 
     render_json({res: true, msg: print_message(:success)})
+  end
+
+  #圈人提示
+  def get_quan_suggest
+    halt_400 unless @current_uid
+      
+    nicknames = Following.stn(@current_uid).where('following_nickname like ? and uid = ?', "%#{params[:q]}%", @current_uid).select('following_nickname').limit(10).map{|f| f.following_nickname}
+    halt '' unless nicknames.size > 0
+
+    halt nicknames.join(',')
+  end
+
+  #举报
+  def do_create_report
+
+    halt_400 unless @current_uid
+
+    #整理参数
+    tmp = {
+      report_id:params[:report_id],
+      content:params[:content],
+      uid:params[:uid],
+      nickname:params[:nickname],
+      to_uid:params[:to_uid],
+      to_nickname:params[:to_nickname],
+      content_id:params[:content_id],
+      content_title:params[:content_title],
+      fujian_path:params[:fujian_path],
+      content_type:params[:content_type],
+      track_id:params[:track_id],
+      album_id:params[:album_id],
+      comment_id:params[:comment_id]
+    }
+
+    report = ReportInformation.new(tmp)
+    validate = report.report_id and report.uid and report.content_title and report.content_type and (report.track_id or report.album_id)
+    if validate and report.save
+      # 举报的人收到一条系统通知
+      xima = $profile_client.queryUserBasicInfo(1)
+      Inbox.create( uid: xima.uid,
+            nickname: xima.nickname,
+            avatar_path: xima.logoPic,
+            to_uid: @current_uid,
+            to_nickname: @current_user.nickname,
+            to_avatar_path: @current_user.logoPic,
+            message_type: 5,
+            content: "您好，您的举报信息我们已经收到。非常感谢您对我们工作的支持。" )
+
+      $counter_client.incr(Settings.counter.user.new_notice, @current_uid, 1)
+
+      halt render_json({ result: "success" })
+    else
+      halt render_json({ result: "failure" })
+    end
   end
 
   #podcast 服务
@@ -606,7 +660,7 @@ class CenterController < ApplicationController
   end
 
   #podcast 创建action
-  def xhr_create_podcast
+  def do_create_podcast
 
     halt render_json({res: false, msg:'请先登陆'}) if @current_uid.nil? or !@current_user.isVerified
 
