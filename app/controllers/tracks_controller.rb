@@ -100,29 +100,33 @@ class TracksController < ApplicationController
 
     @lovers_count = all_lover.count
     lovers = all_lover.select('id, uid').order("created_at desc").offset((@page-1)*@per_page).limit(@per_page)
+    
+    @follow_status = {}
     lover_uids = lovers.collect{|l| l.uid}
     if lover_uids.size > 0
       profile_users = $profile_client.getMultiUserBasicInfos(lover_uids)
       @lovers = lover_uids.collect{ |uid| profile_users[uid] }
       @lover_tracks_counts = $counter_client.getByIds(Settings.counter.user.tracks, lover_uids)
       @lover_followers_counts = $counter_client.getByIds(Settings.counter.user.followers, lover_uids)
+      @lover_followings_counts = $counter_client.getByIds(Settings.counter.user.followings, lover_uids)
+      if @current_uid
+        follows = Following.stn(@current_uid).where(uid: @current_uid, following_uid: lover_uids).select('following_uid, is_mutual')
+        follows.each do |follow|
+          @follow_status[follow.following_uid] = [true,follow.is_mutual]
+        end
+      end
     else
       @lovers = []
       @lover_tracks_counts = []
       @lover_followers_counts = []
+      @lover_followings_counts = []
     end
 
     @track_play_count = $counter_client.get(Settings.counter.track.plays, @tir.track_id.to_s)
     @track_share_count = $counter_client.get(Settings.counter.track.shares, @tir.track_id.to_s)
-    @track_comment_count = Comment.stn(@tir.track_id).where(track_id: @tir.track_id).count
-    @track_favorite_count = Lover.stn(@tir.track_id).where(track_id: @tir.track_id).count
 
-    # 计数纠正
-    comment_counter = $counter_client.get(Settings.counter.track.comments, @tir.track_id.to_s)
+    @track_favorite_count = Lover.stn(@tir.track_id).where(track_id: @tir.track_id).count
     lovers_counter = $counter_client.get(Settings.counter.track.favorites, @tir.track_id.to_s)
-    if comment_counter != @track_comment_count
-      $counter_client.set(Settings.counter.track.comments, @tir.track_id, @track_comment_count)
-    end
     if lovers_counter != @track_favorite_count
       $counter_client.set(Settings.counter.track.favorites, @tir.track_id, @track_favorite_count)
     end
@@ -177,15 +181,6 @@ class TracksController < ApplicationController
 
       $rabbitmq_channel.fanout(Settings.topic.favorite.created, durable: true).publish(Yajl::Encoder.encode(topic_hash), content_type: 'text/plain', persistent: true)
 
-      $rabbitmq_channel.queue('favorite.created.dj', durable: true).publish(Yajl::Encoder.encode({
-        uid: fav.uid,
-        id: fav.id,
-        sharing_to: params[:sharing_to],
-        dotcom: Settings.home_root,
-        is_mob: false,
-        upload_source: 2
-      }), content_type: 'text/plain')
-
       $counter_client.incr(Settings.counter.user.favorites, @current_uid, 1)
 
       $counter_client.incr(Settings.counter.track.favorites, fav.track_id, 1)
@@ -194,6 +189,8 @@ class TracksController < ApplicationController
       if params[:no_more_alert] and !params[:no_more_alert].empty?
         $sync_set_client.noMoreFavoriteSyncAlert(@current_uid, params[:no_more_alert]=='true')
       end
+
+      CoreAsync::FavoriteCreatedWorker.perform_async(:favorite_created,fav.id,fav.uid,2,params[:sharing_to],Settings.home_root)
 
     end
 
@@ -230,7 +227,8 @@ class TracksController < ApplicationController
   #播放统计 params: duration played_secs
   def do_play_track
 
-    halt '' unless params[:id]
+    track_id = (tmp=params[:id].to_i)>0 ? tmp : nil
+    halt '' unless track_id
 
     current_now = Time.now
     uuid = SecureRandom.uuid.gsub('-', '')
@@ -242,7 +240,12 @@ class TracksController < ApplicationController
       end
     end
 
-    $counter_client.incr(Settings.counter.track.plays, params[:id].to_i, 1) # 同步加播放数
+    $counter_client.incr(Settings.counter.track.plays, track_id, 1) # 同步加播放数
+
+    CoreAsync::TrackPlayedWorker.perform_async(:track_played,track_id,@current_uid)
+
+    CoreAsync::TrackPlayedWorker.perform_async(:incr_album_plays,track_id)
+
     $rabbitmq_channel.fanout(Settings.topic.track.played, durable: true).publish(Oj.dump({
       client: params[:device] || 'web',
       ip: get_client_ip,
@@ -288,8 +291,9 @@ class TracksController < ApplicationController
     #黑名单
     halt render_json({res: false, message: "", msg: '由于对方的设置，无法进行此操作'}) if BlackUser.where(uid: track.uid,black_uid:@current_uid).first
 
-    if !params[:content].nil? && !params[:content].empty?
-      res = $wordfilter_client.wordFilters(5, @current_uid, get_client_ip, params[:content])
+    content = params[:content].presence
+    if content
+      res = $wordfilter_client.wordFilters(5, @current_uid, get_client_ip, content)
       if res == -11
         halt render_json({res: false, message: "", msg: "评论内容非法"})
       elsif res == -19
@@ -305,7 +309,7 @@ class TracksController < ApplicationController
       uid: @current_uid,  # RECORD拥有者
       nickname: @current_user.nickname,
       is_v: @current_user.isVerified,
-      dig_status: @current_user.isVerified ? 1 : 0,
+      dig_status: calculate_defualt_dig_status(@current_user),
       human_category_id: @current_user.vCategoryId,
       approved_at: Time.now,
       avatar_path: @current_user.logoPic,
@@ -352,6 +356,9 @@ class TracksController < ApplicationController
     }
     record = TrackRecord.create(record_hash)
 
+    # 声音的转发数  +1
+    $counter_client.incr(Settings.counter.track.shares, track.id, 1)
+
     #同步到Origin表
     record_origin = TrackRecordOrigin.new
     record_origin.id = record.id
@@ -359,15 +366,14 @@ class TracksController < ApplicationController
     record_origin.updated_at = record.updated_at
     record_origin.update_attributes(record_hash)
 
-    # 异步处理转发事件
     sharing_to = params[:sharing_to]
+    share_content = cut_str(content.to_s.strip, 60, '..')
 
-    # 生成转发topic
-    share_content = params[:content] ? cut_str(params[:content].strip, 60, '..') : ''
-    
+    CoreAsync::RelayCreatedWorker.perform_async(:relay_created,track.id,content,@current_uid,record.id,sharing_to)
+
     $rabbitmq_channel.fanout(Settings.topic.track.relay, durable: true).publish(Yajl::Encoder.encode(track.to_topic_hash.merge({
       id: record.id,
-      content: params[:content], 
+      content: content, 
       sharing_to: sharing_to, 
       relay_uid: @current_uid, 
       relay_nickname: @current_user.nickname, 
@@ -379,9 +385,6 @@ class TracksController < ApplicationController
       human_category_id: @current_user.vCategoryId,
       created_at: Time.now
     })), content_type: 'text/plain', persistent: true)
-
-    # 声音的转发数  +1
-    $counter_client.incr(Settings.counter.track.shares, track.id, 1)
 
     halt render_json({ res: true })
   end
@@ -399,13 +402,20 @@ class TracksController < ApplicationController
     track = Track.stn(record.track_id).where(id: record.track_id, is_deleted: false).first
     halt render_json({res: false}) if track.nil? or track.uid != @current_uid or track.is_public
 
-    record.update_attribute('is_public', true)
-    track.update_attribute('is_public', true)
+    record.update_attribute(:is_public, true)
+    track.update_attribute(:is_public, true)
+
+    if track.status == 1
+      $counter_client.incr(Settings.counter.user.tracks, track.uid, 1)
+      if track.album_id
+        $counter_client.incr(Settings.counter.album.tracks, track.album_id, 1)
+      end
+    end
+
+    CoreAsync::TrackOnWorker.perform_async(:track_on, track.id, false, nil, nil)
     $rabbitmq_channel.fanout(Settings.topic.track.created, durable: true).publish(Yajl::Encoder.encode(track.to_topic_hash.merge(user_agent: request.user_agent, is_feed: true)), content_type: 'text/plain', persistent: true)
     bunny_logger ||= ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
     bunny_logger.info "track.created.topic #{track.id} #{track.title} #{track.nickname} #{track.updated_at.strftime('%R')}"
-
-    $rabbitmq_channel.queue('track.on', durable: true).publish(Yajl::Encoder.encode({id: track.id, is_new: true}), content_type: 'text/plain')
 
     halt render_json({res: true, message: '改动已生效'})
   end
@@ -464,16 +474,12 @@ class TracksController < ApplicationController
         end
         album.update_attributes(update_attrs) unless update_attrs == {}
 
-        # old_album_id 旧专辑的最后声音的更新操作在album.updated.dj里完成
-        $rabbitmq_channel.queue('album.updated.dj', durable: true).publish(Yajl::Encoder.encode({
-          id: album.id,
-          is_new: false,
-          created_record_ids: [],
-          updated_track_ids: [],
-          moved_record_id_old_album_ids: [ [record.id, old_album_id] ],
-          destroyed_track_ids: [],
-          user_agent: request.user_agent
-        }), content_type: 'text/plain')
+        if track.is_public && track.status == 1
+          $counter_client.incr(Settings.counter.album.tracks, album.id, 1)
+          $counter_client.decr(Settings.counter.album.tracks, old_album_id, 1) if old_album_id
+        end
+
+        CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,false,request.user_agent,nil,nil,[[record.id, old_album_id]],nil,nil,nil,nil)
       end
     elsif params[:album_title] and !params[:album_title].strip.empty?
       # 专辑信息脏字
@@ -493,7 +499,7 @@ class TracksController < ApplicationController
       album.nickname = @current_user.nickname
       album.avatar_path = @current_user.logoPic
       album.is_v = @current_user.isVerified
-      album.dig_status = @current_user.isVerified ? 1 : 0
+      album.dig_status = calculate_dig_status(@current_user)
       album.human_category_id = @current_user.vCategoryId
       album.category_id = track.category_id
       album.tags = track.tags
@@ -501,22 +507,19 @@ class TracksController < ApplicationController
       album.user_source = track.user_source
       album.is_publish = true
       album.is_public = true
-      album.status = get_default_status(@current_user)
+      album.status = calculate_default_status(@current_user)
       album.tracks_order = params[:record_id]
       album.save
 
       track.update_attributes(album_id: album.id, album_title: album.title, album_cover_path: album.cover_path) if record.op_type == 1
       record.update_attributes(album_id: album.id, album_title: album.title, album_cover_path: album.cover_path)
 
-      $rabbitmq_channel.queue('album.updated.dj', durable: true).publish(Yajl::Encoder.encode({
-        id: album.id,
-        is_new: true,
-        created_record_ids: [],
-        updated_track_ids: [],
-        moved_record_id_old_album_ids: [ [record.id, old_album_id] ],
-        destroyed_track_ids: [],
-        user_agent: request.user_agent
-      }), content_type: 'text/plain')
+      if album.status == 1
+        $counter_client.incr(Settings.counter.user.albums, album.uid, 1)
+        $counter_client.incr(Settings.counter.album.tracks, album.id, 1)
+      end
+
+      CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,true,request.user_agent,nil,nil,[[record.id, old_album_id]],nil,nil,nil,nil)
     end
 
     halt render_json({res: true, id: album.id, title: CGI::escapeHTML(album.title)})
@@ -549,8 +552,10 @@ class TracksController < ApplicationController
       if track
         old_is_deleted = track.is_deleted
         track.update_attribute(:is_deleted, true)
-        topic = track.to_topic_hash.merge(is_feed: true, is_off: (!old_is_deleted && track.is_public && track.status == 1))
-        $rabbitmq_channel.fanout(Settings.topic.track.destroyed, durable: true).publish(Oj.dump(topic, mode: :compat), content_type: 'text/plain', persistent: true)
+
+        is_off = !old_is_deleted && track.is_public && track.status == 1
+        CoreAsync::TrackOffWorker.perform_async(:track_off,track.id,is_off)
+        $rabbitmq_channel.fanout(Settings.topic.track.destroyed, durable: true).publish(Oj.dump(track.to_topic_hash.merge(is_feed: true, is_off: is_off), mode: :compat), content_type: 'text/plain', persistent: true)
         bunny_logger ||= ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
         bunny_logger.info "track.destroyed.topic #{track.id} #{track.title} #{track.nickname} #{track.updated_at.strftime('%R')}"
       end
@@ -573,7 +578,46 @@ class TracksController < ApplicationController
 
   # 评论列表
   def track_comment_list_template
+
     set_no_cache_header
+
+    @tir = TrackInRecord.fetch(params[:id])
+
+    halt '' if @tir.nil? or @tir.is_deleted or @tir.status != 1
+
+    @page = ( tmp=params[:page].to_i )>0 ? tmp : 1
+    @per_page = Settings.per_page.track_comments
+
+    all_comments = Comment.stn(@tir.track_id).where(track_id: @tir.track_id, parent_id: nil, is_deleted:false).order('id desc')
+
+    @comments_count = all_comments.count
+    @comments = all_comments.offset((@page-1)*@per_page).limit(@per_page)
+    all_uid_hash = {}
+    @comments.each do |c|
+      all_uid_hash[c.uid] = 1
+    end
+
+    sql_list = []
+    @comments.each do |comment|
+      sql = Comment.stn(@tir.track_id).where(track_id: @tir.track_id, parent_id: comment.id, is_deleted:false).limit(50).to_sql
+      sql_list << sql
+    end
+    union_sql = sql_list.collect{|sql| "(#{sql})" }.join(" union all ")
+    all_replies = Comment.find_by_sql(union_sql)
+
+    @replies = {}
+    all_replies.each do |c|
+      (@replies[c.parent_id] ||= []) << c
+      all_uid_hash[c.uid] = 1
+    end
+
+    all_uids = all_uid_hash.keys
+    if all_uids.length > 0
+      @profile_users = $profile_client.getMultiUserBasicInfos(all_uids)
+    else
+      @profile_users = {}
+    end
+
     render_to_string(partial: :_track_comment_list)
   end
 
@@ -592,7 +636,7 @@ class TracksController < ApplicationController
     @tir = TrackInRecord.fetch(params[:id])
     halt '' if @tir.nil? or @tir.is_deleted or @tir.status != 1
     @comments_count = Comment.stn(@tir.track_id).where(track_id: @tir.track_id).count
-    @comments = Comment.stn(@tir.track_id).where(track_id: @tir.track_id).order('created_at desc').limit(10)
+    @comments = Comment.stn(@tir.track_id).where(track_id: @tir.track_id).order('id desc').limit(10)
     render_to_string(partial: :_feed_comment_list)
   end
 
@@ -939,6 +983,15 @@ class TracksController < ApplicationController
     erb(:_valid_code_partial,layout:false)
   end
 
+  def get_valid_code_json
+    set_no_cache_header
+    
+    codeid = SecureRandom.uuid
+
+    img_src = File.join(Settings.check_outer_root, "/getcode?codeId=#{codeid}")
+    render_json({codeid:codeid,img_src:img_src})
+  end
+
   #编辑声音 action
   def do_update_track
 
@@ -981,13 +1034,22 @@ class TracksController < ApplicationController
     track_dirts = filter_hash(2, @current_user, get_client_ip, {
       title: title,
       intro: intro,
-      lyric: lyric
+      lyric: lyric,
+      singer: singer,
+      singer_category: singer_category,
+      author: author,
+      composer: composer,
+      arrangement: arrangement,
+      post_production: post_production,
+      lyric: lyric,
+      resinger: resinger,
+      announcer: announcer
     })
     halt render_json({res: false, errors: [['dirty_words', track_dirts]]}) if track_dirts.size > 0
 
-    if album_id and track.album_id != album_id
+    if album_id
       album = Album.stn(@current_uid).where(uid: @current_uid, id: album_id, is_deleted: false).first
-      if album
+      if album and track.album_id != album.id
         album_track_count = TrackRecord.stn(@current_uid).where(uid: @current_uid, album_id: album.id, is_deleted: false, status: [0,1]).count
         delayed_track_count = DelayedTrack.where(uid: @current_uid, is_deleted: false, album_id: album.id).count
         temp_track_count = TempAlbumForm.where(uid: @current_uid, state: 0, album_id: album.id).sum('add_tracks') # 专辑缓存表中的数据也算上
@@ -1125,6 +1187,7 @@ class TracksController < ApplicationController
     end
 
     upload_single_track(fileid,transcode_data,title,user_source,category_id,is_public,images,intro,rich_intro,tags,music_category,singer,singer_category,author,composer,arrangement,post_production,lyric,resinger,announcer,sharing_to,share_content,album)
+
     render_json({res: true, redirect_to: "/#/#{@current_uid}/sound/"})
   end
 

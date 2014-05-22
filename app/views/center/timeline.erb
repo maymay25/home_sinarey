@@ -16,3 +16,9 @@
     if(document.getElementById("bdshell_js"))document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + new Date().getHours();
   </script>
 <% end %>
+
+<% if !@u.isVerified %>
+  <% content_for :head do  %>
+    <meta name="robots" content="nofollow" />
+  <% end %>
+<% end %>

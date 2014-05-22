@@ -62,51 +62,39 @@
           </div>
         </div>
         <div class="body_list_wrap">
+          <% ban_users_count = 0 %>
           <ul class="body_list follow_list">
-            <%
-            uids = @lovers.map{|l| l.uid }
-            if uids.size > 0
-              tracks_counts = $counter_client.getByIds(Settings.counter.user.tracks, uids)
-              followers_counts = $counter_client.getByIds(Settings.counter.user.followers, uids)
-              followings_counts = $counter_client.getByIds(Settings.counter.user.followings, uids)
-            else
-              tracks_counts, followers_counts, followings_counts = [], [], []
-            end
-            %>
-
-          <% @lovers.each_with_index do |p, i| %>
+          <% @lovers.each_with_index do |user, i| %>
             <% 
-            if @current_uid
-              following = Following.stn(@current_uid).where(uid: @current_uid, following_uid: p.uid).select('following_uid, is_mutual').first
-              is_follow = following.present?
-              be_followed = following && following.is_mutual
-            else
-              is_follow = false
-              be_followed = false
+            next if user.nil?
+            if user.isLoginBan
+              ban_users_count += 1 
+              next
             end
+            is_follow,be_followed = @follow_status[user.uid]
             %>
             <li class="item" >
               <div class="content_wrap">
                 <div class="picture">
-                  <img alt="<%= p.nickname %>" card="<%= p.uid %>" class="tx" src="<%= picture_url('header', p.logoPic, '60') %>">
+                  <img alt="<%= user.nickname %>" card="<%= user.uid %>" class="tx" src="<%= picture_url('header', user.logoPic, '60') %>">
                 </div>
                 <div class="detail">
                   <div class="detail_top">
-                    <a class="username" card="<%= p.uid %>" href="<%= link_his_path(p.uid) %>"><%= p.nickname %><i class="VIcon"></i></a>
+                    <a class="username" card="<%= user.uid %>" href="<%= link_his_path(user.uid) %>"><%= user.nickname %><i class="VIcon"></i></a>
                   </div>
                   <div class="detail_content">
-                    <%= p.personalSignature %>
+                    <%= user.personalSignature %>
                   </div>
                   <div class="detail_bottom">
-                    <span class="left follower_counter"><%= followers_counts[i] %></span>
-                    <span class="left sound_counter"><%= tracks_counts[i] %></span>
-                    <span class="left attention_counter"><%= followings_counts[i] %></span> 
+                    <span class="left follower_counter"><%= @lover_followers_counts[i] %></span>
+                    <span class="left sound_counter"><%= @lover_tracks_counts[i] %></span>
+                    <span class="left attention_counter"><%= @lover_followings_counts[i] %></span> 
                   </div>
                 </div>
                 <div class="operate_btns">
-                  <% if @current_uid != p.uid %>
-                  <a class="sendLetterBtn" href="javascript:;"><span class="icon" data-options="nickname:'<%= p.nickname %>'">发私信</span></a>
-                  <a class="addBtn2 <%= "already" if is_follow %> <%= "both" if be_followed %>" data-options="uid:<%= p.uid %>,is_follow:<%= is_follow %>,nickname:'<%= p.nickname %>'"href="javascript:;">
+                  <% if @current_uid != user.uid %>
+                  <a class="sendLetterBtn" href="javascript:;"><span class="icon" data-options="nickname:'<%= user.nickname %>'">发私信</span></a>
+                  <a class="addBtn2 <%= "already" if is_follow %> <%= "both" if be_followed %>" data-options="<%= {uid:user.uid,is_follow:is_follow,be_followed:be_followed,nickname:user.nickname}.to_json[1..-2] %>" href="javascript:;">
                     <span class="default"><%= (is_follow && be_followed) ? "相互" : is_follow ? "已" : "" %>关注</span>
                     <span class="hover">取消</span>
                   </a>
@@ -116,6 +104,10 @@
             </li>
             <% end %>
           </ul>
+
+          <% if ban_users_count > 0 %>
+            <div class="hintTxt2">根据相关法律法规和政策，部分用户已屏蔽。</div>
+          <% end %>
 
           <div class="pagingBar mgTB20">
               <%== paginate CustomPagination.new(@lovers_count,@page,@per_page), {outer_window: 1, url:"/#{@tir.uid}/sound/#{@tir.track_id}/liker", link_path: @current_uid.present?} %>

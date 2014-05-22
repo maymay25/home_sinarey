@@ -11,6 +11,10 @@ class CenterController < ApplicationController
   ### 个人中心 -- 首页timeline
   def index_page
 
+
+    # type --- 1:粉丝 /2:选人 /3:全体非机器人主播
+    # to_uids --- 选人的场合，接收者id数组
+
     redirect_to_root
 
     if params[:nickname]
@@ -210,7 +214,7 @@ class CenterController < ApplicationController
   end
 
   #删除用户feed
-  def xhr_del_feed
+  def do_del_feed
 
     # 查询用户的所有分组信息
     groups = FollowingGroup.stn(@current_uid).where(uid: @current_uid)
@@ -970,16 +974,34 @@ class CenterController < ApplicationController
     @follows_count = all_follows.count
     @follows = all_follows.order('id desc').offset((@page-1)*@per_page).limit(@per_page)
 
-    following_uids = @follows.collect{|f| f.following_uid}
-    
-    if following_uids.size > 0
+    following_ids,following_uids = [],[]
+    @follows.each do |f|
+      following_ids << f.id
+      following_uids << f.following_uid
+    end
+
+    if @follows.size > 0
       @users = $profile_client.getMultiUserBasicInfos(following_uids.collect{|uid| uid })
       @following_tracks_counts = $counter_client.getByIds(Settings.counter.user.tracks, following_uids)
       @following_followers_counts = $counter_client.getByIds(Settings.counter.user.followers, following_uids)
-    else
-      @users = {}
-      @following_tracks_counts = []
-      @following_followers_counts = []
+      @follow_status = {}
+      @follows.each do |follow|
+        @follow_status[follow.following_uid] = [true,follow.is_mutual]
+      end
+
+      cache_group_hash = {}
+      @follow_group_ids_hash = {}
+      x2_groups = Followingx2Group.stn(@current_uid).where(uid: @current_uid, following_id: following_ids).select('following_id,following_group_id')
+      x2_groups.each do |x2_group|
+        cache_group_hash[x2_group.following_group_id] ||= 1
+        (@follow_group_ids_hash[x2_group.following_id] ||= []) << x2_group.following_group_id
+      end
+
+      @fgs = {}
+      all_group_ids = cache_group_hash.keys
+      FollowingGroup.stn(@current_uid).where(uid: @current_uid,id:all_group_ids).each do |fg|
+        @fgs[fg.id] = fg
+      end
     end
     @this_title = "我关注的人 喜马拉雅-听我想听"
   end
@@ -993,16 +1015,18 @@ class CenterController < ApplicationController
 
     @follows = Following.stn(@u.uid).where(uid: @u.uid).select('id, following_uid').order('id desc').offset((@page-1)*@per_page).limit(@per_page)
 
-    following_uids = @follows.collect{|f| f.following_uid}
-    
-    if following_uids.size > 0
+    if @follows.size > 0
+      following_uids = @follows.collect{|f| f.following_uid}
       @users = $profile_client.getMultiUserBasicInfos(following_uids)
       @following_tracks_counts = $counter_client.getByIds(Settings.counter.user.tracks, following_uids)
       @following_followers_counts = $counter_client.getByIds(Settings.counter.user.followers, following_uids)
-    else
-      @users = {}
-      @following_tracks_counts = []
-      @following_followers_counts = []
+      @follow_status = {}
+      if @current_uid
+        followings = Following.stn(@current_uid).where(uid: @current_uid, following_uid: following_uids).select('following_uid, is_mutual')
+        followings.each do |follow|
+          @follow_status[follow.following_uid] = [true,follow.is_mutual]
+        end
+      end
     end
 
     check_follow_status(@u.uid)
@@ -1028,10 +1052,18 @@ class CenterController < ApplicationController
       @users = $profile_client.getMultiUserBasicInfos(follower_uids)
       @follower_tracks_counts = $counter_client.getByIds(Settings.counter.user.tracks, follower_uids)
       @follower_followers_counts = $counter_client.getByIds(Settings.counter.user.followers, follower_uids)
+      @follow_status = {}
+      if @current_uid
+        followings = Following.stn(@current_uid).where(uid: @current_uid, following_uid: follower_uids).select('following_uid, is_mutual')
+        followings.each do |follow|
+          @follow_status[follow.following_uid] = [true,follow.is_mutual]
+        end
+      end
     else
       @users = {}
       @follower_tracks_counts = []
       @follower_followers_counts = []
+      @follow_status = {}
     end
 
     $counter_client.set(Settings.counter.user.new_follower, @current_uid, 0) if @page==1
@@ -1056,10 +1088,18 @@ class CenterController < ApplicationController
       @users = $profile_client.getMultiUserBasicInfos(follower_uids)
       @follower_tracks_counts = $counter_client.getByIds(Settings.counter.user.tracks, follower_uids)
       @follower_followers_counts = $counter_client.getByIds(Settings.counter.user.followers, follower_uids)
+      @follow_status = {}
+      if @current_uid
+        followings = Following.stn(@current_uid).where(uid: @current_uid, following_uid: follower_uids).select('following_uid, is_mutual')
+        followings.each do |follow|
+          @follow_status[follow.following_uid] = [true,follow.is_mutual]
+        end
+      end
     else
       @users = {}
       @follower_tracks_counts = []
       @follower_followers_counts = []
+      @follow_status = {}
     end
 
     check_follow_status(@u.uid)

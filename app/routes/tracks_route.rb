@@ -52,5 +52,6 @@ class TracksRoute < TracksController
   route :get, :post, '/upload/choose_album'                  do dispatch(:get_album_choose_list_partial) end #上传·选择声音模块
   route :get, :post, '/upload/valid_code_partial'            do dispatch(:get_valid_code_partial) end # 验证码局部页
   
+  route :get, :post, '/upload/valid_code_json'               do dispatch(:get_valid_code_json) end #验证码json
 
 end

@@ -106,7 +106,7 @@
 
           </div>
 
-          <% if @tir.rich_intro %>
+          <% if @tir.rich_intro && @tir.is_v %>
           <div class="detailContent_intro">
               <div class="mid_intro">
                 <article><%= @tir.rich_intro.html_safe %></article>

@@ -6,7 +6,7 @@ require File.expand_path('boot', __dir__)
 require 'active_record'
 
 require 'sinarey_support'
-require 'sinarey_support/sinatra/html_safe'
+require 'sinarey_support/sinatra/html_safe' unless ENV['DEFAULT_ERB']
 
 require "sinatra/multi_route"
 require "sinatra/content_for"
@@ -26,8 +26,9 @@ require File.expand_path('establish_connection.rb', __dir__)
 require File.expand_path('sinarey', __dir__)
 
 requires = Dir[File.expand_path('initializers/*.rb', __dir__)]
-['app/models','app/helpers','app/controllers','app/routes'].each do |path|
-  requires += Dir[File.expand_path("../#{path}/*.rb", __dir__)]
+
+['models','helpers','controllers','routes'].each do |path|
+  requires += Dir[File.expand_path("../app/#{path}/*.rb", __dir__)]
 end
 
 requires.each do |file|

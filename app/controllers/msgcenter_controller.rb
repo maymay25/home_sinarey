@@ -324,15 +324,7 @@ class MsgcenterController < ApplicationController
 
     $rabbitmq_channel.fanout(Settings.topic.comment.created, durable: true).publish(Yajl::Encoder.encode(topic_hash), content_type: 'text/plain', persistent: true)
 
-    $rabbitmq_channel.queue('comment.created.dj', durable: true).publish(Yajl::Encoder.encode({
-      track_id: comment.track_id,
-      id: comment.id,
-      mid: master_comment_id,
-      pid: params[:parent_id],
-      sharing_to: params[:sharing_to],
-      dotcom: Settings.home_root,
-      is_mob: false
-    }), content_type: 'text/plain')
+    CoreAsync::CommentCreatedWorker.perform_async(:comment_created,comment.id,comment.track_id,params[:parent_id],master_comment_id,params[:sharing_to],Settings.home_root)
 
     # 同步分享确认, 不再提示
     unless params[:no_more_alert].nil? || params[:no_more_alert].empty?
@@ -364,9 +356,10 @@ class MsgcenterController < ApplicationController
 
     halt_400 unless @current_uid
     
-    comment = Comment.stn(params[:track_id]).where(id: params[:comment_id]).first
+    comment = Comment.stn(params[:track_id]).where(id: params[:comment_id], is_deleted: false).first
     if comment.uid == @current_uid or comment.track_uid == @current_uid
-      comment.destroy
+      comment.is_deleted = true
+      comment.save
 
       # 发已删除topic
       $rabbitmq_channel.fanout(Settings.topic.comment.destroyed, durable: true).publish(Yajl::Encoder.encode({
@@ -555,10 +548,7 @@ class MsgcenterController < ApplicationController
       )
     end
 
-    $rabbitmq_channel.queue('message.created.dj', durable: true).publish(Yajl::Encoder.encode({
-      uid: chat.uid,
-      chat_id: chat.id
-    }), content_type: 'text/plain')
+    CoreAsync::MessageCreatedWorker.perform_async(:message_created,chat.uid,chat.id)
 
     chat.content = puts_face(params[:content])
     render_json({res: chat, msg: print_message(:success)})

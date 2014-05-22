@@ -1,54 +1,30 @@
-<%
-tir = @tir || TrackInRecord.fetch(params[:id])
-
-page = ( tmp=params[:page].to_i )>0 ? tmp : 1
-per_page = Settings.per_page.track_comments
-
-all_comments = Comment.stn(params[:id]).where(track_id: params[:id], parent_id: nil).select('id, second, content, track_id, uid, nickname, avatar_path, created_at').order('created_at desc')
-comments_count = all_comments.count
-comments = all_comments.offset((page-1)*per_page).limit(per_page)
-all_uids = comments.collect{|c| c.uid } || []
-replies = {}.tap do |hash|
-  comments.each do |comment|
-    sub_comments = Comment.stn(params[:id]).where(track_id: params[:id], parent_id: comment.id).select('id, second, content, track_id, uid, nickname, avatar_path, created_at').limit(20)
-    hash[comment.id] = sub_comments
-    all_uids += sub_comments.collect{|c| c.uid } || []
-  end
-end
-all_uids = all_uids.compact.uniq
-if all_uids.length > 0
-  profile_users = $profile_client.getMultiUserBasicInfos(all_uids)
-else
-  profile_users = {}
-end
-%>
 
 <ul class="commentList">
-  <% comments.each do |comment| %>
+  <% @comments.each do |cmt| %>
   <li class="listItem">
     <div class="comment2">
       <div class="left">
-        <a class="userface" href="<%= link_his_path(comment.uid) %>" card="<%= comment.uid %>">
-          <img alt="<%= comment.nickname %>" src="<%= picture_url('header', comment.avatar_path, 60) %>" data-options="defaultImg:person_60">
+        <a class="userface" href="<%= link_his_path(cmt.uid) %>" card="<%= cmt.uid %>">
+          <img alt="<%= cmt.nickname %>" src="<%= picture_url('header', cmt.avatar_path, 60) %>" data-options="defaultImg:person_60">
         </a>
       </div>
       <div class="right">
-        <a href="javascript:;" class="reportBtn" title="举报" data-options="<%= {track_id:comment.track_id,comment_id:comment.id,uid:@current_uid,to_uid:comment.uid,content_title:comment.content,content_type:ReportInformation::TYPE["comment"]}.to_json %>"></a>
+        <a href="javascript:;" class="reportBtn" title="举报" data-options="<%= {track_id:cmt.track_id,comment_id:cmt.id,uid:@current_uid,to_uid:cmt.uid,content_title:cmt.content,content_type:ReportInformation::TYPE["comment"]}.to_json %>"></a>
         <div>
-          <a href="<%= link_his_path(comment.uid) %>" card="<%= comment.uid %>"><%= comment.nickname %><% if profile_users[comment.uid].isVerified %><i class="VIcon">&nbsp;</i><% end %></a>&nbsp;<span><% if comment.second %>在声音 <%= parse_duration comment.second %> 处<% end %>评论</span>
+          <a href="<%= link_his_path(cmt.uid) %>" card="<%= cmt.uid %>"><%= cmt.nickname %><% if @profile_users[cmt.uid].isVerified %><i class="VIcon">&nbsp;</i><% end %></a>&nbsp;<span><% if cmt.second %>在声音 <%= parse_duration cmt.second %> 处<% end %>评论</span>
         </div>
-        <div class="comment_content"><%== simple_format(puts_face(comment.content)) %></div>
+        <div class="comment_content"><%== simple_format(puts_face(cmt.content)) %></div>
         <div class="comment_bottom">
-          <span class="comment_createtime"><%= comment.created_at.strftime('%-m月%-d日 %H:%M') %></span>
-          <a href="javascript:;" class="replyBtn" data-options="<%= Yajl::Encoder.encode({c_id: comment.id, c_second: comment.second,c_nickname: comment.nickname}) %>">回复</a>
-          <% if comment.uid==@current_uid or tir.uid==@current_uid %>
-          <a class="delBtn" data-options="<%= Yajl::Encoder.encode({comment_id:comment.id,track_id:comment.track_id}) %>">删除</a>
+          <span class="comment_createtime"><%= cmt.created_at.strftime('%-m月%-d日 %H:%M') %></span>
+          <a href="javascript:;" class="replyBtn" data-options="<%= {c_id: cmt.id, c_second: cmt.second,c_nickname: cmt.nickname}.to_json %>">回复</a>
+          <% if cmt.uid==@current_uid or @tir.uid==@current_uid %>
+          <a class="delBtn" data-options="<%= {comment_id:cmt.id,track_id:cmt.track_id}.to_json %>">删除</a>
           <% end %>
         </div>
         <div class="reply_box_entry"></div>
-        <% if replies[comment.id].size > 0 %>
+        <% if (replies=@replies[cmt.id]).size > 0 %>
         <div class="commentReply mgT10 is-comment-onReplay">
-        <% replies[comment.id].each_with_index do |reply, i| %>
+        <% replies.each_with_index do |reply, i| %>
           <div class="comment <% if i > 0 %>mgT20<% end %>">
             <div class="left">
               <a class="userface" href="<%= link_his_path(reply.uid) %>" card="<%= reply.uid %>">
@@ -56,16 +32,16 @@ end
               </a>
             </div>
             <div class="right">
-              <a href="javascript:;" class="reportBtn" title="举报" data-options="<%= {track_id:comment.track_id,comment_id:reply.id,uid:@current_uid,to_uid:reply.uid,content_title:reply.content,content_type:ReportInformation::TYPE["comment"]}.to_json %>"></a>
+              <a href="javascript:;" class="reportBtn" title="举报" data-options="<%= {track_id:cmt.track_id,comment_id:reply.id,uid:@current_uid,to_uid:reply.uid,content_title:reply.content,content_type:ReportInformation::TYPE["comment"]}.to_json %>"></a>
               <div>
-                <a href="<%= link_his_path(reply.uid) %>" card="<%= reply.uid %>"><%= reply.nickname %><% if profile_users[reply.uid].isVerified %><i class="VIcon">&nbsp;</i><% end %></a>
+                <a href="<%= link_his_path(reply.uid) %>" card="<%= reply.uid %>"><%= reply.nickname %><% if @profile_users[reply.uid].isVerified %><i class="VIcon">&nbsp;</i><% end %></a>
               </div>
               <div class="comment_content"><%== simple_format(puts_face(reply.content)) %></div>
               <div class="comment_bottom">
                 <span class="comment_createtime"><%= reply.created_at.strftime('%-m月%-d日 %H:%M') %></span>
-                <a href="javascript:;" class="replyBtn" data-options="<%= Yajl::Encoder.encode({c_id: reply.id, c_second: reply.second, c_nickname: reply.nickname}) %>">回复</a>
-                <% if reply.uid==@current_uid or tir.uid==@current_uid %>
-                <a class="delBtn" data-options="<%= Yajl::Encoder.encode({comment_id:reply.id,track_id:comment.track_id}) %>">删除</a>
+                <a href="javascript:;" class="replyBtn" data-options="<%= {c_id: reply.id, c_second: reply.second, c_nickname: reply.nickname}.to_json %>">回复</a>
+                <% if reply.uid==@current_uid or @tir.uid==@current_uid %>
+                <a class="delBtn" data-options="<%= {comment_id:reply.id,track_id:cmt.track_id}.to_json %>">删除</a>
                 <% end %>
               </div>
             </div>
@@ -81,5 +57,5 @@ end
 </ul>
 
 <div class="pagingBar mgT30">
-  <%== paginate CustomPagination.new(comments_count,page,per_page), {outer_window: 1, theme: 'explore'} %>
+  <%== paginate CustomPagination.new(@comments_count,@page,@per_page), {outer_window: 1, theme: 'explore'} %>
 </div>

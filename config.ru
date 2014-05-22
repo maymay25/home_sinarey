@@ -2,7 +2,7 @@ puts 'starting...'
 require File.expand_path('../config/application',  __FILE__)
 puts 'environment: ' + Sinarey.env
 
-use Rack::Deflater
+#use Rack::Deflater
 
 map '/' do
   run HomeRouter

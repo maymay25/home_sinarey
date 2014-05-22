@@ -59,17 +59,19 @@
                 </div>
 
                 <div class="body_list_wrap">
-                    <% if @follows and @follows.length>0 %>
                     <ul class="body_list follow_list">
                         <% @follows.each_with_index do |f,i| %>
                         <%
                           user = @users[f.following_uid]
-                          is_follow = true
-                          be_followed = Following.stn(user.uid).where(uid: user.uid, following_uid: @current_uid ).select('id').any?
-                          group_ids = Followingx2Group.stn(@current_uid).where(uid: @current_uid, following_id: f.id).select('following_group_id').collect{|fx2g| fx2g.following_group_id}
-                          group_ids << '-1' if f.is_auto_push
+                          next if user.nil?
+                          is_follow,be_followed = @follow_status[user.uid]
+                          group_ids = @follow_group_ids_hash[f.id] || []
                           groups = f.is_auto_push ? ['必听组'] : []
-                          groups.concat(@fgs.where(id: group_ids).collect{|fg| CGI.escapeHTML(fg.title)})
+                          group_ids.each do |group_id|
+                            fg = @fgs[group_id]
+                            next if fg.nil?
+                            groups << escape_javascript(fg.title)
+                          end
                         %>
                         <li class="item">
                             <div class="content_wrap">
@@ -98,7 +100,7 @@
                                     <a class="sendLetterBtn" href="javascript:;" data-options="nickname:'<%= user.nickname %>'">
                                         <span class="icon">发私信</span>
                                     </a>
-                                    <a class="addBtn2 <%= "already" if is_follow %> <%= "both" if be_followed %>" data-options="uid:<%= user.uid %>,is_follow:<%= is_follow %>,be_followed:<%= be_followed %>,remove:'li.item',remove_state:false,nickname:'<%= user.nickname %>'" href="javascript:;">
+                                    <a class="addBtn2 <%= "already" if is_follow %> <%= "both" if be_followed %>" data-options="<%= {uid:user.uid,is_follow:is_follow,be_followed:be_followed,nickname:user.nickname,remove:'li.item',remove_state:false}.to_json[1..-2] %>" href="javascript:;">
                                         <span class="default"><%= (is_follow && be_followed) ? "相互" : is_follow ? "已" : "" %>关注</span>
                                         <span class="hover">取消</span>
                                     </a>
@@ -115,7 +117,6 @@
                         <%== paginate CustomPagination.new(@follows_count,@page,@per_page), {outer_window: 1, url:"/#{@current_uid}/follow", link_path: @current_uid.present?} %>
                     </div>
                     
-                    <% end %>
                 </div>
             </div>
         </div>

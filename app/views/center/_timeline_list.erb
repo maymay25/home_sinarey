@@ -192,7 +192,7 @@
                                         </div>
                                         <div>
                                             <% if @current_uid != feed.toUid %>
-                                            <a class="addBtn2 small <%= "already" if is_follow %> <%= "both" if be_followed %>" data-options="uid:<%= feed.toUid %>,is_follow:<%= is_follow %>,nickname:'<%= feed.toNickName %>'">
+                                            <a class="addBtn2 small <%= "already" if is_follow %> <%= "both" if be_followed %>" data-options="<%= {uid:feed.toUid,is_follow:is_follow,be_followed:false,nickname:feed.toNickName}.to_json[1..-2] %>" href="javascript:;">
                                                 <span class="default"><%= (is_follow && be_followed) ? "相互" : is_follow ? "已" : "" %>关注</span>
                                                 <span class="hover">取消</span>
                                             </a>

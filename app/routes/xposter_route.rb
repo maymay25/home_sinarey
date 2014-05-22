@@ -7,6 +7,6 @@ class XposterRoute < XposterController
 
   route :get,        '/xposter/starsport'          do dispatch(:starsport_homepage) end
   route :get,        '/xposter/starsport_help'     do dispatch(:starsport_help) end
-  route :get,        '/xposter/starsport_works'    do dispatch(:starsport_works) end
+  route :get,        '/xposter/starsport_works'    do dispatch(:starsport_works2) end
 
 end

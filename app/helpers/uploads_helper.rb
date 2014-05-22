@@ -5,7 +5,7 @@ module UploadsHelper
   def upload_single_track(fileid,transcode_data,title,user_source,category_id,is_public,images,intro,rich_intro,tags,music_category,singer,singer_category,author,composer,arrangement,post_production,lyric,resinger,announcer,sharing_to,share_content,album)
 
     current_now = Time.now
-    default_status = get_default_status(@current_user)
+    default_status = calculate_default_status(@current_user)
 
     track = Track.new
     track.upload_source = 2 # 网站
@@ -14,7 +14,7 @@ module UploadsHelper
     track.nickname = @current_user.nickname
     track.avatar_path = @current_user.logoPic
     track.is_v = @current_user.isVerified
-    track.dig_status = (@current_user.isVerified || @current_user.isRobot) ? 1 : 0
+    track.dig_status = calculate_dig_status(@current_user)
     track.human_category_id = @current_user.vCategoryId
     track.approved_at = current_now if default_status == 1
     track.title = title
@@ -159,6 +159,13 @@ module UploadsHelper
       explore_height: track.explore_height
     )
 
+    if track.is_public && track.status == 1
+      $counter_client.incr(Settings.counter.user.tracks, track.uid, 1)
+      if track.album_id
+        $counter_client.incr(Settings.counter.album.tracks, track.album_id, 1)
+      end
+    end
+
     # 如果添加到专辑，更新专辑排序
     if album
       if album.tracks_order
@@ -169,29 +176,14 @@ module UploadsHelper
         end
       end
       album.save
-
-      mqMessage = {
-        id: album.id,
-        is_new: false,
-        user_agent: request.user_agent,
-        created_record_ids: [track_record.id],
-        share: [sharing_to, share_content],
-        share_config: 'sound'
-      }
-      $rabbitmq_channel.queue('album.updated.dj', durable: true).publish(Yajl::Encoder.encode(mqMessage), content_type: 'text/plain')
+      CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,false,request.user_agent,[track_record.id],nil,nil,nil,nil,[sharing_to, share_content],'sound')
     else
-      $rabbitmq_channel.queue('track.on', durable: true).publish(Yajl::Encoder.encode({
-        id: track.id,
-        share: [sharing_to, share_content],
-        is_new: true
-      }), content_type: 'text/plain')
-
-      if track.is_public && track.status == 1 && track.play_path_64 && track.waveform
+      if track.is_public && track.status == 1
+        CoreAsync::TrackOnWorker.perform_async(:track_on, track.id, true, [sharing_to, share_content], nil)
         $rabbitmq_channel.fanout(Settings.topic.track.created, durable: true).publish(Yajl::Encoder.encode(track.to_topic_hash.merge(user_agent: request.user_agent, is_feed: true)), content_type: 'text/plain', persistent: true)
         bunny_logger = ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
         bunny_logger.info "track.created.topic #{track.id} #{track.title} #{track.nickname} #{track.updated_at.strftime('%R')}"
       end
-
     end
   end
 
@@ -200,7 +192,7 @@ module UploadsHelper
     
     current_now = Time.now
     task_count_tag = current_now.to_i
-    default_status = get_default_status(@current_user)
+    default_status = calculate_default_status(@current_user)
     cleaned_rich_intro = clean_html(rich_intro) if rich_intro.present?
     cleaned_lyric = CGI.escapeHTML(Sanitize.clean(lyric, { elements: %w(br) }))[0, 5000] if lyric.present?
 
@@ -211,7 +203,7 @@ module UploadsHelper
     track_origin.nickname = @current_user.nickname
     track_origin.avatar_path = @current_user.logoPic
     track_origin.is_v = @current_user.isVerified
-    track_origin.dig_status = (@current_user.isVerified || @current_user.isRobot) ? 1 : 0
+    track_origin.dig_status = calculate_dig_status(@current_user)
     track_origin.human_category_id = @current_user.vCategoryId
     track_origin.approved_at = current_now if default_status == 1
     track_origin.title = title
@@ -411,7 +403,7 @@ module UploadsHelper
     album.nickname = @current_user.nickname
     album.avatar_path = @current_user.logoPic
     album.is_v = @current_user.isVerified
-    album.dig_status = @current_user.isVerified ? 1 : 0
+    album.dig_status = calculate_dig_status(@current_user)
     album.human_category_id = @current_user.vCategoryId
     album.title = title
     album.intro = intro
@@ -426,7 +418,7 @@ module UploadsHelper
     album.is_public = true
     album.is_records_desc = is_records_desc
     album.is_finished = is_finished
-    album.status = get_default_status(@current_user)
+    album.status = calculate_default_status(@current_user)
     album.save
 
     # 专辑富文本
@@ -442,17 +434,17 @@ module UploadsHelper
     # 存专辑下的声音
     response = manage_album_tracks(album, zipfiles, p_transcode_res, default_cover_path, default_cover_exlore_height,cleaned_rich_intro)
 
-    mqMessage = {
-      id: album.id,
-      is_new: true,
-      created_record_ids: response[:create],
-      updated_track_ids: response[:update],
-      moved_record_id_old_album_ids: response[:move],
-      destroyed_track_ids: response[:destroy],
-      share: [sharing_to, share_content],
-      user_agent: request.user_agent
-    }
-    $rabbitmq_channel.queue('album.updated.dj', durable: true).publish(Yajl::Encoder.encode(mqMessage), content_type: 'text/plain')
+    if album.status == 1
+      $counter_client.incr(Settings.counter.user.albums, album.uid, 1)
+      new_tracks_size = response[:create].size
+      if new_tracks_size > 0
+        $counter_client.incr(Settings.counter.user.albums, album.uid, 1)
+        $counter_client.incr(Settings.counter.user.tracks, album.uid, new_tracks_size)
+        $counter_client.incr(Settings.counter.album.tracks, album.id, new_tracks_size)
+      end
+    end
+
+    CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,true,request.user_agent,response[:create],response[:update],response[:move],response[:destroy],nil,[sharing_to, share_content],nil)
 
     true
   end
@@ -465,7 +457,7 @@ module UploadsHelper
     album.nickname = @current_user.nickname
     album.avatar_path = @current_user.logoPic
     album.is_v = @current_user.isVerified
-    album.dig_status = @current_user.isVerified ? 1 : 0
+    album.dig_status = calculate_dig_status(@current_user)
     album.human_category_id = @current_user.vCategoryId
     album.title = title
     album.intro = intro
@@ -480,7 +472,7 @@ module UploadsHelper
     album.is_publish = true
     album.is_records_desc = is_records_desc
     album.publish_at = datetime
-    album.status = get_default_status(@current_user)
+    album.status = calculate_default_status(@current_user)
     album.rich_intro = cut_intro(rich_intro)
     album.save
 
@@ -665,15 +657,21 @@ module UploadsHelper
         end
         album.save
       end
-      mqMessage = { id: album.id,user_agent: request.user_agent,moved_record_id_old_album_ids: [[record.id, cache_album_id]] }
-      $rabbitmq_channel.queue('album.updated.dj', durable: true).publish(Yajl::Encoder.encode(mqMessage), content_type: 'text/plain')
+      CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,false,request.user_agent,nil,nil,[[record.id, cache_album_id]],nil,nil,nil,nil)
     elsif cache_album_id
       past_album = Album.stn(@current_uid).where(id: cache_album_id, uid: @current_uid).first
       if past_album
         past_album.tracks_order &&= past_album.tracks_order.split(',').delete_if{ |id| id == record.id }.join(",")
         past_album.save
-        $counter_client.decr(Settings.counter.album.tracks, past_album.id, 1) if track and track.is_public
+
+        if track and track.is_public
+          $counter_client.decr(Settings.counter.album.tracks, past_album.id, 1)
+          plays = $counter_client.get(Settings.counter.track.plays, track.id)
+          $counter_client.decr(Settings.counter.album.plays, past_album.id, plays) if plays > 0
+        end
+
         mqMessage = { id: past_album.id, user_agent: request.user_agent }
+        CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,past_album.id,false,request.user_agent,nil,nil,nil,nil,nil,nil,nil)
         $rabbitmq_channel.queue('album.updated.dj', durable: true).publish(Yajl::Encoder.encode(mqMessage), content_type: 'text/plain')
       end
     end
@@ -682,11 +680,39 @@ module UploadsHelper
       $rabbitmq_channel.fanout(Settings.topic.track.updated, durable: true).publish(Yajl::Encoder.encode(track.to_topic_hash), content_type: 'text/plain', persistent: true)
       bunny_logger = ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
       bunny_logger.info "track.updated.topic #{track.id} #{track.title} #{track.nickname} #{track.updated_at.strftime('%R')}"
+
+      if track.is_public && track.status == 1 && !@current_user.isVerified
+        ApprovingTrack.where(track_id: track.id, is_update: true).destroy_all
+        uag = UidApproveGroup.where(uid: track.uid).first
+        ApprovingTrack.create(album_cover_path: track.album_cover_path,
+          album_id: track.album_id,
+          album_title: track.album_title,
+          approve_group_id: uag && uag.approve_group_id,
+          category_id: track.category_id,
+          cover_path: track.cover_path,
+          duration: track.duration,
+          intro: track.intro,
+          is_deleted: track.is_deleted,
+          is_public: track.is_public,
+          nickname: track.nickname,
+          play_path: track.play_path,
+          play_path: track.play_path_64,
+          status: track.status,
+          title: track.title,
+          track_created_at: track.created_at,
+          track_id: track.id,
+          transcode_state: track.transcode_state,
+          uid: track.uid,
+          user_source: track.user_source,
+          tags: track.tags,
+          is_update: true
+        )
+      end
     elsif track.is_public
+      CoreAsync::TrackOnWorker.perform_async(:track_on, track.id, false, nil, nil)
       $rabbitmq_channel.fanout(Settings.topic.track.created, durable: true).publish(Yajl::Encoder.encode(track.to_topic_hash.merge(user_agent: request.headers['user_agent'], is_feed: true)), content_type: 'text/plain', persistent: true)
       bunny_logger = ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
       bunny_logger.info "track.created.topic #{track.id} #{track.title} #{track.nickname} #{track.updated_at.strftime('%R')}"
-      $rabbitmq_channel.queue('track.on', durable: true).publish(Yajl::Encoder.encode({id: track.id, is_new: true}), content_type: 'text/plain')
     end   
   end
 
@@ -713,17 +739,19 @@ module UploadsHelper
 
     response = manage_album_tracks(album, zipfiles2, p_transcode_res, default_cover_path, default_cover_exlore_height,cleaned_rich_intro)
 
-    mqMessage = {
-      id: album.id,
-      is_new: false,
-      created_record_ids: response[:create],
-      updated_track_ids: response[:update],
-      moved_record_id_old_album_ids: response[:move],
-      destroyed_track_ids: response[:destroy],
-      share: [sharing_to, share_content],
-      user_agent: request.user_agent
-    }
-    $rabbitmq_channel.queue('album.updated.dj', durable: true).publish(Yajl::Encoder.encode(mqMessage), content_type: 'text/plain')
+    if album.status == 1
+      incr_count = response[:create].size + response[:move].size - response[:destroy].size
+      if incr_count > 0
+        $counter_client.incr(Settings.counter.user.tracks, album.uid, incr_count)
+        $counter_client.incr(Settings.counter.album.tracks, album.id, incr_count)
+      elsif incr_count < 0
+        decr_count = incr_count.abs
+        $counter_client.decr(Settings.counter.user.tracks, album.uid, decr_count)
+        $counter_client.decr(Settings.counter.album.tracks, album.id, decr_count)
+      end
+    end
+
+    CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,false,request.user_agent,response[:create],response[:update],response[:move],response[:destroy],nil,[sharing_to, share_content],nil)
 
     true
   end
@@ -790,6 +818,7 @@ module UploadsHelper
     
     tmp_attrs = {
       title: title,
+      nickname: @current_user.nickname,
       intro: intro,
       short_intro: intro && intro[0, 100],
       rich_intro: cut_intro(rich_intro),
@@ -836,17 +865,12 @@ module UploadsHelper
       album.save
     end
 
-    $rabbitmq_channel.queue('album.updated.dj', durable: true).publish(Yajl::Encoder.encode({
-      id: album.id,
-      is_new: false,
-      created_record_ids: create_record_ids,
-      updated_track_ids: [],
-      moved_record_id_old_album_ids: [],
-      destroyed_track_ids: [],
-      share: [params[:sharing_to], params[:share_content]],
-      user_agent: request.headers['user_agent']
-    }), content_type: 'text/plain')
+    if album.status == 1 and (new_tracks_size=create_record_ids.size)>0
+      $counter_client.incr(Settings.counter.user.tracks, album.uid, new_tracks_size)
+      $counter_client.incr(Settings.counter.album.tracks, album.id, new_tracks_size)
+    end
 
+    CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,false,request.user_agent,create_record_ids,nil,nil,nil,nil,[sharing_to, share_content],nil)
   end
 
   def delayed_create_album_tracks(datetime,album,delayedzipfiles,is_records_desc,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height,cleaned_rich_intro)
@@ -854,12 +878,12 @@ module UploadsHelper
     return if delayedzipfiles.blank?
 
     dalbum = DelayedAlbum.new
-    dalbum.uid = album.uid
-    dalbum.nickname = album.nickname
-    dalbum.avatar_path = album.avatar_path
-    dalbum.is_v = album.is_v
-    dalbum.dig_status = album.dig_status
-    dalbum.human_category_id = album.human_category_id
+    dalbum.uid = @current_uid
+    dalbum.nickname = @current_user.nickname
+    dalbum.avatar_path = @current_user.logoPic
+    dalbum.is_v = @current_user.isVerified
+    dalbum.dig_status = calculate_dig_status(@current_user)
+    dalbum.human_category_id = @current_user.vCate
     dalbum.title = album.title
     dalbum.intro = album.intro
     dalbum.short_intro = album.short_intro
@@ -901,12 +925,12 @@ module UploadsHelper
       track.waveform = transcode_data['waveform']
       track.is_crawler = false
       track.upload_source = 2 # 网站上传
-      track.uid = album.uid # 源发布者id
-      track.nickname = album.nickname # 源发布者昵称
-      track.avatar_path = album.avatar_path #源发布者头像
-      track.is_v = album.is_v
-      track.dig_status = album.dig_status # 发现页可见
-      track.human_category_id = album.human_category_id
+      track.uid = @current_user..uid # 源发布者id
+      track.nickname = @current_user.nickname # 源发布者昵称
+      track.avatar_path = @current_user.logoPic #源发布者头像
+      track.is_v = @current_user.isVerified
+      track.dig_status = calculate_dig_status(@current_user) # 发现页可见
+      track.human_category_id = @current_user.vCategoryId
       track.approved_at = Time.now
       track.album_id = album.id # 源专辑id
       track.delayed_album_id = dalbum.id # 临时专辑id
@@ -1102,11 +1126,11 @@ module UploadsHelper
     track.waveform = transcode_data['waveform']
     track.is_crawler = false
     track.upload_source = 2 # 网站上传
-    track.uid = album.uid # 源发布者id
+    track.uid = @current_uid # 源发布者id
     track.nickname = @current_user.nickname # 源发布者昵称
     track.avatar_path = @current_user.logoPic #源发布者头像
     track.is_v = @current_user.isVerified
-    track.dig_status = @current_user.isVerified ? 1 : 0 # 发现页可见
+    track.dig_status = calculate_dig_status(@current_user) # 发现页可见
     track.human_category_id = @current_user.vCategoryId
     track.approved_at = Time.now
     track.album_id = album.id # 源专辑id

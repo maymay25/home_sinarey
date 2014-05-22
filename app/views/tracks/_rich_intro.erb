@@ -1,5 +1,5 @@
 <% tir = @tir || TrackInRecord.fetch(params[:id]) %>
-<% if tir %>
+<% if tir && tir.is_v %>
 
   <%
     trackrich = TrackRich.stn(tir.track_id).where(track_id: tir.track_id).first

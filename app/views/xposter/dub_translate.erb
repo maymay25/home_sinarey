@@ -6,58 +6,81 @@
 <title>喜马拉雅</title>
 <%== erb :_check_redirect %>
 </head>
-<body>	
+<body>
 	<div class="dubWrap">
 		<div class="dubHd">
 			<a class="dubHd_logo" href="http://www.ximalaya.com"></a>
-			<!--<div class="dubHd_txt">译声一试配音大赛</div>	-->		
-			<a class="dubHdBtn" href="javascript:;" style="visibility:hidden;">展示区</a><a class="dubHdBtn on" href="/xposter/dub_translate">翻译首页</a><a class="dubHdBtn" href="/xposter/dub">大赛首页</a>
+			<a class="dubHdBtn" href="javascript:;" style="visibility:hidden;">展示区</a>
+			<a class="dubHdBtn on" href="/xposter/dub_translate">翻译首页</a>
+			<a class="dubHdBtn" href="/xposter/dub">大赛首页</a>
 		</div>
-		<!--我要报名弹出框-->
 		<div class="dubPopupWrap" id="dubPopup">
 			<div class="dubPopup">
-				<p>	1.注册账号，上传头像并绑定邮箱或手机。</p>
-				<p>	2.发送参赛作品至大赛指定邮箱。</p>
-				<p>	3.审核通过，选手的喜马拉雅电台用户昵称、个人近照和个人简介将会展示在大赛展示区内</p>
-				<p>	4.通过初赛，工作人员将会邮件或电话通知决赛安排。</p>
+				<p>1.注册账号，上传头像并绑定邮箱或手机。</p>
+				<p>2.发送参赛作品至大赛指定邮箱。</p>
+				<p>3.审核通过，选手的喜马拉雅电台用户昵称、个人近照和个人简介将会展示在大赛展示区内</p>
+				<p>4.通过初赛，工作人员将会邮件或电话通知决赛安排。</p>
 				<a class="dubCloseBtn" id="dubCloseBtn" title="关闭"></a>
 			</div>
 		</div>
-		<div class="dubBanner"><div class="dubBannerBtnWrap"><a class="dubApplyBtn" id="dubApplyBtn"></a></div><div class="dubBanner2"></div></div>
-		
+		<div class="dubBanner">
+			<div class="dubBannerBtnWrap">
+				<a class="dubApplyBtn" id="dubApplyBtn"></a>
+			</div>
+			<div class="dubBanner2"></div>
+		</div>
+
 		<div class="dubIntroWrap">
 			<div class="dubIntroNavBarWrap navBar-trans">
 				<span class="dubIntroNavBarBg1"></span>
 				<ul class="dubIntroNavBar">
-					<li class="on"><a href="#dubA1">大赛细则</a></li>
-					<li><a href="#dubA2">大赛安排</a></li>
-					<li><a href="#dubA3">大赛片段</a></li>
+					<li class="on">
+						<a href="#dubA1">大赛细则</a>
+					</li>
+					<li>
+						<a href="#dubA2">大赛安排</a>
+					</li>
+					<li>
+						<a href="#dubA3">大赛片段</a>
+					</li>
 				</ul>
 				<span class="dubIntroNavBarBg2"></span>
 			</div>
 			<div class="dubIntro">
 				<a id="dubA1"></a>
 				<div class="dubIntro_tit3">大赛细则</div>
-				<div class="dubIntro_txt2"> 
-					1、登陆网站，注册账号，上传头像并绑定邮箱或手机。<br/>
-					2、以个人为单位参加2014“译声一试”影视翻译配音大赛。<br/>
-					3、根据主办方提供的2个英文视频，翻译成中文配音脚本（按照<a href="<%= static_url '/poster/dub_translate_example.docx' %>" target="_blank">范本格式</a>填写）。<br/>
-					4、完成后以邮件附件形式发送至大赛邮箱ysysfanyi@163.com。<br/>
-					5、限投稿一次，经确认后，主办方不再接受参赛作品和选手个人信息的替换。<br/>
-					6、在附件中提供个人真实信息（姓名，性别，出生年月，居住地，联系方式，职业，获奖情况、个人近照等）。报名成功后，选手的喜马拉雅电台用户昵称、个人近照和个人简介将会展示在大赛展示区内，大赛主办方对选手的真实姓名和联系方式保密。<br/>
-					7、初赛作品统一命名格式：“喜马拉雅电台用户昵称_译声一试”。<br/>
-					8、初赛决出30强选手进入决赛。<br/>
+				<div class="dubIntro_txt2">
+					1、登陆网站，注册账号，上传头像并绑定邮箱或手机。
+					<br/>	
+					2、以个人为单位参加2014“译声一试”影视翻译配音大赛。
+					<br/>	
+					3、根据主办方提供的2个英文视频，翻译成中文配音脚本（按照
+					<a href="<%= static_url '/poster/dub_translate_example.docx' %>" target="_blank">范本格式</a>
+					填写）。
+					<br/>	
+					4、完成后以邮件附件形式发送至大赛邮箱ysysfanyi@163.com。
+					<br/>	
+					5、限投稿一次，经确认后，主办方不再接受参赛作品和选手个人信息的替换。
+					<br/>	
+					6、在附件中提供个人真实信息（姓名，性别，出生年月，居住地，联系方式，职业，获奖情况、个人近照等）。报名成功后，选手的喜马拉雅电台用户昵称、个人近照和个人简介将会展示在大赛展示区内，大赛主办方对选手的真实姓名和联系方式保密。
+					<br/>	
+					7、初赛作品统一命名格式：“喜马拉雅电台用户昵称_译声一试”。
+					<br/>	
+					8、初赛决出30强选手进入决赛。
+					<br/>	
 					9、决赛选手根据赛制要求完成比赛，获得翻译类各项奖次。
-
 				</div>
 			</div>
 			<div class="dubIntro">
 				<a id="dubA2"></a>
 				<div class="dubIntro_tit3">大赛安排</div>
-				<div class="dubIntro_txt2"> 
-					5月1日——6月16日&nbsp;&nbsp;&nbsp;&nbsp;网络报名、初赛<br/>
-					6月17日——7月上旬&nbsp;&nbsp;初赛评审<br/>
-					7月中下旬&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;决赛、颁奖（上海）<br/>
+				<div class="dubIntro_txt2">
+					5月01日——6月16日&nbsp;&nbsp;网络报名、初赛
+					<br/>	
+					6月17日——7月上旬&nbsp;&nbsp;初赛评审
+					<br/>	
+					7月中下旬&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;决赛、颁奖（上海）
+					<br/>	
 
 				</div>
 			</div>
@@ -65,128 +88,32 @@
 				<a id="dubA3"></a>
 				<div class="dubIntro_tit3">大赛片段</div>
 				<div class="dubIntro_txt1">
-					<div>英译中片段1（<a href="<%= static_url '/poster/dub_demo1.doc' %>" target="_blank">原文文本</a>）</div>
 					<div>
-						<embed src="http://static.video.qq.com/TPout.swf?vid=q0128ydn7si&auto=0" allowfullscreen="true" quality="high" width="740" height="500" align="middle" allowscriptaccess="always" type="application/x-shockwave-flash">
-						
+						英译中片段1（
+						<a href="<%= static_url '/poster/dub_demo1.doc' %>" target="_blank">原文文本</a>
+						）
 					</div>
-					<br/>
-					<div>英译中片段2（<a href="<%= static_url '/poster/dub_demo2.docx' %>" target="_blank">原文文本</a>）</div>
 					<div>
-						<embed src="http://static.video.qq.com/TPout.swf?vid=g0128huhr0e&auto=0" allowfullscreen="true" quality="high" width="740" height="500" align="middle" allowscriptaccess="always" type="application/x-shockwave-flash">
+						<embed src="http://static.video.qq.com/TPout.swf?vid=q0128ydn7si&auto=0" allowfullscreen="true" quality="high" width="740" height="500" align="middle" allowscriptaccess="always" type="application/x-shockwave-flash"></div>
+					<br/>	
+					<div>
+						英译中片段2（
+						<a href="<%= static_url '/poster/dub_demo2.docx' %>" target="_blank">原文文本</a>
+						）
 					</div>
+					<div>
+						<embed src="http://static.video.qq.com/TPout.swf?vid=g0128huhr0e&auto=0" allowfullscreen="true" quality="high" width="740" height="500" align="middle" allowscriptaccess="always" type="application/x-shockwave-flash"></div>
 				</div>
-			</div>			
-			
-			<div class="dubFooter">网络文化经营许可证-文网文[2010]150号     北京那里汇聚网络科技有限公司 京ICP备12017437号-1 网络110报警服务<br/>
-	Copyright © 2011-2012 www.ximalaya.com lnc.ALL Rights Reserved     请使用者仔细阅读喜马拉雅网 使用协议 和 版权声明</div>
+			</div>
+
+			<div class="dubFooter">
+				网络文化经营许可证-文网文[2010]150号     北京那里汇聚网络科技有限公司 京ICP备12017437号-1 网络110报警服务
+				<br/>	
+				Copyright © 2011-2012 www.ximalaya.com lnc.ALL Rights Reserved     请使用者仔细阅读喜马拉雅网 使用协议 和 版权声明
+			</div>
 
 		</div>
-		
-		<!--
-		<div class="dubIntroWrap dubNoPd">
-			<div class="dubIntroNavBarWrap">
-				<span class="dubIntroNavBarBg1"></span>
-				<ul class="dubIntroNavBar">
-					<li class="on"><a href="#dubA1">大赛简介</a></li>
-					<li><a href="#dubA2">大赛流程</a></li>
-					<li><a href="#dubA3">大赛规则</a></li>
-					<li><a href="#dubA4">大赛片段</a></li>
-					<li><a href="#dubA5">大赛奖励</a></li>
-					<li><a href="#dubA6">合作单位</a></li>
-				</ul>
-				<span class="dubIntroNavBarBg2"></span>
-			</div>
-			<div class="dubIntro">
-				<a id="dubA1"></a>
-				<div class="dubIntro_tit">大赛简介</div>
-				<div class="dubIntro_txt1">第十届<em>译声一试•网络翻译大赛</em>，是由上海电影译制厂、上海电影家协会、上海翻译家协会联合喜马拉雅电台共同打造的顶级影视翻译盛宴。大赛集结明星配音演员、资深电影家、翻译家担任评委，联袂发掘神一样的字幕组。届时大赛会与第17届上海国际电影节同步举行，只要你想，你就是明星！</div>			
-			</div>
-			<div class="dubIntro">
-				<a id="dubA2"></a>
-				<div class="dubIntro_tit">大赛流程</div>
-				<div class="dubIntro_pic"></div>
-				<div class="dubIntro_txt2"> 
-				<p>流程说明</p>
-				4月03日左右&nbsp;&nbsp;&nbsp;&nbsp;网络海选启动<br/>
-				 
-				5月05日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;网络海选截止<br/>
-				 
-				5月31日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;复赛名单公布<br/>
-				 
-				6月01日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;现场复赛<br/>
-				 
-				6月19日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;配音组与翻译组复赛晋级选手联合准备决赛作品 <br/>
-				 
-				6月20日&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;决赛
-				</div>
-			</div>
-			<div class="dubIntro">
-				<a id="dubA3"></a>
-				<div class="dubIntro_tit">大赛规则</div>
-				<div class="dubIntro_txt3"> 
-					<span class="dubIntro_txt3Bg"></span>
-					<div>海选</div>
-					<p>1.	选手以个人为单位参加“译声一试•网络翻译大赛”  <br/>
-					2.	大赛页面提供英译中和中译英视频各一个片段，选手登录喜马拉雅电台后，按照参赛稿范本将所有片段翻译成相应文本。<br/>
-					3.	参赛作品需按照<a href="http://pan.baidu.com/s/1o6JihmU" target="_blank">英译中参赛稿范本</a>、<a href="http://pan.baidu.com/s/1bns0ke7" target="_blank">中译英参赛稿范本</a>填写。完成后发送至大赛邮箱<a href="mailto:ysyswlfyds@163.com">ysyswlfyds@163.com</a><br/>
-					4.	海选阶段每个选手仅限投稿一次，一旦投稿大赛组委会将不接受参赛作品替换。海选作品统一命名格式：喜马拉雅电台用户昵称_译声一试。<br/>
-					5.	海选决出前30强
-					</p>
-					<div>复赛</div>
-					<p>1.	复赛地点：上海，复赛期间主办方安排住宿。<br/>
-						2.	现场复赛，前30强选手按照主办方提供的3个英译中片段，现场翻译成中文配音脚本，比赛现场可以使用字典等翻译辅助工具。（预计一整天）。<br/>
-						3.	复赛决出前6强（复赛成绩占决赛80%分值）
-					</p>
-					<div>决赛</div>
-					<p>1.	前6强选手作品由配音比赛男女前6强选手配音（配音选手配音效果占决赛20%分值）。<br/>
-						2.	决赛在6名选手中决出冠、亚、季军。
-					</p>
-					<p>选手参加大赛视为同意其所有参赛作品著作权归选手和主办方共同所有，主办方有权独自将参赛作品用于展示、宣传等商业目的。<br/>
-					本次活动的最终解释权归主办方及协办方共同所有。
-
-						</p>
-				</div>
-			</div>
-			<div class="dubIntro">
-				<a id="dubA4"></a>
-				<div class="dubIntro_tit">大赛片段</div>
-				<div class="dubIntro_txt1">
-					<div>中译英</div>
-					<div>
-						<embed src="http://static.video.qq.com/TPout.swf?vid=s0127197sgx&auto=0" allowFullScreen="true" quality="high" width="740" height="500" align="middle" allowScriptAccess="always" type="application/x-shockwave-flash"></embed>
-					</div>
-					<div>英译中</div>
-					<div>
-						<embed src="http://static.video.qq.com/TPout.swf?vid=x01278oankt&auto=0" allowFullScreen="true" quality="high" width="740" height="500" align="middle" allowScriptAccess="always" type="application/x-shockwave-flash"></embed>
-					</div>
-				</div>
-			</div>
-			<div class="dubIntro">
-				<a id="dubA5"></a>
-				<div class="dubIntro_tit">大赛奖励</div>
-				<div class="dubIntro_txt1">
-					本次大赛获奖者将获得主办方提供的证书及奖品，同时有望成为上海电影译制厂签约翻译，获邀参与上海电影家协会和上海翻译家协会举办的相关活动。有机会参演好莱坞大片的译制工作，并获邀参与上海电影家协会和上海翻译家协会举办的各类大型活动。
-				</div>
-			</div>
-			<div class="dubIntro">
-				<a id="dubA6"></a>
-				<div class="dubIntro_tit">合作单位</div>
-				<div class="dubIntro_txt5">
-					<div>主办方</div>
-					<div>						
-						<span class="dubSponsor2Icon" title="上海电影译制厂"></span>
-						<span class="dubSponsor3Icon" title="上海电影家协会"></span>
-						<span class="dubSponsor1Icon" title="上海翻译家协会"></span>
-					</div>
-					<div>协办方</div>
-					<div><span class="dubXimaIcon" title="上海证大喜马拉雅网络科技有限公司"></span></div>
-				</div>
-			</div>
-		<div class="dubFooter">网络文化经营许可证-文网文[2010]150号     北京那里汇聚网络科技有限公司 京ICP备12017437号-1 网络110报警服务<br/>
-Copyright © 2011-2012 www.ximalaya.com lnc.ALL Rights Reserved     请使用者仔细阅读喜马拉雅网 使用协议 和 版权声明</div>
 	</div>
-	-->
 	
 <%== erb :_script %>
 

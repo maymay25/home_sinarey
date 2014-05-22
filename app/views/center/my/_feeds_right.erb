@@ -193,7 +193,7 @@
                   <a href="javascript:;" class="closeBtn" title="不感兴趣"></a>
                 </div>
                 <% if @current_uid != u.uid %>
-                <a class="addBtn2 small fr" data-options="uid:<%= u.uid %>,is_follow:false,remove:'li.listItem',remove_state:true,show:':hidden:eq(0)'">
+                <a class="addBtn2 small fr" data-options="<%= {uid:u.uid,is_follow:false,be_followed:false,remove:'li.listItem',remove_state:true,show:':hidden:eq(0)'}.to_json[1..-2] %>" href="javascript:;">
                   <span>关注</span>
                 </a>
                 <% end %>

@@ -97,7 +97,7 @@
 
           </div>
 
-          <% if @album.rich_intro %> 
+          <% if @album.rich_intro && @album.is_v %>
           <div class="detailContent_intro">
             <div class="mid_intro">
               <article><%= @album.rich_intro.html_safe %></article>

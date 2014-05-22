@@ -36,10 +36,11 @@ end
 
 after_fork do |server, worker|
 
-  new_app_logger!(worker.nr)
-
   defined?(REDIS) and
     REDIS.client.reconnect
+
+  defined?(SidekiqRedis) and
+    SidekiqRedis.client.reconnect
 
   defined?(RICKREDIS) and
     RICKREDIS.client.reconnect

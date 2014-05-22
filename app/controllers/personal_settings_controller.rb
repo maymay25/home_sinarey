@@ -1,5 +1,7 @@
 class PersonalSettingsController < ApplicationController
 
+  include FollowHelper
+
   set :views, ['personal_settings','application']
 
   def dispatch(action)
@@ -114,44 +116,14 @@ class PersonalSettingsController < ApplicationController
         BlackUser.create(uid:@current_uid,black_uid: params[:uid])
       end
 
-      #取消关注
-      following = Following.stn(@current_uid).where(uid: @current_uid, following_uid: params[:uid]).first
-      if following 
-        following.destroy
-        $rabbitmq_channel.queue('following.destroyed.rb', durable: true).publish(Yajl::Encoder.encode({
-          id: following.id,
-          uid: following.uid,
-          following_uid: following.following_uid,
-          is_auto_push: following.is_auto_push,
-          nickname: following.nickname,
-          avatar_path: following.avatar_path,
-          following_nickname: following.following_nickname,
-          following_avatar_path: following.following_avatar_path
-        }), content_type: 'text/plain')
-      end
-      
-      #移除粉丝
-      following = Following.stn(params[:uid]).where(uid: params[:uid], following_uid: @current_uid).first
-      if following
-        following.destroy
-        $rabbitmq_channel.queue('following.destroyed.rb', durable: true).publish(Yajl::Encoder.encode({
-          id: following.id,
-          uid: following.uid,
-          following_uid: following.following_uid,
-          is_auto_push: following.is_auto_push,
-          nickname: following.nickname,
-          avatar_path: following.avatar_path,
-          following_nickname: following.following_nickname,
-          following_avatar_path: following.following_avatar_path
-        }), content_type: 'text/plain')
-      end
+      destroy_follow_relation(@current_uid,params[:uid]) #取消关注
 
-      success, message = true, '添加黑名单成功'
+      destroy_follow_relation(params[:uid],@current_uid) #移除粉丝
+
+      halt render_json({success: true, message: '添加黑名单成功'})
     else
-      success, message = false, '添加失败'
+      halt render_json({success: false, message: '添加失败'})
     end
-
-    halt render_json({success: success, message: message})
   end
 
   #移出黑名单

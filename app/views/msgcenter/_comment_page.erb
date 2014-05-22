@@ -49,7 +49,7 @@
                         next
                       end
 
-                      comment = Comment.stn(tir.track_id).where(id: msg.comment_id).first
+                      comment = Comment.stn(tir.track_id).where(id: msg.comment_id, is_deleted: false).first
                       unless comment # 对应评论不存在
                         msg.destroy 
                         next

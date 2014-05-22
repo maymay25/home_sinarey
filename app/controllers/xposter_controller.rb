@@ -154,4 +154,50 @@ class XposterController < ApplicationController
     erb :starsport_works,layout:false
   end
 
+  #20强名单
+  def starsport_works2
+    if Sinarey.env=='development'
+      track_ids = [214682, 214622, 214609, 214608, 214531, 214526, 214523, 214522, 214521, 214508, 214507, 214506, 214505, 214485, 214265, 214264, 214263, 214262, 214261, 214045]
+      track_ids2 = [214611]
+    else
+      track_ids = [2674464,2666960,2674859,2669520,2661227,2667778,2647840,2686697,2680616,2701147,2716280,2722176,2731895,2731987,2732362,2733062,2735296,2737795,2689621,2704667]
+      track_ids2 = [2651996]
+    end
+
+    @tirs = TrackInRecord.mfetch(track_ids)
+    hit_ids = @tirs.map{|track| track.track_id }
+    hit_uids = @tirs.map{|track| track.uid }
+    if hit_ids.length > 0
+      @favorites_counts = $counter_client.getByIds(Settings.counter.track.favorites, hit_ids)
+      @plays_counts = $counter_client.getByIds(Settings.counter.track.plays, hit_ids)
+    end
+
+    @tirs2 = TrackInRecord.mfetch(track_ids2)
+    hit_ids2 = @tirs2.map{|track| track.track_id }
+    hit_uids2 = @tirs2.map{|track| track.uid }
+    if hit_ids2.length > 0
+      @favorites_counts2 = $counter_client.getByIds(Settings.counter.track.favorites, hit_ids2)
+      @plays_counts2 = $counter_client.getByIds(Settings.counter.track.plays, hit_ids2)
+    end
+
+    @is_favorited = {}
+    all_hit_ids = (hit_ids + hit_ids2).uniq
+    if all_hit_ids.length >0
+      if @current_uid
+        favorite_status2 = Favorite.stn(@current_uid).where(uid: @current_uid, track_id: all_hit_ids)
+        favorite_status2.each do |f|
+          @is_favorited[f.track_id] = 1
+        end
+      end
+    end
+
+    @profile_users = {}
+    all_hit_uids = (hit_uids + hit_uids2).uniq
+    if all_hit_uids.length>0
+      @profile_users = $profile_client.getMultiUserBasicInfos(all_hit_uids)
+    end
+
+    erb :starsport_works2,layout:false
+  end
+
 end

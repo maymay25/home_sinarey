@@ -3,7 +3,7 @@ source 'http://ruby.taobao.org/'
 gem 'thin'
 
 if RUBY_PLATFORM =~ /mingw/
-  gem 'redis', '3.0.5'
+  gem 'redis', '3.0.6'
 else
   gem 'unicorn'
   gem 'hiredis', '~> 0.4.0'
@@ -35,7 +35,7 @@ gem 'mysql2'
 
 gem 'passport_thrift_client'
 
-gem 'sidekiq'
+gem 'core_async', '1.0.0'
 
 gem 'yajl-ruby', require: 'yajl'
 

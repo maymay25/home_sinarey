@@ -19,7 +19,7 @@ else
 end
 
 trackrich = TrackRich.stn(params[:id]).where(track_id: params[:id]).select('lyric').first
-lyric = Sanitize.clean(CGI.unescapeHTML(CGI.unescapeHTML(trackrich.lyric)), { elements: %w(br) }) if trackrich && trackrich.lyric
+lyric = Sanitize.clean(CGI.unescapeHTML(CGI.unescapeHTML(trackrich.lyric)), { elements: %w(br) }) if trackrich && trackrich.lyric && tir.is_v
 %>
 
 <div class="ad1">

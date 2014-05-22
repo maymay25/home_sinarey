@@ -20,3 +20,9 @@
 
 </script>
 <% end %>
+
+<% if !@u.isVerified %>
+  <% content_for :head do  %>
+    <meta name="robots" content="nofollow" />
+  <% end %>
+<% end %>

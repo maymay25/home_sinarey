@@ -5,7 +5,7 @@
                 <div class="hallo"></div>
             </div>
             <div class="right">
-                <div class="selecter group-select selecter-s3 hidden" id="nav_status">
+                <div class="selecter group-select selecter-s3 <% if ![3,9].include?(params[:category].to_i) or true %>hidden<% end %>" id="nav_status">
                     <div class="selecter-selected" data-value="">
                         <span class="selecter-text">全部</span><em class="selecter-arrow">◆</em>
                     </div> 

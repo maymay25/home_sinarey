@@ -1,4 +1,0 @@
-assets/uploads/*
-assets/web-built/*
-uploads/tmp/*
-!.gitignore

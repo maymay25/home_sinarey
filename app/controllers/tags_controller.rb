@@ -99,13 +99,27 @@ class TagsController < ApplicationController
     #follower列表
     @per_page = 10
     @page = params["page"].nil? ? 1 : params["page"].to_i
+    @follow_status = {}
+    
     @tagfollowers_count = tag_followers.count
     follower_uids = tag_followers[(@page-1)*@per_page,@per_page].collect{|t| t.uid}
     if follower_uids.size > 0
       profile_users = $profile_client.getMultiUserBasicInfos(follower_uids)
       @tagfollowers = follower_uids.collect{ |uid| profile_users[uid] }
+      @user_tracks_counts = $counter_client.getByIds(Settings.counter.user.tracks, follower_uids)
+      @user_followers_counts = $counter_client.getByIds(Settings.counter.user.followers, follower_uids)
+      @user_followings_counts = $counter_client.getByIds(Settings.counter.user.followings, follower_uids)
+      if @current_uid
+        followings = Following.stn(@current_uid).where(uid: @current_uid, following_uid: follower_uids).select('following_uid, is_mutual')
+        followings.each do |follow|
+          @follow_status[follow.following_uid] = [true,follow.is_mutual]
+        end
+      end
     else
       @tagfollowers = []
+      @user_tracks_counts = []
+      @user_followers_counts = []
+      @user_followings_counts = []
     end
     
     @this_title = "#{@tag_name} 喜马拉雅-听我想听"

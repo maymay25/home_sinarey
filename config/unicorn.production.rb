@@ -61,13 +61,14 @@ after_fork do |server, worker|
   defined?(REDIS) and
     REDIS.client.reconnect
 
+  defined?(SidekiqRedis) and
+    SidekiqRedis.client.reconnect
+
   defined?(RICKREDIS) and
     RICKREDIS.client.reconnect
 
   defined?(CMSREDIS) and
     CMSREDIS.client.reconnect
-
-  new_app_logger!(worker.nr)
 
   new_bunny!
 

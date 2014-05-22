@@ -1,0 +1,143 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="<%= static_url "/css/web.css" %>" rel="stylesheet" type="text/css">
+<link href="<%= static_url "/poster/css/poster.css" %>" rel="stylesheet" type="text/css">
+<title>喜马拉雅</title>
+<%== erb :_check_redirect %>
+</head>
+<body>  
+<div class="starsport">
+  <div class="starsportPopupWrap" id="starsportPopup">
+    <div class="starsportPopup">
+      <p> 1.注册喜马拉雅账号，上传头像并且绑定邮箱或者手机</p>
+      <p> 2.录制音频并私信五星体育官方活动账号：“<em><a href="http://www.ximalaya.com/9485923/" target="_blank">谁来解说世界杯</a></em>”告知参赛作品名称<br/><a class="starsportLink" href="/xposter/starsport_help" target="_blank">(点击查看上传录制声音教程)</a></p>
+      <p> 3.官方采集音频后私信回复则参选成功</p>
+      <p> 4.参选成功，声音将展示在作品展示页面上</p>
+      <a class="starsportCloseBtn" id="starsportCloseBtn" title="关闭"></a>
+    </div>
+  </div>
+  <div class="starsportHd">
+    <div class="starsportHdInner">
+      <a class="starsport_logo" href="http://www.ximalaya.com"></a>
+      <span class="starsportHd_slogan">声色世界杯</span>
+
+      <div class="bdsharebuttonbox" style="float:right;margin-top: 12px;width: 150px;"><a href="#" class="bds_more" data-cmd="more"></a><a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a><a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a><a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a><a href="#" class="bds_tqq" data-cmd="tqq" title="分享到腾讯微博"></a><a href="#" class="bds_renren" data-cmd="renren" title="分享到人人网"></a></div>
+      <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"告别平淡！共享激情！喜马拉雅联合五星体育，谁来解说世界杯！赶紧参加！！！","bdMini":"2","bdMiniList":false,"bdPic":"<%= static_url "/poster/startsport.jpg" %>","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+
+    </div>
+  </div>
+  <div class="starsportBanner"><div class="starsportBannerBtnWrap"><a class="starsportBtn" id="starsportBtn">立即报名</a></div></div>
+  <div class="starsportNavBar">
+    <a href="/xposter/starsport">大赛首页</a><a href="javascript:;" class="on">作品展示</a>
+  </div>
+  <div class="starsportBd">
+    <div class="starsportWorks starsportWorks-pos1">
+      <div class="starsportIntro_tit worksTit-pos1">20强名单</div>
+      <div class="starsportWorks_bg1"></div>
+      <div class="starsportWorks_content">
+        <div class="starsportWorksList">
+          <% @tirs.each_with_index do |tir,index| %>
+          <% user = @profile_users[tir.uid] %>
+          <div class="starsportWorksListItem" sound_id="<%= tir.track_id %>">
+            <div class="bd">
+              <img src="<%= picture_url('track', tir.cover_path, '180') %>" src=''>
+              <a class="playBtn"></a>
+              <span class="playcountIcon"><%= @plays_counts[index] %></span>
+              <a class="starsportLikeBtn <%= 'liked' if @is_favorited[tir.track_id] %>"><%= @favorites_counts[index] %></a>
+              <div class="mask"></div>
+            </div>
+            <div class="btm">
+              <div class="soundName"><%= tir.title %></div>
+              <div class="user"><%= user && user.nickname %></div>
+            </div>
+          </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <div class="starsportWorks starsportWorks-pos1">
+      <div class="starsportIntro_tit worksTit-pos1">网络之星</div>
+      <div class="starsportWorks_bg1"></div>
+      <div class="starsportWorks_content">
+        <div class="starsportWorksList">
+          <% @tirs2.each_with_index do |tir,index| %>
+          <% user = @profile_users[tir.uid] %>
+          <div class="starsportWorksListItem" sound_id="<%= tir.track_id %>">
+            <div class="bd">
+              <img src="<%= picture_url('track', tir.cover_path, '180') %>" src=''>
+              <a class="playBtn"></a>
+              <span class="playcountIcon"><%= @plays_counts2[index] %></span>
+              <a class="starsportLikeBtn <%= 'liked' if @is_favorited[tir.track_id] %>"><%= @favorites_counts2[index] %></a>
+              <div class="mask"></div>
+            </div>
+            <div class="btm">
+              <div class="soundName"><%= tir.title %></div>
+              <div class="user"><%= user && user.nickname %></div>
+            </div>
+          </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="starsportFoot">网络文化经营许可证-文网文[2010]150号&nbsp;&nbsp;&nbsp;&nbsp; 北京那里汇聚网络科技有限公司 京ICP备12017437号-1 网络110报警服务<br>
+Copyright © 2011-2012 www.ximalaya.com lnc.ALL Rights Reserved&nbsp;&nbsp;&nbsp;&nbsp; 请使用者仔细阅读喜马拉雅网 使用协议 和 版权声明
+  </div>
+</div>
+
+<%== erb :_script %>
+
+<script>
+window.onload = function(){
+  var starsportBtn = document.getElementById("starsportBtn");
+  var starsportPopup = document.getElementById("starsportPopup");
+  var close=document.getElementById("starsportCloseBtn");
+
+  starsportBtn.onclick = function(){
+  starsportPopup.style.display = "block";
+  }
+  
+  close.onclick = function(){
+  starsportPopup.style.display = "none";
+  }
+  
+}
+
+require(["page/page_base", 'model/sound'], function(Page, SoundModel){
+  var page = new Page();
+  page.init();
+  $(".starsportLikeBtn").on("click", function(){
+    var $el = $(this);
+    var $sound = $el.closest("[sound_id]");
+    var soundId = $sound.attr("sound_id");
+    var soundModel;
+    var num = $el.text();
+    if($el.is(".liked")){
+      soundModel = new SoundModel({
+                  id: soundId,
+                  isFavorited: true
+              });
+              soundModel.unlike(function(){
+                $el.removeClass("liked");
+                $el.text(parseInt(num)-1);
+              });
+    }else{
+      soundModel = new SoundModel({
+                  id: soundId,
+                  isFavorited: false
+              });
+              soundModel.like(function(){
+                $el.addClass("liked");
+                $el.text(parseInt(num)+1);
+              });
+    }
+  });
+})
+
+</script>
+
+</body>
+
+</html>

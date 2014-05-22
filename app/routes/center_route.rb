@@ -14,7 +14,7 @@ class CenterRoute < CenterController
   route :get, :post, '/feed/index'                  do dispatch(:get_more_feeds) end
   route :get, :post, '/feed'                        do dispatch(:get_more_feeds) end
   route :post,       '/feed/no_read'                do dispatch(:get_no_read_feed_num) end
-  route :post,       '/feed/del_feed'               do dispatch(:xhr_del_feed) end
+  route :post,       '/feed/del_feed'               do dispatch(:do_del_feed) end
 
   route :get,        '/center/timeline_list'        do dispatch(:get_timeline_list) end
 

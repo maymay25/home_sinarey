@@ -53,13 +53,24 @@ module Sinarey
         end
       end
 
+
+      def app_logger
+        current_day = Time.now.strftime('%Y-%m-%d')
+        if (@@logger_day||=nil) != current_day
+          @@app_logger = ::Logger.new(Sinarey.root+"/log/#{current_day}.log")
+          @@logger_day = current_day
+        end
+        @@app_logger
+      end
+
       if Sinarey.env=='development'
         def writelog(msg)
           puts msg.to_s
+          app_logger << (msg.to_s + "\n")
         end
       else
         def writelog(msg)
-          $app_logger << (msg.to_s + "\n")
+          app_logger << (msg.to_s + "\n")
         end
       end
 

@@ -1,5 +1,7 @@
 class FollowController < ApplicationController
 
+  include FollowHelper
+
   set :views, ['follow','application']
 
   def dispatch(action,params_options={})
@@ -8,7 +10,7 @@ class FollowController < ApplicationController
   end
 
   #关注 params: following_uid
-  def xhr_follow_user
+  def do_follow_user
 
     halt_400 unless @current_uid
 
@@ -82,6 +84,9 @@ class FollowController < ApplicationController
 
       follow_topic << topic_hash
 
+      follow_list = follow_topic.collect{|h| {uid:h[:uid], nickname:h[:nickname], following_uid:h[:following_uid]} }
+      CoreAsync::FollowingCreatedWorker.perform_async(:following_created,follow_list)
+
       $rabbitmq_channel.fanout(Settings.topic.follow.created, durable: true).publish(Yajl::Encoder.encode(follow_topic), content_type: 'text/plain', persistent: true)
     end
     
@@ -89,7 +94,7 @@ class FollowController < ApplicationController
   end
 
   #取消关注 params: following_uid
-  def xhr_cancel_follow_user
+  def do_cancel_follow_user
 
     halt_400 unless @current_uid
 
@@ -99,7 +104,7 @@ class FollowController < ApplicationController
   end
 
   #移除粉丝 params: uid
-  def xhr_remove_follower
+  def do_remove_follower
     halt_400 unless @current_uid
 
     destroy_follow_relation(params[:uid],@current_uid)
@@ -108,7 +113,7 @@ class FollowController < ApplicationController
   end
 
   #设置用户的分组 params: following_uid, following_group_ids[], is_auto_push
-  def xhr_set_groups
+  def do_set_groups
 
     groups,res = [],{}
     
@@ -194,7 +199,7 @@ class FollowController < ApplicationController
   end
 
   # params: title
-  def xhr_create_following_group
+  def do_create_following_group
 
     halt render_json({res: false, errno: "following_groups.1", msg: print_message(:params_missing, "current uid")}) unless @current_uid
 
@@ -212,7 +217,7 @@ class FollowController < ApplicationController
   end
 
   # params: id, title
-  def xhr_update_following_group
+  def do_update_following_group
 
     halt render_json({res: false, errno: "following_groups.1", msg: print_message(:params_missing, "current uid")}) unless @current_uid
 
@@ -233,7 +238,7 @@ class FollowController < ApplicationController
   end
 
   # params: id
-  def xhr_destroy_following_group
+  def do_destroy_following_group
 
     halt render_json({res: false, error: "unlogin", msg: print_message(:params_missing, "current uid")}) unless @current_uid
 
@@ -256,27 +261,6 @@ class FollowController < ApplicationController
     }), content_type: 'text/plain', persistent: true)
       
     render_json({res: true, msg: print_message(:success)})
-  end
-
-
-  private
-
-  def destroy_follow_relation(uid,uid2)
-    following = Following.stn(uid).where(uid: uid, following_uid: uid2).first
-    if following
-      following.destroy
-
-      $rabbitmq_channel.queue('following.destroyed.rb', durable: true).publish(Yajl::Encoder.encode({
-        id: following.id,
-        uid: following.uid,
-        following_uid: following.following_uid,
-        is_auto_push: following.is_auto_push,
-        nickname: following.nickname,
-        avatar_path: following.avatar_path,
-        following_nickname: following.following_nickname,
-        following_avatar_path: following.following_avatar_path
-      }), content_type: 'text/plain')
-    end
   end
 
 end

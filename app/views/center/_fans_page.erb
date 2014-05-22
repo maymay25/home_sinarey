@@ -38,19 +38,18 @@
                 </div>
 
                 <div class="body_list_wrap">
-                    <% if @followers and @followers.length>0 %>
+
+                    <% ban_users_count = 0 %>
                     <ul class="body_list follow_list">
                         <% @followers.each_with_index do |f,i| %>
                         <%
                             user = @users[f.uid]
-                            if @current_uid
-                                following = Following.stn(@current_uid).where(uid: @current_uid, following_uid: user.uid).select('following_uid, is_mutual').first
-                                is_follow = following.present? 
-                                be_followed = following.present? and following.is_mutual==true
-                            else
-                                is_follow = false
-                                be_followed = false
+                            next if user.nil?
+                            if user.isLoginBan
+                              ban_users_count += 1 
+                              next
                             end
+                            is_follow,be_followed = @follow_status[user.uid]
                         %>
                         <li class="item">
                             <div class="content_wrap">
@@ -91,10 +90,14 @@
                         </li>
                         <% end %>
                     </ul>
+
+                    <% if ban_users_count > 0 %>
+                      <div class="hintTxt2">根据相关法律法规和政策，部分用户已屏蔽。</div>
+                    <% end %>
+                    
                     <div class="pagingBar mgTB20">
                         <%== paginate CustomPagination.new(@followers_count,@page,@per_page), {outer_window: 1, url:"/#{@u.uid}/fans", link_path: @current_uid.present?, max_page: 10, notice: '由于系统限制，你无法查看他的所有粉丝'} %>
                     </div>
-                    <% end %>
                 </div>
             </div>
         </div>
