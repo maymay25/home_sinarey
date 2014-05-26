@@ -11,7 +11,11 @@ module Sinarey
     @core_root = File.open(File.join(@root, '/config/production/core.root')).readline.chomp
   else
     @secret = File.open(@root+'/config/secret').readline.chomp
-    @core_root = File.open(File.join(@root, '/config/core.root')).readline.chomp
+    if RUBY_PLATFORM =~ /mingw/
+      @core_root = File.open(File.join(@root, '/config/core.root')).readline.chomp
+    else
+      @core_root = File.open(File.join(@root, '/config/core.root.test')).readline.chomp
+    end
   end
   @session_key = 'rack.session'
 
