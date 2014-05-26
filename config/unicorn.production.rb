@@ -13,6 +13,9 @@ working_directory "/srv/http/ting/#{app}/current"
 
 pid "/tmp/#{app}.pid"
 
+stderr_path "#{@dir}log/unicorn.stderr.log"
+stdout_path "#{@dir}log/unicorn.stdout.log"
+
 preload_app true
 GC.respond_to?(:copy_on_write_friendly=) and
   GC.copy_on_write_friendly = true

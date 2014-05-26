@@ -33,7 +33,9 @@ gem 'will_paginate', '~> 3.0'
 
 gem 'mysql2'
 
-gem 'passport_thrift_client'
+gem 'passport_thrift_client', '0.1.1'
+
+gem 'profile_thrift_client', '0.0.1'
 
 gem 'core_async', '1.0.0'
 

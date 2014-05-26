@@ -1,6 +1,8 @@
 Encoding.default_internal='utf-8'
 Encoding.default_external='utf-8'
 
+
+
 require File.expand_path('boot', __dir__)
 
 require 'active_record'
