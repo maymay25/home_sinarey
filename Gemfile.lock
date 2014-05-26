@@ -41,6 +41,7 @@ GEM
       mini_portile (= 0.6.0)
     oj (2.9.3)
     passport_thrift_client (0.1.1)
+    profile_thrift_client (0.0.1)
     rack (1.5.2)
     rack-protection (1.5.3)
       rack
@@ -108,7 +109,8 @@ DEPENDENCIES
   idservice_client
   mysql2
   oj
-  passport_thrift_client
+  passport_thrift_client (= 0.1.1)
+  profile_thrift_client (= 0.0.1)
   rake
   redis (= 3.0.6)
   sanitize
