@@ -407,8 +407,6 @@ class AlbumsController < ApplicationController
     removeSound = (params[:removeSound].to_s != "false") ? 1 : 2
     is_off = album.is_public && album.status == 1
 
-    CoreAsync::AlbumOffWorker.perform_async(:album_off, album.id, is_off, removeSound)
-
     topic = album.to_topic_hash.merge(is_feed: true, op_type: removeSound, is_off: is_off)
     $rabbitmq_channel.fanout(Settings.topic.album.destroyed, durable: true).publish(Oj.dump(topic, mode: :compat), content_type: 'text/plain', persistent: true)
     bunny_logger = ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))

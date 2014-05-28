@@ -242,10 +242,6 @@ class TracksController < ApplicationController
 
     $counter_client.incr(Settings.counter.track.plays, track_id, 1) # 同步加播放数
 
-    CoreAsync::TrackPlayedWorker.perform_async(:track_played,track_id,@current_uid)
-
-    CoreAsync::TrackPlayedWorker.perform_async(:incr_album_plays,track_id)
-
     $rabbitmq_channel.fanout(Settings.topic.track.played, durable: true).publish(Oj.dump({
       client: params[:device] || 'web',
       ip: get_client_ip,
@@ -554,7 +550,6 @@ class TracksController < ApplicationController
         track.update_attribute(:is_deleted, true)
 
         is_off = !old_is_deleted && track.is_public && track.status == 1
-        CoreAsync::TrackOffWorker.perform_async(:track_off,track.id,is_off)
         $rabbitmq_channel.fanout(Settings.topic.track.destroyed, durable: true).publish(Oj.dump(track.to_topic_hash.merge(is_feed: true, is_off: is_off), mode: :compat), content_type: 'text/plain', persistent: true)
         bunny_logger ||= ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
         bunny_logger.info "track.destroyed.topic #{track.id} #{track.title} #{track.nickname} #{track.updated_at.strftime('%R')}"

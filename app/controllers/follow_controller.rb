@@ -84,9 +84,6 @@ class FollowController < ApplicationController
 
       follow_topic << topic_hash
 
-      follow_list = follow_topic.collect{|h| {uid:h[:uid], nickname:h[:nickname], following_uid:h[:following_uid]} }
-      CoreAsync::FollowingCreatedWorker.perform_async(:following_created,follow_list)
-
       $rabbitmq_channel.fanout(Settings.topic.follow.created, durable: true).publish(Yajl::Encoder.encode(follow_topic), content_type: 'text/plain', persistent: true)
     end
     
