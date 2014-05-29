@@ -38,7 +38,7 @@ gem 'passport_thrift_client', '0.1.1'
 
 gem 'profile_thrift_client', '0.0.1'
 
-gem 'core_async', '1.0.1'
+gem 'core_async', '1.0.0'
 
 gem 'yajl-ruby', require: 'yajl'
 
