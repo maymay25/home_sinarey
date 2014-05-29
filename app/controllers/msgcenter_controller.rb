@@ -482,7 +482,7 @@ class MsgcenterController < ApplicationController
 
     chat = nil
 
-    cleaned_content = CGI.escapeHTML(cleaned_content)
+    cleaned_content = CGI.escapeHTML(params[:content].to_s)
 
     if [1,2].include?(@current_uid)
       cleaned_content = parse_urls(cleaned_content)
