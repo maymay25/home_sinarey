@@ -34,7 +34,11 @@ class ApplicationController < Sinarey::Application
 
   def set_current_user
     set_current_uid
-    @current_user = $profile_client.queryUserBasicInfo(@current_uid) if @current_uid
+    @current_user = get_profile_user_basic_info(@current_uid) if @current_uid
+
+    if @current_user.nil?
+      @current_uid=nil
+    end
   end
 
   def set_current_uid
@@ -176,8 +180,8 @@ class ApplicationController < Sinarey::Application
 
   def render_json(json)
     json ||= {}
-    content_type :json
-    Oj.dump(json, mode: :compat)
+    content_type :json, charset:'utf-8'
+    oj_dump(json)
   end
 
   def render_to_string(options)

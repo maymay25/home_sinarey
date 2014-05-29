@@ -153,7 +153,7 @@
                                           pic:picture_url('track', feed.wtImagePath, '180'),
                                           url:"#{Settings.home_root}/#{touser.uid}/sound/#{feed.toTid}"
                                       } %>
-                                      <a href="javascript:;" class="bdShareBtn link1" data="<%= Yajl::Encoder.encode(bds_config) %>">分享</a>
+                                      <a href="javascript:;" class="bdShareBtn link1" data="<%= oj_dump(bds_config) %>">分享</a>
                                   </div>
                                 </div>
                                 <div>

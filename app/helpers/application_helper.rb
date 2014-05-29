@@ -1,6 +1,15 @@
 
 module ApplicationHelper
 
+  def get_profile_user_basic_info(uid)
+    this_uid = uid.to_i
+
+    return nil if this_uid < 1
+    user = $profile_client.queryUserBasicInfo(this_uid)
+    return nil if user.nil? or user.uid.zero?
+    user
+  end
+
   def simple_format(string)
     return '' if string.empty?
     string = string.gsub("\n\r","<br />").gsub("\r", "").gsub("\n", "<br />")
@@ -74,14 +83,14 @@ module ApplicationHelper
 
   # 输出url
   def parse_urls(str)
-    i = str.index(/(http:\/\/|www.)[:\w\.\/]+/)
+    i = str.index(/(http:\/\/|www.)[:\w\.\/\?=&]+/)
     while i
       # 取右近 i 的截断字符为 j
-      j = str.index(/[^:\w\.\/]/, i + 1)
+      j = str.index(/[^:\w\.\/\?=&]/, i + 1)
       if j
         html = htmlize_url(str[i...j])
         str[i...j] = html
-        i = str.index(/(http:\/\/|www.)[:\w\.\/]+/, i + html.size)
+        i = str.index(/(http:\/\/|www.)[:\w\.\/=&]+/, i + html.size)
       else
         str[i..-1] = htmlize_url(str[i..-1])
         break
@@ -155,6 +164,14 @@ module ApplicationHelper
     str
   end
 
+  def oj_dump(hash)
+    Oj.dump(hash, mode: :compat)
+  end
+
+  def oj_load(json)
+    Oj.load(json)
+  end
+
   def htmlize_name(name)
     his_home = @current_uid ? "/#/n/#{name}/" : "/n/#{name}/"
     "<a href=\"#{his_home}\" class=\"a_4\" rel=\"nofollow\" card=\"n#{name}\">#{name}</a>"
@@ -169,7 +186,7 @@ module ApplicationHelper
   def decode_json_string(str)
     return nil if str.nil? or str.empty?
     begin
-      Yajl::Parser.parse(str)
+      oj_load(str)
     rescue MultiJson::DecodeError
       nil
     end

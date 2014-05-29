@@ -169,7 +169,7 @@
                         pic:picture_url('track', t["cover_path"], '180'),
                         url:"#{Settings.home_root}/#{t["uid"]}/sound/#{t["trackid"]}"
                     } %>
-                    <a href="javascript:;" class="bdShareBtn link1" data="<%= Yajl::Encoder.encode(bds_config) %>">分享</a>
+                    <a href="javascript:;" class="bdShareBtn link1" data="<%= oj_dump(bds_config) %>">分享</a>
                   </div>
                 </div>
 

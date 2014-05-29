@@ -218,6 +218,7 @@
                             <% users.each_with_index do |user,m| %>
                             
                             <%
+                              next if user.nil?
                               pic_desc = "#{user['personDescribe']}".strip
                               pic_desc = "#{user['personalSignature']}".strip if pic_desc == ""
                               lastest_track = user['lastest_track']

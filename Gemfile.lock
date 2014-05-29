@@ -1,5 +1,6 @@
 GEM
   remote: http://ruby.taobao.org/
+  remote: http://ruby.ximalaya.com/
   specs:
     activemodel (3.2.18)
       activesupport (= 3.2.18)
@@ -22,7 +23,7 @@ GEM
     celluloid (0.15.2)
       timers (~> 1.1.0)
     connection_pool (2.0.0)
-    core_async (1.0.0)
+    core_async (1.0.1)
       sidekiq (~> 3.0)
     daemons (1.1.9)
     eventmachine (1.0.3-x86-mingw32)
@@ -103,7 +104,7 @@ PLATFORMS
 DEPENDENCIES
   activerecord (~> 3.2)
   bunny
-  core_async (= 1.0.0)
+  core_async (= 1.0.1)
   feed (>= 0.0.2)
   hessian2
   idservice_client

@@ -54,7 +54,7 @@ module UploadsHelper
       create_images,image_index = [],0
       images.each do |image|
         begin
-        covers = Yajl::Parser.parse(image)
+        covers = oj_load(image)
         if covers['status'] and covers['status']!=false and covers['data'] and cover=covers['data'].first and cover_track=cover['uploadTrack'] and paths = cover['processResult']
           create_images << [cover_track['id'].to_i, image_index+1, paths["origin"], paths["180n_height"]]
           if image_index.zero?
@@ -176,11 +176,11 @@ module UploadsHelper
         end
       end
       album.save
-      CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,false,request.user_agent,[track_record.id],nil,nil,nil,nil,[sharing_to, share_content],'sound')
+      CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,false,request.user_agent,get_client_ip,[track_record.id],nil,nil,nil,nil,[sharing_to, share_content],'sound')
     else
       if track.is_public && track.status == 1
         CoreAsync::TrackOnWorker.perform_async(:track_on, track.id, true, [sharing_to, share_content], nil)
-        $rabbitmq_channel.fanout(Settings.topic.track.created, durable: true).publish(Yajl::Encoder.encode(track.to_topic_hash.merge(user_agent: request.user_agent, is_feed: true)), content_type: 'text/plain', persistent: true)
+        $rabbitmq_channel.fanout(Settings.topic.track.created, durable: true).publish(oj_dump(track.to_topic_hash.merge(user_agent: request.user_agent, is_feed: true, ip: get_client_ip)), content_type: 'text/plain', persistent: true)
         bunny_logger = ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
         bunny_logger.info "track.created.topic #{track.id} #{track.title} #{track.nickname} #{track.updated_at.strftime('%R')}"
       end
@@ -260,7 +260,7 @@ module UploadsHelper
       create_images,image_index = [],0
       images.each do |image|
         begin
-        covers = Yajl::Parser.parse(image)
+        covers = oj_load(image)
         if covers['status'] and covers['status']!=false and covers['data'] and cover=covers['data'].first and cover_track=cover['uploadTrack'] and paths = cover['processResult']
           create_images << [cover_track['id'].to_i, image_index+1, paths["origin"], paths["180n_height"]]
           if image_index.zero?
@@ -376,7 +376,7 @@ module UploadsHelper
       user_agent: request.user_agent,
       rich_intro: cleaned_rich_intro
     }
-    $rabbitmq_channel.queue('timing.publish.queue', durable: true).publish(Yajl::Encoder.encode(mqMessage), content_type: 'text/plain', persistent: true)
+    $rabbitmq_channel.queue('timing.publish.queue', durable: true).publish(oj_dump(mqMessage), content_type: 'text/plain', persistent: true)
   end
 
   #上传多条声音·添加到指定专辑
@@ -444,7 +444,7 @@ module UploadsHelper
       end
     end
 
-    CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,true,request.user_agent,response[:create],response[:update],response[:move],response[:destroy],nil,[sharing_to, share_content],nil)
+    CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,true,request.user_agent,get_client_ip,response[:create],response[:update],response[:move],response[:destroy],nil,[sharing_to, share_content],nil)
 
     true
   end
@@ -548,7 +548,7 @@ module UploadsHelper
       is_records_desc: is_records_desc,
       rich_intro: cleaned_rich_intro
     }
-    $rabbitmq_channel.queue('timing.publish.queue', durable: true).publish(Yajl::Encoder.encode(mqMessage), content_type: 'text/plain', persistent: true)
+    $rabbitmq_channel.queue('timing.publish.queue', durable: true).publish(oj_dump(mqMessage), content_type: 'text/plain', persistent: true)
 
     true
   end
@@ -601,7 +601,7 @@ module UploadsHelper
           end
         else
           begin
-          covers = Yajl::Parser.parse(image)
+          covers = oj_load(image)
           if covers['status'] and covers['status']!=false and covers['data'] and cover=covers['data'].first and cover_track=cover['uploadTrack'] and paths = cover['processResult']
             create_images << [cover_track['id'].to_i, image_index+1, paths["origin"], paths["180n_height"]]
             if image_index.zero?
@@ -657,7 +657,11 @@ module UploadsHelper
         end
         album.save
       end
-      CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,false,request.user_agent,nil,nil,[[record.id, cache_album_id]],nil,nil,nil,nil)
+
+      #老专辑声音数同步减1
+      $counter_client.decr(Settings.counter.album.tracks, cache_album_id, 1) if cache_album_id && track.status == 1 && track.is_public
+
+      CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,false,request.user_agent,get_client_ip,nil,nil,[[record.id, cache_album_id]],nil,nil,nil,nil)
     elsif cache_album_id
       past_album = Album.stn(@current_uid).where(id: cache_album_id, uid: @current_uid).first
       if past_album
@@ -671,13 +675,13 @@ module UploadsHelper
         end
 
         mqMessage = { id: past_album.id, user_agent: request.user_agent }
-        CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,past_album.id,false,request.user_agent,nil,nil,nil,nil,nil,nil,nil)
-        $rabbitmq_channel.queue('album.updated.dj', durable: true).publish(Yajl::Encoder.encode(mqMessage), content_type: 'text/plain')
+        CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,past_album.id,false,request.user_agent,get_client_ip,nil,nil,nil,nil,nil,nil,nil)
+        $rabbitmq_channel.queue('album.updated.dj', durable: true).publish(oj_dump(mqMessage), content_type: 'text/plain')
       end
     end
 
     if cache_is_public
-      $rabbitmq_channel.fanout(Settings.topic.track.updated, durable: true).publish(Yajl::Encoder.encode(track.to_topic_hash), content_type: 'text/plain', persistent: true)
+      $rabbitmq_channel.fanout(Settings.topic.track.updated, durable: true).publish(oj_dump(track.to_topic_hash.merge(ip: get_client_ip)), content_type: 'text/plain', persistent: true)
       bunny_logger = ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
       bunny_logger.info "track.updated.topic #{track.id} #{track.title} #{track.nickname} #{track.updated_at.strftime('%R')}"
 
@@ -710,7 +714,7 @@ module UploadsHelper
       end
     elsif track.is_public
       CoreAsync::TrackOnWorker.perform_async(:track_on, track.id, false, nil, nil)
-      $rabbitmq_channel.fanout(Settings.topic.track.created, durable: true).publish(Yajl::Encoder.encode(track.to_topic_hash.merge(user_agent: request.headers['user_agent'], is_feed: true)), content_type: 'text/plain', persistent: true)
+      $rabbitmq_channel.fanout(Settings.topic.track.created, durable: true).publish(oj_dump(track.to_topic_hash.merge(user_agent: request.user_agent, is_feed: true, ip: get_client_ip)), content_type: 'text/plain', persistent: true)
       bunny_logger = ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
       bunny_logger.info "track.created.topic #{track.id} #{track.title} #{track.nickname} #{track.updated_at.strftime('%R')}"
     end   
@@ -751,7 +755,7 @@ module UploadsHelper
       end
     end
 
-    CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,false,request.user_agent,response[:create],response[:update],response[:move],response[:destroy],nil,[sharing_to, share_content],nil)
+    CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,false,request.user_agent,get_client_ip,response[:create],response[:update],response[:move],response[:destroy],nil,[sharing_to, share_content],nil)
 
     true
   end
@@ -870,7 +874,7 @@ module UploadsHelper
       $counter_client.incr(Settings.counter.album.tracks, album.id, new_tracks_size)
     end
 
-    CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,false,request.user_agent,create_record_ids,nil,nil,nil,nil,[sharing_to, share_content],nil)
+    CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,false,request.user_agent,get_client_ip,create_record_ids,nil,nil,nil,nil,[sharing_to, share_content],nil)
   end
 
   def delayed_create_album_tracks(datetime,album,delayedzipfiles,is_records_desc,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height,cleaned_rich_intro)
@@ -971,7 +975,7 @@ module UploadsHelper
       is_records_desc: dalbum.is_records_desc,
       rich_intro: cleaned_rich_intro
     }
-    $rabbitmq_channel.queue('timing.publish.queue', durable: true).publish(Yajl::Encoder.encode(mqMessage), content_type: 'text/plain', persistent: true)
+    $rabbitmq_channel.queue('timing.publish.queue', durable: true).publish(oj_dump(mqMessage), content_type: 'text/plain', persistent: true)
 
     REDIS.incr("#{Settings.delayedpublishcount}.#{Time.new.strftime('%F')}")
   end

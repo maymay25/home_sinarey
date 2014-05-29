@@ -207,8 +207,9 @@
                         </div>
                         <div class="fans_content">
                             <% @followers.each do |f| %>
-                            <% u = @users[f.uid]
-                                next if u.nil?
+                            <% 
+                               u = @users[f.uid]
+                               next if u.nil? or u.isLoginBan
                              %>
                             <a href="<%= link_path "/#{u.uid}" %>">
                                 <img card="<%= u.uid %>" src="<%= picture_url('header',u.logoPic,'60') %>" alt="">

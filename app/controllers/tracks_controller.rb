@@ -50,7 +50,7 @@ class TracksController < ApplicationController
       end
     end
 
-    @track_user = $profile_client.queryUserBasicInfo(@tir.track_uid)
+    @track_user = get_profile_user_basic_info(@tir.track_uid)
 
     check_follow_status(@track_user.uid)
 
@@ -84,7 +84,7 @@ class TracksController < ApplicationController
 
     halt_404 if @tir.nil? or (!@tir.is_public && @tir.uid != @current_uid) or @tir.is_deleted or @tir.status != 1
 
-    @u = $profile_client.queryUserBasicInfo(@tir.uid)
+    @u = get_profile_user_basic_info(@tir.uid)
 
     @track_record = TrackRecord.stn(@tir.uid).where(uid: @tir.uid, track_id: @tir.track_id, is_deleted: false).first
     @track_rich = TrackRich.stn(@tir.track_id).where(track_id: @tir.track_id).first
@@ -179,7 +179,7 @@ class TracksController < ApplicationController
       current_ps = PersonalSetting.where(uid: @current_uid).first
       topic_hash[:is_feed] = current_ps.nil? || current_ps.is_feed_favorite==true
 
-      $rabbitmq_channel.fanout(Settings.topic.favorite.created, durable: true).publish(Yajl::Encoder.encode(topic_hash), content_type: 'text/plain', persistent: true)
+      $rabbitmq_channel.fanout(Settings.topic.favorite.created, durable: true).publish(oj_dump(topic_hash), content_type: 'text/plain', persistent: true)
 
       $counter_client.incr(Settings.counter.user.favorites, @current_uid, 1)
 
@@ -207,7 +207,7 @@ class TracksController < ApplicationController
       fav.destroy
 
       # 发已删除topic
-      $rabbitmq_channel.fanout(Settings.topic.favorite.destroyed, durable: true).publish(Yajl::Encoder.encode({
+      $rabbitmq_channel.fanout(Settings.topic.favorite.destroyed, durable: true).publish(oj_dump({
         id: fav.id,
         uid: fav.uid,
         track_id: fav.track_id,
@@ -367,7 +367,7 @@ class TracksController < ApplicationController
 
     CoreAsync::RelayCreatedWorker.perform_async(:relay_created,track.id,content,@current_uid,record.id,sharing_to)
 
-    $rabbitmq_channel.fanout(Settings.topic.track.relay, durable: true).publish(Yajl::Encoder.encode(track.to_topic_hash.merge({
+    $rabbitmq_channel.fanout(Settings.topic.track.relay, durable: true).publish(oj_dump(track.to_topic_hash.merge({
       id: record.id,
       content: content, 
       sharing_to: sharing_to, 
@@ -379,7 +379,8 @@ class TracksController < ApplicationController
       track_record_id: record.id,
       upload_source: 2, 
       human_category_id: @current_user.vCategoryId,
-      created_at: Time.now
+      created_at: Time.now,
+      ip: get_client_ip
     })), content_type: 'text/plain', persistent: true)
 
     halt render_json({ res: true })
@@ -409,7 +410,7 @@ class TracksController < ApplicationController
     end
 
     CoreAsync::TrackOnWorker.perform_async(:track_on, track.id, false, nil, nil)
-    $rabbitmq_channel.fanout(Settings.topic.track.created, durable: true).publish(Yajl::Encoder.encode(track.to_topic_hash.merge(user_agent: request.user_agent, is_feed: true)), content_type: 'text/plain', persistent: true)
+    $rabbitmq_channel.fanout(Settings.topic.track.created, durable: true).publish(oj_dump(track.to_topic_hash.merge(user_agent: request.user_agent, is_feed: true, ip: get_client_ip)), content_type: 'text/plain', persistent: true)
     bunny_logger ||= ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
     bunny_logger.info "track.created.topic #{track.id} #{track.title} #{track.nickname} #{track.updated_at.strftime('%R')}"
 
@@ -475,9 +476,14 @@ class TracksController < ApplicationController
           $counter_client.decr(Settings.counter.album.tracks, old_album_id, 1) if old_album_id
         end
 
-        CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,false,request.user_agent,nil,nil,[[record.id, old_album_id]],nil,nil,nil,nil)
+        CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,false,request.user_agent,get_client_ip,nil,nil,[[record.id, old_album_id]],nil,nil,nil,nil)
       end
     elsif params[:album_title] and !params[:album_title].strip.empty?
+
+      if Settings.is_check_mobile
+        halt render_json({res: false, errors: [['mobile', '请先绑定手机']]}) unless @current_user.mobile
+      end
+
       # 专辑信息脏字
       album_dirts = filter_hash(3, @current_user, get_client_ip, {
         album_title: params[:album_title],
@@ -515,7 +521,10 @@ class TracksController < ApplicationController
         $counter_client.incr(Settings.counter.album.tracks, album.id, 1)
       end
 
-      CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,true,request.user_agent,nil,nil,[[record.id, old_album_id]],nil,nil,nil,nil)
+      #老专辑声音数同步减1
+      $counter_client.decr(Settings.counter.album.tracks, old_album_id, 1) if old_album_id && track.status == 1 && track.is_public
+
+      CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,true,request.user_agent,get_client_ip,nil,nil,[[record.id, old_album_id]],nil,nil,nil,nil)
     end
 
     halt render_json({res: true, id: album.id, title: CGI::escapeHTML(album.title)})
@@ -550,7 +559,7 @@ class TracksController < ApplicationController
         track.update_attribute(:is_deleted, true)
 
         is_off = !old_is_deleted && track.is_public && track.status == 1
-        $rabbitmq_channel.fanout(Settings.topic.track.destroyed, durable: true).publish(Oj.dump(track.to_topic_hash.merge(is_feed: true, is_off: is_off), mode: :compat), content_type: 'text/plain', persistent: true)
+        $rabbitmq_channel.fanout(Settings.topic.track.destroyed, durable: true).publish(Oj.dump(track.to_topic_hash.merge(is_feed: true, is_off: is_off, ip: get_client_ip), mode: :compat), content_type: 'text/plain', persistent: true)
         bunny_logger ||= ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
         bunny_logger.info "track.destroyed.topic #{track.id} #{track.title} #{track.nickname} #{track.updated_at.strftime('%R')}"
       end
@@ -563,8 +572,8 @@ class TracksController < ApplicationController
         $counter_client.decr(Settings.counter.album.tracks, record.album_id, 1)
       end
 
-      $rabbitmq_channel.fanout(Settings.topic.track.relay_destroyed, durable: true).publish(Yajl::Encoder.encode({
-        id: record.id, track_id: record.track_id, uid: record.uid, created_at: record.created_at, is_feed: true
+      $rabbitmq_channel.fanout(Settings.topic.track.relay_destroyed, durable: true).publish(oj_dump({
+        id: record.id, track_id: record.track_id, uid: record.uid, created_at: record.created_at, is_feed: true, ip: get_client_ip
       }), content_type: 'text/plain', persistent: true)
     end
 
@@ -1004,6 +1013,10 @@ class TracksController < ApplicationController
     track = Track.stn(record.track_id).where(id: record.track_id, is_deleted: false).first
     halt_error("声音源数据不存在") unless track
 
+    if Settings.is_check_mobile
+      halt render_json({res: false, errors: [['mobile', '请先绑定手机']]}) unless @current_user.mobile
+    end
+
     #参数整理
     title = params[:title].to_s.chomp
     intro = params[:intro].to_s
@@ -1064,6 +1077,10 @@ class TracksController < ApplicationController
     halt_400 unless @current_uid
     
     halt_403({res: false, errors: [['page', '对不起，您已被暂时禁止发布声音']]}) if @current_user.isLoginBan or is_user_banned?(@current_uid)
+
+    if Settings.is_check_mobile
+      halt render_json({res: false, errors: [['mobile', '请先绑定手机']]}) unless @current_user.mobile
+    end
 
     if params[:codeid] and !@current_user.isVerified
       if Net::HTTP.get(URI(File.join(Settings.check_root, "/validateAction?codeId=#{params[:codeid]}&userCode=#{CGI.escape(params[:validcode] || '')}"))) == 'false'
@@ -1151,7 +1168,7 @@ class TracksController < ApplicationController
     # 检查新上传的声音转码状态
     transcode_res = TRANSCODE_SERVICE.checkTranscodeState(@current_uid, [Hessian2::TypeWrapper.new(:long, fileid)] )
     begin
-      p_transcode_res = Yajl::Parser.parse(transcode_res)
+      p_transcode_res = oj_load(transcode_res)
     rescue
       #
     end
@@ -1213,7 +1230,7 @@ class TracksController < ApplicationController
 
     if new_fileids_size>0 # 检查新上传的声音转码状态
       transcode_res = TRANSCODE_SERVICE.checkTranscodeState(@current_uid, new_fileids.collect{ |id| Hessian2::TypeWrapper.new(:long, id) })
-      p_transcode_res = Yajl::Parser.parse(transcode_res)
+      p_transcode_res = oj_load(transcode_res)
 
       if !p_transcode_res['success']
         writelog('check transcode state failed')
@@ -1223,7 +1240,7 @@ class TracksController < ApplicationController
 
     if image.present?
       begin
-        img_data = Yajl::Parser.parse(image)
+        img_data = oj_load(image)
         if img_data and img_data['status']
           pic = img_data['data'][0]['processResult']
           default_cover_path = pic['origin']
@@ -1305,7 +1322,7 @@ class TracksController < ApplicationController
 
     if new_fileids_size>0
       transcode_res = TRANSCODE_SERVICE.checkTranscodeState(@current_uid, new_fileids.collect{ |id| Hessian2::TypeWrapper.new(:long, id) })
-      p_transcode_res = Yajl::Parser.parse(transcode_res)
+      p_transcode_res = oj_load(transcode_res)
 
       if !p_transcode_res['success']
         writelog('check transcode state failed')

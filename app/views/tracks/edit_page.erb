@@ -118,10 +118,10 @@
                                                 </div>
                                             </div>
                                             <div id="genre_sub" class="selecter selecter-s5">
-                                                <input type="hidden" name="categories_music" value="<%= (@record.music_category.nil? or @record.music_category=="") ? '未设置' : @record.music_category %>"/>
-                                                <div class="selecter-selected" data-value="<%= (@record.music_category.nil? or @record.music_category=="") ? '未设置' : @record.music_category %>">
+                                                <input type="hidden" name="categories_music" value="<%= @record.music_category.blank? ? '未设置' : @record.music_category %>"/>
+                                                <div class="selecter-selected" data-value="<%= @record.music_category.blank? ? '未设置' : @record.music_category %>">
                                                     <span class="selecter-text">
-                                                        <%= (@record.music_category=="") ? '未设置' : @record.music_category %>
+                                                        <%= @record.music_category.blank? ? '未设置' : @record.music_category %>
                                                     </span>
                                                     <em class="selecter-arrow">◆</em>
                                                 </div>

@@ -19,9 +19,9 @@
                         <%= comment['created_at'].strftime('%-m月%-d日 %H:%M') %>
                         <span class="comment_operate">
                         <% if @current_uid == comment['uid'] %>
-                        <a class="comment_delete" href="javascript:;" data-options="<%= Yajl::Encoder.encode({comment_id: comment.id,track_id: @tir['track_id']}) %>">删除</a>
+                        <a class="comment_delete" href="javascript:;" data-options="<%= oj_dump({comment_id: comment.id,track_id: @tir['track_id']}) %>">删除</a>
                         <% end %>
-                        <a href="javascript:;" class="replyBtn" data-options="<%= Yajl::Encoder.encode({c_id: comment.id, c_second: comment.second, c_nickname: comment.nickname}) %>">回复</a>
+                        <a href="javascript:;" class="replyBtn" data-options="<%= oj_dump({c_id: comment.id, c_second: comment.second, c_nickname: comment.nickname}) %>">回复</a>
                         </span>
                     </span>
                 </div>

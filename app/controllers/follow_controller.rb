@@ -14,7 +14,7 @@ class FollowController < ApplicationController
 
     halt_400 unless @current_uid
 
-    following_user = $profile_client.queryUserBasicInfo(params[:following_uid].to_i)
+    following_user = get_profile_user_basic_info(params[:following_uid].to_i)
 
     followings_sum, limit_sum = $counter_client.get(Settings.counter.user.followings, @current_uid).to_i, 2000
     halt render_json({res: false, error: "same", msg: "关注失败，达到关注人数上限(#{limit_sum})"}) if followings_sum >= limit_sum
@@ -84,7 +84,7 @@ class FollowController < ApplicationController
 
       follow_topic << topic_hash
 
-      $rabbitmq_channel.fanout(Settings.topic.follow.created, durable: true).publish(Yajl::Encoder.encode(follow_topic), content_type: 'text/plain', persistent: true)
+      $rabbitmq_channel.fanout(Settings.topic.follow.created, durable: true).publish(oj_dump(follow_topic), content_type: 'text/plain', persistent: true)
     end
     
     render_json({ res: {is_followed: true, is_mutual_followed: is_mutual, be_followed:is_mutual}, msg: print_message(:success) })
@@ -164,7 +164,7 @@ class FollowController < ApplicationController
         end
       end
 
-      $rabbitmq_channel.fanout(Settings.topic.followgroup.changed, durable: true).publish(Yajl::Encoder.encode({
+      $rabbitmq_channel.fanout(Settings.topic.followgroup.changed, durable: true).publish(oj_dump({
         uid: following.uid,
         following_uid: following.following_uid,
         current_following_groups: group_ids,
@@ -250,7 +250,7 @@ class FollowController < ApplicationController
 
     following_uids = Following.stn(@current_uid).where(uid: @current_uid, id: following_ids).select('following_uid').collect{|f| f.following_uid}
 
-    $rabbitmq_channel.fanout(Settings.topic.followgroup.destroyed, durable: true).publish(Yajl::Encoder.encode({
+    $rabbitmq_channel.fanout(Settings.topic.followgroup.destroyed, durable: true).publish(oj_dump({
       uid: @current_uid,
       group_id: fg.id,
       following_uids: following_uids,

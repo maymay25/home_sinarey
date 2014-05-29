@@ -120,7 +120,7 @@
                                             pic:picture_url('track', feed.wtImagePath, '180'),
                                             url:"#{Settings.home_root}/#{feed.uid}/sound/#{feed.toTid}"
                                         } %>
-                                        <a href="javascript:;" class="bdShareBtn link1" data="<%= Yajl::Encoder.encode(bds_config) %>">分享</a>
+                                        <a href="javascript:;" class="bdShareBtn link1" data="<%= oj_dump(bds_config) %>">分享</a>
                                     </div>
                                 </div>
 
@@ -410,7 +410,7 @@
                                             pic:picture_url('track', feed.wtImagePath, '180'),
                                             url:"#{Settings.home_root}//#{feed.toUid}/sound/#{feed.toTid}"
                                         } %>
-                                        <a href="javascript:;" class="bdShareBtn link1" data="<%= Yajl::Encoder.encode(bds_config) %>">分享</a>
+                                        <a href="javascript:;" class="bdShareBtn link1" data="<%= oj_dump(bds_config) %>">分享</a>
                                     </div>
                                 </div>
                                 <div>

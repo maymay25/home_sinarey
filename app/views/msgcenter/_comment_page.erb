@@ -112,9 +112,9 @@
                                     <span class="left"><%= parse_time_until_now(msg.created_at) %></span>
                                     <span class="right">
                                         <% if msg.uid != @current_uid %>
-                                        <a href="javascript:;" class="replyBtn" data-options="<%= Yajl::Encoder.encode({c_id: msg.comment_id, c_second:msg.second, c_nickname: msg.nickname, t_id: msg.track_id}) %>">回复</a>
+                                        <a href="javascript:;" class="replyBtn" data-options="<%= oj_dump({c_id: msg.comment_id, c_second:msg.second, c_nickname: msg.nickname, t_id: msg.track_id}) %>">回复</a>
                                         <% end %>
-                                        <a href="javascript:;" class="destroyBtn" data-options="<%= Yajl::Encoder.encode({c_id: msg.comment_id,t_id: msg.track_id}) %>">删除评论</a>
+                                        <a href="javascript:;" class="destroyBtn" data-options="<%= oj_dump({c_id: msg.comment_id,t_id: msg.track_id}) %>">删除评论</a>
                                     </span>
                                 </div>
                                 <div class="reply_box_entry"></div>

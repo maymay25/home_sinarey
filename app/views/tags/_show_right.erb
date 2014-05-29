@@ -11,11 +11,17 @@ right_tagfollowers = follower_uids.collect{ |uid| profile_users[uid] }
 
 
 <% if right_tagfollowers.count > 0 %>
+
 <% 
-  uids = right_tagfollowers.map{|f| f.uid}
+  uids = right_tagfollowers.map{|user| user.uid}
+  @follow_status = {}
   if uids.size > 0
     @tracks_counts = $counter_client.getByIds(Settings.counter.user.tracks, uids)
     @followers_counts = $counter_client.getByIds(Settings.counter.user.followers, uids)
+    follows = Following.stn(@current_uid).where(uid: @current_uid, following_uid: uids).select('following_uid, is_mutual')
+    follows.each do |f|
+      @follow_status[user.following_uid] = [true,user.is_mutual]
+    end
   else
     @tracks_counts, @followers_counts = [], []
   end
@@ -27,34 +33,29 @@ right_tagfollowers = follower_uids.collect{ |uid| profile_users[uid] }
     <h2 class="title">这些人添加了该标签</h2>
   </div>
   <ul class="personPanelBar3List">
-    <% right_tagfollowers.each_with_index do |f, i| %>
+    <% right_tagfollowers.each_with_index do |user, i| %>
     <% 
-    if @current_uid
-      following = Following.stn(@current_uid).where(uid: @current_uid, following_uid: f.uid).select('following_uid, is_mutual').first
-      is_follow = following.present?
-      be_followed = following && following.is_mutual
-    else
-      is_follow = false
-      be_followed = false
-    end
+      next if user.nil?
+      next if user.isLoginBan
+      is_follow,be_followed =  @follow_status[user.uid]
     %>
 
     <li class="listItem">
       <div class="personPanelBar3">
         <div class="cl">
           <div class="left">
-            <a class="userface" href="<%= link_his_path(f.uid) %>" card="<%= f.uid %>">
-              <img alt="<%= f.nickname %>" src="<%= picture_url('header', f.logoPic, '60') %>" data-options="defaultImg:person_60"><span></span>
+            <a class="userface" href="<%= link_his_path(user.uid) %>" card="<%= user.uid %>">
+              <img alt="<%= user.nickname %>" src="<%= picture_url('header', user.logoPic, '60') %>" data-options="defaultImg:person_60"><span></span>
             </a>
           </div>
           <div class="middle">
             <div class="title">
-              <a href="<%= link_his_path(f.uid) %>" title="<%= f.nickname %>"><%= f.nickname %></a>
+              <a href="<%= link_his_path(user.uid) %>" title="<%= user.nickname %>"><%= user.nickname %></a>
             </div>
           </div>
           <div class="right">
-              <% if @current_uid != f.uid %>
-              <a class="addBtn2 small <%= "already" if is_follow %> <%= "both" if be_followed %>" data-options="<%= {uid:f.uid,is_follow:is_follow,nickname:f.nickname}.to_json[1..-2] %>" href="javascript:;">
+              <% if @current_uid != user.uid %>
+              <a class="addBtn2 small <%= "already" if is_follow %> <%= "both" if be_followed %>" data-options="<%= {uid:user.uid,is_follow:is_follow,nickname:user.nickname}.to_json[1..-2] %>" href="javascript:;">
                   <span class="default"><%= (is_follow && be_followed) ? "相互" : is_follow ? "已" : "" %>关注</span>
                   <span class="hover">取消</span>
               </a>

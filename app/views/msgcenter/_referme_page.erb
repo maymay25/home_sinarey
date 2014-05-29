@@ -66,7 +66,7 @@
                                         <span class="left"><%= parse_time_until_now(msg.created_at) %></span>
                                         <span class="right">
                                             <% if has_content %>
-                                            <a href="javascript:;" class="replyBtn" data-options="<%= Yajl::Encoder.encode({c_id: msg.comment_id, c_second: msg.second, c_nickname: msg.nickname, t_id: msg.track_id}) %>">回复</a>
+                                            <a href="javascript:;" class="replyBtn" data-options="<%= oj_dump({c_id: msg.comment_id, c_second: msg.second, c_nickname: msg.nickname, t_id: msg.track_id}) %>">回复</a>
                                             <% end %>
                                         </span>
                                     </div>
@@ -98,7 +98,7 @@
                                     </div>
                                     <div class="detail_bottom">
                                         <span class="left"><%= parse_time_until_now(msg.created_at) %></span>
-                                        <span class="right"><a href="javascript:;" class="replyBtn" data-options="<%=  Yajl::Encoder.encode({c_id: msg.comment_id, c_second: msg.second, c_nickname: msg.nickname, t_id: msg.track_id}) %>">回复</a></span>
+                                        <span class="right"><a href="javascript:;" class="replyBtn" data-options="<%=  oj_dump({c_id: msg.comment_id, c_second: msg.second, c_nickname: msg.nickname, t_id: msg.track_id}) %>">回复</a></span>
                                     </div>
                                     <div class="reply_box_entry"></div>
                                 </div>

@@ -66,7 +66,12 @@
                           next if user.nil?
                           is_follow,be_followed = @follow_status[user.uid]
                           group_ids = @follow_group_ids_hash[f.id] || []
-                          groups = f.is_auto_push ? ['必听组'] : []
+                          if f.is_auto_push
+                            group_ids << '-1'
+                            groups = ['必听组']
+                          else
+                            groups = []
+                          end  
                           group_ids.each do |group_id|
                             fg = @fgs[group_id]
                             next if fg.nil?

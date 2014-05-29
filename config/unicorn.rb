@@ -9,12 +9,14 @@ listen 9059, tcp_nopush: true
 
 timeout 30
 
-working_directory "/srv/#{app}"
+app_root = File.expand_path('../..',__FILE__)
+
+working_directory app_root
 
 pid "/tmp/#{app}.pid"
 
-stderr_path "#{@dir}log/unicorn.stderr.log"
-stdout_path "#{@dir}log/unicorn.stdout.log"
+stderr_path "#{@dir}log/unicorn.#{app}.log"
+stdout_path "#{@dir}log/unicorn.#{app}.log"
 
 preload_app true
 GC.respond_to?(:copy_on_write_friendly=) and

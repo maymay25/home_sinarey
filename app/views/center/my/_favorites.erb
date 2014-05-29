@@ -52,11 +52,16 @@
                 </div>
                 
                 <div class="body_list_wrap">
-                    <% if @favorites && @favorites.length>0 %>
+                    <% ban_users_count = 0 %>
                     <ul class="body_list feedList" sound_ids="<%= @favorites.collect{|r|r.track_id}.join(",") %>">
                         <% @favorites.each_with_index do |f,i| %>
                         <%
                           user = @users[f.track_uid]
+                          next if user.nil?
+                          if user.isLoginBan
+                            ban_users_count += 1
+                            next
+                          end
                         %>
                         <li class="listItem" sound_id="<%= f.track_id %>">
                             <div class="feed">
@@ -155,7 +160,7 @@
                                                     pic:picture_url('track', f.cover_path, '180'),
                                                     url:"#{Settings.home_root}/#{f.track_uid}/sound/#{f.track_id}"
                                                 } %>
-                                                <a href="javascript:;" class="bdShareBtn link1" data="<%= Yajl::Encoder.encode(bds_config) %>">分享</a>
+                                                <a href="javascript:;" class="bdShareBtn link1" data="<%= oj_dump(bds_config) %>">分享</a>
                                             </div>
                                         </div>
                                         <div>
@@ -170,11 +175,14 @@
                         <% end %>
                     </ul>
 
+                    <% if ban_users_count > 0 %>
+                      <div class="hintTxt2">根据相关法律法规和政策，部分用户已屏蔽。</div>
+                    <% end %>
+
                     <div class="pagingBar mgTB20">
                         <%== paginate CustomPagination.new(@favorites_count,@page,@per_page), {outer_window: 1, url:"/#{@current_uid}/favorites", link_path: @current_uid.present?} %>
                     </div>
                     
-                    <% end %>
                 </div>
             </div>
         </div>

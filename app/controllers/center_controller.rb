@@ -21,9 +21,9 @@ class CenterController < ApplicationController
       users = $profile_client.getProfileByNickname(params[:nickname])
       halt_404 if users.empty?
       uid = users.first.uid
-      @u = $profile_client.queryUserBasicInfo(uid)
+      @u = get_profile_user_basic_info(uid)
     else
-      @u = $profile_client.queryUserBasicInfo(params[:uid].to_i)
+      @u = get_profile_user_basic_info(params[:uid].to_i)
     end
 
     halt_404 if @u.nil? or @u.isLoginBan
@@ -103,7 +103,7 @@ class CenterController < ApplicationController
       hash[:pageSize] = @feeds.pageSize
       hash[:currentSize] = @feeds.currentSize
       hash[:totalSize] = @feeds.totalSize
-      @feeds_json = Yajl::Encoder.encode(hash)
+      @feeds_json = oj_dump(hash)
     end
 
     set_my_counts
@@ -207,7 +207,7 @@ class CenterController < ApplicationController
       hash[:pageSize] = @feeds.pageSize
       hash[:currentSize] = @feeds.currentSize
       hash[:totalSize] = @feeds.totalSize
-      @feeds_json = Yajl::Encoder.encode(hash)
+      @feeds_json = oj_dump(hash)
     end
 
     halt erb_js(:'my/more_feeds_js')
@@ -252,7 +252,7 @@ class CenterController < ApplicationController
       halt_404
     end
 
-    @u = $profile_client.queryUserBasicInfo(params[:uid].to_i)
+    @u = get_profile_user_basic_info(params[:uid].to_i)
     halt_404 if @u.nil? or @u.isLoginBan
 
     init_his_sound_page
@@ -271,7 +271,7 @@ class CenterController < ApplicationController
       halt_404
     end
 
-    @u = $profile_client.queryUserBasicInfo(params[:uid].to_i)
+    @u = get_profile_user_basic_info(params[:uid].to_i)
     halt_404 if @u.nil? or @u.isLoginBan
     
     init_his_album_page
@@ -290,7 +290,7 @@ class CenterController < ApplicationController
       halt_404
     end
 
-    @u = $profile_client.queryUserBasicInfo(params[:uid].to_i)
+    @u = get_profile_user_basic_info(params[:uid].to_i)
     halt_404 if @u.nil? or @u.isLoginBan
 
     init_his_follow_page
@@ -309,7 +309,7 @@ class CenterController < ApplicationController
       halt_404
     end
 
-    @u = $profile_client.queryUserBasicInfo(params[:uid].to_i)
+    @u = get_profile_user_basic_info(params[:uid].to_i)
     halt_404 if @u.nil? or @u.isLoginBan
 
     init_his_fans_page
@@ -328,7 +328,7 @@ class CenterController < ApplicationController
       halt_404
     end
 
-    @u = $profile_client.queryUserBasicInfo(params[:uid].to_i)
+    @u = get_profile_user_basic_info(params[:uid].to_i)
     halt_404 if @u.nil? or @u.isLoginBan
 
     init_his_favorites_page
@@ -460,7 +460,7 @@ class CenterController < ApplicationController
       halt render_json({}) if users.empty? 
       user = users.first
     else
-      user = $profile_client.queryUserBasicInfo(params[:uid].to_i)
+      user = get_profile_user_basic_info(params[:uid].to_i)
     end
 
     halt render_json({}) if user.nil? or user.isLoginBan
@@ -595,7 +595,7 @@ class CenterController < ApplicationController
     validate = report.report_id and report.uid and report.content_title and report.content_type and (report.track_id or report.album_id)
     if validate and report.save
       # 举报的人收到一条系统通知
-      xima = $profile_client.queryUserBasicInfo(1)
+      xima = get_profile_user_basic_info(1)
       Inbox.create( uid: xima.uid,
             nickname: xima.nickname,
             avatar_path: xima.logoPic,

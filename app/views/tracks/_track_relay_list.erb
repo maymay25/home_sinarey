@@ -26,7 +26,7 @@ commentList">
         <div class="comment_bottom">
           <span class="comment_createtime"><%= relay.created_at.strftime('%-m月%-d日 %H:%M') %></span>
           <% if relay.comment_id %>
-          <a href="javascript:;" class="replyBtn" data-options="<%= Yajl::Encoder.encode({c_id: relay.comment_id, c_second: '', c_nickname: relay.nickname}) %>">回复</a>
+          <a href="javascript:;" class="replyBtn" data-options="<%= oj_dump({c_id: relay.comment_id, c_second: '', c_nickname: relay.nickname}) %>">回复</a>
           <% end %>
         </div>
         <div class="reply_box_entry"></div>

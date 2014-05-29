@@ -124,9 +124,9 @@ class DelayedUploadTasksController < ApplicationController
       end
     end
 
-    xima = $profile_client.queryUserBasicInfo(1)
+    xima = get_profile_user_basic_info(1)
 
-    author = $profile_client.queryUserBasicInfo(uid)
+    author = get_profile_user_basic_info(uid)
     Inbox.create( uid: xima.uid,
           nickname: xima.nickname,
           avatar_path: xima.logoPic,

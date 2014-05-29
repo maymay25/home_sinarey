@@ -18,7 +18,7 @@
             <h2 class="title">我关注的人(<%= all_followings.count %>)</h2>
         </div>
         <div class="fans_content">
-            <% following_uids.each do |uid| ; ; u = followings_profile[uid] %>
+            <% following_uids.each do |uid| ; u = followings_profile[uid] ; next if u.nil? or u.isLoginBan %>
             <a href="<%= link_his_path(u.uid) %>" title="<%= u.nickname %>">
                 <img card="<%= u.uid %>" alt="<%= u.nickname %>" src="<%= picture_url('header', u.logoPic, '60')  %>" data-options="defaultImg:person_60">
             </a>
@@ -41,7 +41,7 @@
             <h2 class="title">我的粉丝(<%= all_followers.count %>)</h2>
         </div>
         <div class="fans_content">
-            <% follower_uids.each do |uid| ; ; u = followers_profile[uid] %>
+            <% follower_uids.each do |uid| ; u = followers_profile[uid] ; next if u.nil? or u.isLoginBan %>
             <a href="<%= link_his_path(u.uid) %>" title="<%= u.nickname %>">
                 <img card="<%= u.uid %>" alt="<%= u.nickname %>" src="<%= picture_url('header', u.logoPic, '60')  %>" data-options="defaultImg:person_60">
             </a>

@@ -27,7 +27,7 @@ class AlbumsController < ApplicationController
       halt_404 if !is_own
     end
 
-    @u = $profile_client.queryUserBasicInfo(@album.uid)
+    @u = get_profile_user_basic_info(@album.uid)
     
     setrich = TrackSetRich.stn(@album.id).where(track_set_id: @album.id).select('rich_intro').first
     @rich_intro = setrich ? clean_html(setrich.rich_intro) : clean_html(@album.intro)
@@ -152,6 +152,10 @@ class AlbumsController < ApplicationController
 
     halt_403({res: false, errors: [['page', '对不起，您已被暂时禁止发布专辑']]}) if @current_user.isLoginBan or is_user_banned?(@current_uid)
 
+    if Settings.is_check_mobile
+      halt render_json({res: false, errors: [['mobile', '请先绑定手机']]}) unless @current_user.mobile
+    end
+
     if params[:codeid] and !@current_user.isVerified
       if Net::HTTP.get(URI(File.join(Settings.check_root, "/validateAction?codeId=#{params[:codeid]}&userCode=#{CGI.escape(params[:validcode] || '')}"))) == 'false'
         halt render_json({res: false, errors: [['page', '验证码不匹配']]})
@@ -186,7 +190,7 @@ class AlbumsController < ApplicationController
 
     if new_fileids_size>0 # 检查新上传的声音转码状态
       transcode_res = TRANSCODE_SERVICE.checkTranscodeState(@current_uid, new_fileids.collect{ |id| Hessian2::TypeWrapper.new(:long, id) })
-      p_transcode_res = Yajl::Parser.parse(transcode_res)
+      p_transcode_res = oj_load(transcode_res)
       if !p_transcode_res['success']
         writelog('check transcode state failed')
         halt_error('声音转码失败')
@@ -207,7 +211,7 @@ class AlbumsController < ApplicationController
 
     if image.present?
       begin
-        img_data = Yajl::Parser.parse(image)
+        img_data = oj_load(image)
         if img_data and img_data['status']
           pic = img_data['data'][0]['processResult']
           default_cover_path = pic['origin']
@@ -340,7 +344,7 @@ class AlbumsController < ApplicationController
 
     if image.present?
       begin
-      img_data = Yajl::Parser.parse(image)
+      img_data = oj_load(image)
       if img_data and img_data['status']
         pic = img_data['data'][0]['processResult']
         default_cover_path = pic['origin']
@@ -354,7 +358,7 @@ class AlbumsController < ApplicationController
 
     if new_fileids_size>0
       transcode_res = TRANSCODE_SERVICE.checkTranscodeState(@current_uid, new_fileids.collect{ |id| Hessian2::TypeWrapper.new(:long, id) })
-      p_transcode_res = Yajl::Parser.parse(transcode_res)
+      p_transcode_res = oj_load(transcode_res)
 
       if !p_transcode_res['success']
         writelog('check transcode state failed')
@@ -407,7 +411,7 @@ class AlbumsController < ApplicationController
     removeSound = (params[:removeSound].to_s != "false") ? 1 : 2
     is_off = album.is_public && album.status == 1
 
-    topic = album.to_topic_hash.merge(is_feed: true, op_type: removeSound, is_off: is_off)
+    topic = album.to_topic_hash.merge(is_feed: true, op_type: removeSound, is_off: is_off, ip: get_client_ip)
     $rabbitmq_channel.fanout(Settings.topic.album.destroyed, durable: true).publish(Oj.dump(topic, mode: :compat), content_type: 'text/plain', persistent: true)
     bunny_logger = ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
     bunny_logger.info "album.destroyed.topic #{album.id} #{album.title} #{album.nickname} #{album.updated_at.strftime('%R')}"

@@ -50,9 +50,15 @@
                 </style>
 
                 <div class="download_operate">
-                    <a target="_blank" href="<%= File.join(Settings.home_root, '/down?tag=web&client=ios') %>" class="download_iphoneBtn2"></a>
-                    <a target="_blank" href="<%= File.join(Settings.home_root, '/down?tag=web&client=android') %>" class="download_androidBtn2"></a>
-                    <a target="_blank" href="<%= File.join(Settings.home_root, '/down?tag=web&client=wp') %>" class="download_wpBtn2"></a>
+                    <a class="download_iphoneBtn2" target="_blank" href="<%= File.join(Settings.home_root, '/down?tag=web&client=ios') %>"></a>
+                    
+                    <% case params[:tag] when 'and-sem-baidu' %>
+                    <a class="download_androidBtn2" target="_blank" href="http://s1.xmcdn.com/apk/ximalaya-and-sem-baidu-2.0.69.3.apk-zipaligned.apk"></a>
+                    <% else %>
+                    <a class="download_androidBtn2" target="_blank" href="<%= File.join(Settings.home_root, '/down?tag=web&client=android') %>"></a>
+                    <% end %>
+                    
+                    <a class="download_wpBtn2" target="_blank" href="<%= File.join(Settings.home_root, '/down?tag=web&client=wp') %>"></a>
                     <a href="<%= REDIS.get('app_url.ximalaya_web') || Settings.app_url.ximalaya_web %>" style="position: absolute;right: -126px;top: 22px;"  name="喜马拉雅" onclick="return wdapi_apkdl_m(this, 'source');" title="通过豌豆荚下载">
                         <img alt="豌豆荚一键安装" src="http://img.wdjimg.com/logo/oneclick-3.png"/>
                     </a>
@@ -116,7 +122,13 @@
 
         <div class="download_btm">
             <a class="download_iphoneBtn2" target="_blank" href="<%= File.join(Settings.home_root, '/down?tag=web&client=ios') %>"></a>
+            
+            <% case params[:tag] when 'and-sem-baidu' %>
+            <a class="download_androidBtn2" target="_blank" href="http://s1.xmcdn.com/apk/ximalaya-and-sem-baidu-2.0.69.3.apk-zipaligned.apk"></a>
+            <% else %>
             <a class="download_androidBtn2" target="_blank" href="<%= File.join(Settings.home_root, '/down?tag=web&client=android') %>"></a>
+            <% end %>
+
             <a class="download_wpBtn2" target="_blank" href="<%= File.join(Settings.home_root, '/down?tag=web&client=wp') %>"></a>
             <div class="download_codebtm"><img src="<%= static_url '/css/img/code.png' %>"></div> 
         </div>

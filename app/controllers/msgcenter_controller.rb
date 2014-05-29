@@ -17,7 +17,7 @@ class MsgcenterController < ApplicationController
     set_no_cache_header
     redirect_to_login('/#/msgcenter/notice') unless @current_uid
 
-    xima = $profile_client.queryUserBasicInfo(1)
+    xima = get_profile_user_basic_info(1)
 
     # 上次收到的最后一条公告 喜马发的
     sysmsg_count = Inbox.stn(@current_uid).where(to_uid: @current_uid, message_type: 5, uid: xima.uid).count
@@ -195,7 +195,7 @@ class MsgcenterController < ApplicationController
 
     track_ps = PersonalSetting.where(uid: tir.uid).first
     if track_ps
-      u = $profile_client.queryUserBasicInfo(tir.uid)
+      u = get_profile_user_basic_info(tir.uid)
       res = {res: false, message: "", msg: '由于对方的隐私设置，发送失败'}
       case track_ps.allow_comment
       when 2
@@ -322,9 +322,9 @@ class MsgcenterController < ApplicationController
 
     topic_hash[:is_feed] = current_ps.nil? || current_ps.is_feed_comment==true
 
-    $rabbitmq_channel.fanout(Settings.topic.comment.created, durable: true).publish(Yajl::Encoder.encode(topic_hash), content_type: 'text/plain', persistent: true)
+    $rabbitmq_channel.fanout(Settings.topic.comment.created, durable: true).publish(oj_dump(topic_hash), content_type: 'text/plain', persistent: true)
 
-    CoreAsync::CommentCreatedWorker.perform_async(:comment_created,comment.id,comment.track_id,params[:parent_id],master_comment_id,params[:sharing_to],Settings.home_root)
+    CoreAsync::CommentCreatedWorker.perform_async(:comment_created,comment.id,comment.track_id,params[:parent_id],master_comment_id,get_client_ip,params[:sharing_to],Settings.home_root)
 
     # 同步分享确认, 不再提示
     unless params[:no_more_alert].nil? || params[:no_more_alert].empty?
@@ -362,7 +362,7 @@ class MsgcenterController < ApplicationController
       comment.save
 
       # 发已删除topic
-      $rabbitmq_channel.fanout(Settings.topic.comment.destroyed, durable: true).publish(Yajl::Encoder.encode({
+      $rabbitmq_channel.fanout(Settings.topic.comment.destroyed, durable: true).publish(oj_dump({
         id: comment.id,
         uid: comment.uid,
         track_id: comment.track_id,
@@ -427,7 +427,7 @@ class MsgcenterController < ApplicationController
 
     redirect_to_login('/#/msgcenter/letter') unless @current_uid
 
-    @with_user = $profile_client.queryUserBasicInfo(params[:uid].to_i)
+    @with_user = get_profile_user_basic_info(params[:uid].to_i)
     halt_404 unless @with_user
 
     receive_notice if params[:uid].to_i == 2
@@ -481,13 +481,20 @@ class MsgcenterController < ApplicationController
     end
 
     chat = nil
+
+    cleaned_content = CGI.escapeHTML(cleaned_content)
+
+    if [1,2].include?(@current_uid)
+      cleaned_content = parse_urls(cleaned_content)
+    end
+    
     ActiveRecord::Base.transaction do 
       # 我的联系人他
       linkman = Linkman.stn(@current_uid).where(uid: @current_uid, linkman_uid: to_profile.uid).first
       now = Time.new
       if linkman
         linkman.last_chat_at = now
-        linkman.last_chat_content = params[:content]
+        linkman.last_chat_content = cleaned_content
         linkman.save
       else
         Linkman.create(uid: @current_uid, 
@@ -498,7 +505,7 @@ class MsgcenterController < ApplicationController
           linkman_avatar_path: to_profile.logoPic,
           no_read_count: 0,
           last_chat_at: now,
-          last_chat_content: params[:content]
+          last_chat_content: cleaned_content
         )
       end
 
@@ -507,7 +514,7 @@ class MsgcenterController < ApplicationController
       if to_linkman
         to_linkman.no_read_count = to_linkman.no_read_count + 1
         to_linkman.last_chat_at = now
-        to_linkman.last_chat_content = params[:content]
+        to_linkman.last_chat_content = cleaned_content
         to_linkman.save
       else
         Linkman.create(
@@ -519,7 +526,7 @@ class MsgcenterController < ApplicationController
           linkman_avatar_path: @current_user.logoPic,
           no_read_count: 1,
           last_chat_at: now,
-          last_chat_content: params[:content]
+          last_chat_content: cleaned_content
         )
       end
 
@@ -531,7 +538,7 @@ class MsgcenterController < ApplicationController
         with_nickname: to_profile.nickname,
         with_avatar_path: to_profile.logoPic,
         is_in: false,
-        content: params[:content],
+        content: cleaned_content,
         upload_source: 2
       )
 
@@ -543,14 +550,14 @@ class MsgcenterController < ApplicationController
         with_nickname: @current_user.nickname,
         with_avatar_path: @current_user.logoPic,
         is_in: true,
-        content: params[:content],
+        content: cleaned_content,
         upload_source: 2
       )
     end
 
     CoreAsync::MessageCreatedWorker.perform_async(:message_created,chat.uid,chat.id)
 
-    chat.content = puts_face(params[:content])
+    chat.content = puts_face(cleaned_content)
     render_json({res: chat, msg: print_message(:success)})
   end
 
@@ -638,7 +645,7 @@ class MsgcenterController < ApplicationController
   
   def receive_notice
     # 收公告 拉雅发的
-    laya = $profile_client.queryUserBasicInfo(2)
+    laya = get_profile_user_basic_info(2)
 
     last_receive = ReceiveLaya.where(uid: @current_uid).first
 
@@ -691,7 +698,7 @@ class MsgcenterController < ApplicationController
   end
 
   def check_my_laya(new_annos_count = 0)
-    laya = $profile_client.queryUserBasicInfo(2)
+    laya = get_profile_user_basic_info(2)
     linkman = Linkman.stn(@current_uid).where(uid: @current_uid, linkman_uid: 2).first
     now = Time.new
     if linkman 
