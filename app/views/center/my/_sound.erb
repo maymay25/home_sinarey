@@ -75,7 +75,7 @@
                 </div>
 
                 <div class="personal_list_head">
-                    <div class="left"><%= (params[:q] and params[:q]!="") ? "找到#{@track_records_count}个符合条件的声音" : "共有#{@track_records_count}个声音" %></div>
+                    <div class="left"><%= params[:q].present? ? "找到#{@track_records_count}个符合条件的声音" : "共有#{@track_records_count}个声音" %></div>
                     <div class="personal_list_head_operate"><a class="uploadBtn2" href="/upload"><span>上传录制</span></a></div>
                     <div class="searchPanel2 right">                        
                         <input class="search_input" type="text" value="<%= params[:q] %>" name="" autocomplete="off" placeholder="搜索声音">                      
@@ -84,29 +84,32 @@
                 </div>
                 
                 
-                <% if @track_records.count > 0 %>
+                <% if @track_records_count > 0 %>
                 <div class="body_list_wrap">
-                    <ul class="body_list" sound_ids="<%= @track_records.collect{|r|r.track_id}.join(",") %>">
+                    <ul class="body_list" sound_ids="<%= @tracks.each_value.collect{|t|t.id}.join(",") %>">
                         <% @track_records.each_with_index do |r,i| %>
                         <%
-                          user = @users[r.track_uid]
-                          is_favorited = @is_favorited[r.track_id]
+                          t = @tracks[r.track_id]
+                          next if t.nil? or t.is_deleted
+                          album = @albums[t.album_id]
+                          user = @users[t.uid]
+                          is_favorited = @is_favorited[t.id]
                         %>
-                        <li class="item" sound_id="<%= r.track_id %>">
+                        <li class="item" sound_id="<%= t.id %>">
                             <div class="content_wrap">
                                 <div class="sound">
 
                                     <div class="sound_unexpandBox">
                                         <div class="sound_titlebar">
                                             <div class="sound_titlebar_title">
-                                                <a href="<%= link_path "/#{r.track_uid}/sound/#{r.track_id}" %>" class="sound_title">
-                                                    <%= r.title %>
-                                                    <% if !r.is_public and r.track_uid == @current_uid %>
-                                                    <i class="privacyIcon" record_id="<%= r.id %>" title="私密声音"></i>
+                                                <a href="<%= link_path "/#{t.uid}/sound/#{t.id}" %>" class="sound_title">
+                                                    <%= t.title %>
+                                                    <% if !t.is_public and t.uid == @current_uid %>
+                                                    <i class="privacyIcon" record_id="<%= t.id %>" title="私密声音"></i>
                                                     <% end %>
                                                 </a>
                                                 <span class="from">
-                                                <% if r.album_id %>&nbsp;&nbsp;来自<a href="<%= link_path "/#{r.track_uid}/album/#{r.album_id}" %>">《<%= r.album_title %>》</a><% end %>
+                                                <% if album %>&nbsp;&nbsp;来自<a href="<%= link_path "/#{album.uid}/album/#{album.id}" %>">《<%= album.title %>》</a><% end %>
                                                 </span>
                                             </div>
                                             <% if r.op_type == 2 %><span>【转采】</span><% end %>
@@ -114,22 +117,22 @@
 
                                             <div class="personal_operate">
                                                 <% if r.op_type != 2 %>
-                                                <a class="personal_editBtn" href="/edit_track/<%= r.id %>">编辑</a>
+                                                <a class="personal_editBtn" href="/edit_track/<%= t.id %>">编辑</a>
                                                 <% end %>
-                                                <a class="personal_deleteBtn destroyBtn" destroy_id="<%= r.id %>">删除</a>
-                                                <% if r.is_public %>
-                                                <a class="personal_addtoAlbum" data-options="<%= oj_dump({source:r.user_source,track_id:r.track_id,record_id:r.id}) %>"><% if r.album_id %>更改专辑<% else %>添加到专辑<% end %></a>
+                                                <a class="personal_deleteBtn destroyBtn" destroy_id="<%= t.id %>">删除</a>
+                                                <% if t.is_public %>
+                                                <a class="personal_addtoAlbum" data-options="<%= oj_dump({source:t.user_source,track_id:t.id,record_id:t.id}) %>"><% if t.album_id %>更改专辑<% else %>添加到专辑<% end %></a>
                                                 <% end %>
                                             </div>
 
                                         </div>
-                                        <div class="smallPlayer" sound_uploadid="<%= r.upload_id %>" sound_wave="<%= file_url r.waveform %>">
+                                        <div class="smallPlayer" sound_uploadid="<%= t.upload_id %>" sound_wave="<%= file_url t.waveform %>">
                                             <a href="javascript:;" class="playBtn"></a>
-                                            <span class="duration"><%= parse_duration r.duration %></span>
-                                            <% if r.cover_path and r.cover_path!="" %>
-                                            <div class="pin" sound_popsrc="<%= r.track_id %>">
-                                                <a href="<%= link_path "/#{r.track_uid}/sound/#{r.track_id}" %>" class="soundface">
-                                                    <img alt="" src="<%= picture_url('track', r.cover_path, '60') %>" data-options="defaultImg:track_60">
+                                            <span class="duration"><%= parse_duration t.duration %></span>
+                                            <% if t.cover_path and t.cover_path!="" %>
+                                            <div class="pin" sound_popsrc="<%= t.id %>">
+                                                <a href="<%= link_path "/#{t.uid}/sound/#{t.id}" %>" class="soundface">
+                                                    <img alt="" src="<%= picture_url('track', t.cover_path, '60') %>" data-options="defaultImg:track_60">
                                                     <span></span>
                                                 </a>
                                             </div>
@@ -139,22 +142,22 @@
 
                                     <div class="sound_expandBox">
                                         <div class="sound_titlebar">
-                                            <a class="sound_title" href="<%= link_path "/#{r.track_uid}/sound/#{r.track_id}" %>">
-                                                <%= r.title %>
-                                                <% if !r.is_public and r.track_uid == @current_uid %>
-                                                <i class="privacyIcon" record_id="<%= r.id %>" title="私密声音"></i>
+                                            <a class="sound_title" href="<%= link_path "/#{t.uid}/sound/#{t.id}" %>">
+                                                <%= t.title %>
+                                                <% if !t.is_public and t.uid == @current_uid %>
+                                                <i class="privacyIcon" record_id="<%= t.id %>" title="私密声音"></i>
                                                 <% end %>
                                             </a>
                                             <span class="sound_playcount" title="<%= @track_plays_counts[i] %>次播放"><%= @track_plays_counts[i] %></span>
-                                            <div class="fr"><span class="sound_position">00:00</span>/<span class="sound_duration"><%= parse_duration r.duration %></span></div>
+                                            <div class="fr"><span class="sound_position">00:00</span>/<span class="sound_duration"><%= parse_duration t.duration %></span></div>
 
                                             <div class="personal_operate">
                                                 <% if r.op_type != 2 %>
-                                                <a class="personal_editBtn" href="/edit_track/<%= r.id %>">编辑</a>
+                                                <a class="personal_editBtn" href="/edit_track/<%= t.id %>">编辑</a>
                                                 <% end %>
-                                                <a class="personal_deleteBtn destroyBtn" destroy_id="<%= r.id %>">删除</a>
-                                                <% if r.is_public %>
-                                                <a class="personal_addtoAlbum" data-options="<%= oj_dump({source:r.user_source,track_id:r.track_id,record_id:r.id}) %>"><% if r.album_id %>更改专辑<% else %>添加到专辑<% end %></a>
+                                                <a class="personal_deleteBtn destroyBtn" destroy_id="<%= t.id %>">删除</a>
+                                                <% if t.is_public %>
+                                                <a class="personal_addtoAlbum" data-options="<%= oj_dump({source:t.user_source,track_id:t.id,record_id:t.id}) %>"><% if t.album_id %>更改专辑<% else %>添加到专辑<% end %></a>
                                                 <% end %>
                                             </div>
 
@@ -170,8 +173,8 @@
                                                         <div class="player_progressbarBg"></div>
                                                         <div class="player_seekbar"></div>
                                                         <div class="player_playbar"></div>
-                                                        <% if r.waveform %>
-                                                            <div class="player_wavebox" sound_wave="<%= get_wave_url r.waveform %>" sound_uploadid="<%= r.upload_id %>"></div>
+                                                        <% if t.waveform %>
+                                                            <div class="player_wavebox" sound_wave="<%= get_wave_url t.waveform %>" sound_uploadid="<%= t.upload_id %>"></div>
                                                         <% end %>
                                                          <div class="player_progressbarCoverBg"></div>
                                                         <div class="player_nonius">
@@ -189,10 +192,10 @@
                                                     </div>
                                                 </div>
 
-                                                <% if r.cover_path and r.cover_path!="" %>
-                                                <div class="pin" sound_popsrc="<%= r.track_id %>">
-                                                    <a href="<%= link_path "/#{r.track_uid}/sound/#{r.track_id}" %>" class="soundface">
-                                                        <img alt="" src="<%= picture_url('track', r.cover_path, '60') %>" data-options="defaultImg:track_60">
+                                                <% if t.cover_path and t.cover_path!="" %>
+                                                <div class="pin" sound_popsrc="<%= t.id %>">
+                                                    <a href="<%= link_path "/#{t.uid}/sound/#{t.id}" %>" class="soundface">
+                                                        <img alt="" src="<%= picture_url('track', t.cover_path, '60') %>" data-options="defaultImg:track_60">
                                                         <span></span>
                                                     </a>
                                                 </div>
@@ -200,7 +203,7 @@
                                             </div>
                                         </div>
                                         <div class="sound_content">
-                                          <%= r.intro.truncate(160) if r.intro %>
+                                          <%= t.intro.truncate(160) if t.intro %>
                                         </div>
                                     </div>
 
@@ -211,15 +214,15 @@
                                             <a href="javascript:;" class="likeBtn link1 <%= 'is-sound-liked' if is_favorited %>">赞(<span class="count"><%= @track_favorites_counts[i] %></span>)</a>
                                             <a href="javascript:;" class="commentBtn link1">评论(<span class="count"><%= @track_comments_counts[i] %></span>)</a>
                                             <a href="javascript:;" class="forwardBtn link1">转采(<span class="count"><%= @track_shares_counts[i] %></span>)</a>
-                                            <% if r.status == 0 %>
+                                            <% if t.status == 0 %>
                                             <a href="javascript:;" class="link1" notice="待审核声音暂时不能分享...">分享</a>
                                             <% else %>
                                             <% bds_config = {
                                                 bdDes:"喜马拉雅好声音",
-                                                text:"#{r.intro.truncate(80) if r.intro} 我觉得《#{r.title}》听起来挺不错的，你觉得呢？（分享自 @喜马拉雅好声音 ）",
-                                                title:r.title,
-                                                pic:picture_url('track', r.cover_path, '180'),
-                                                url:"#{Settings.home_root}/#{r.track_uid}/sound/#{r.track_id}"
+                                                text:"#{t.intro.truncate(80) if t.intro} 我觉得《#{t.title}》听起来挺不错的，你觉得呢？（分享自 @喜马拉雅好声音 ）",
+                                                title:t.title,
+                                                pic:picture_url('track', t.cover_path, '180'),
+                                                url:"#{Settings.home_root}/#{t.uid}/sound/#{t.id}"
                                             } %>
                                             <a href="javascript:;" class="bdShareBtn link1" data="<%= oj_dump(bds_config) %>">分享</a>
                                             <% end %>
@@ -231,7 +234,7 @@
                                         <div class="relay_box_entry"></div>
                                     </div>
                                 </div>
-                                <% if r.status == 0 %>
+                                <% if t.status == 0 %>
                                 <div class="listenhelp is-review">
                                     <span class="tit">待审核</span>
                                     <a class="grouphelp"></a>
@@ -250,7 +253,7 @@
                         <%== paginate CustomPagination.new(@track_records_count,@page,@per_page), {outer_window: 1, url:"/#{@current_uid}/sound", link_path: @current_uid.present?} %>
                     </div>
                 </div>
-                <% elsif @page <= 1 %>
+                <% elsif @page <= 1 and params[:q].blank? %>
                     <div class="noItem">                    
                         <span class="noItemTit">啊呀！你还没有声音！</span><br>
                         <span>立即<a href="/upload">上传或录制</a>一段声音，展示给大家</span>

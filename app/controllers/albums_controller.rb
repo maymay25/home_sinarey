@@ -32,7 +32,7 @@ class AlbumsController < ApplicationController
     setrich = TrackSetRich.stn(@album.id).where(track_set_id: @album.id).select('rich_intro').first
     @rich_intro = setrich ? clean_html(setrich.rich_intro) : clean_html(@album.intro)
 
-    @page = params[:page].to_i > 0 ? params[:page].to_i : 1
+    @page = (tmp=params[:page].to_i)>0 ? tmp : 1
     @per_page = 100
 
     tracks_conds = {uid: @album.uid, album_id: @album.id, is_deleted: false}

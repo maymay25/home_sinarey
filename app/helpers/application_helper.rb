@@ -457,19 +457,7 @@ module ApplicationHelper
 
   #客户端ip
   def get_client_ip
-    @temp[:client_ip] ||= env['X-REAL-IP'] || request.ip
-  end
-
-
-
-  def params_page
-    @temp[:params_page] ||= begin
-      if params[:page].present?
-        params[:page].to_i
-      else
-        1
-      end
-    end
+    @temp[:client_ip] ||= env['X-REAL-IP'] || env['X-Real-IP'] || request.ip
   end
 
   #设置分页的默认值

@@ -814,12 +814,24 @@ class CenterController < ApplicationController
     @track_records_count = all_track_records.count
     @track_records = all_track_records.order(order).offset((@page-1)*@per_page).limit(@per_page)
     
-    track_ids = @track_records.collect{|r| r.track_id}
-    track_uids = @track_records.collect{|r| r.track_uid || r.uid }.uniq
+    if @track_records.length > 0
 
-    @is_favorited = {}
-    if track_ids.size > 0
-      @users = track_uids.count>0 ? $profile_client.getMultiUserBasicInfos(track_uids) : {}
+      @tracks = {}
+      track_ids = @track_records.collect{|r| r.track_id }.compact.uniq
+      ori_tracks = Track.mfetch(track_ids,true)
+      ori_tracks.each do |t|
+        @tracks[t.id] = t
+      end
+
+      track_uids = ori_tracks.collect{|t| t.uid }.compact.uniq
+      @users = track_uids.present? ? $profile_client.getMultiUserBasicInfos(track_uids) : {}
+
+      @albums = {}
+      album_ids = @track_records.collect{|r| r.album_id }.compact.uniq
+      ori_albums = album_ids.present? ? TrackSet.mfetch(album_ids,true) : []
+      ori_albums.each do |album|
+        @albums[album.id] = album
+      end
 
       @track_plays_counts = $counter_client.getByIds(Settings.counter.track.plays, track_ids)
       @track_favorites_counts = $counter_client.getByIds(Settings.counter.track.favorites, track_ids)
@@ -827,17 +839,12 @@ class CenterController < ApplicationController
       @track_comments_counts = $counter_client.getByIds(Settings.counter.track.comments, track_ids)
 
       if @current_uid
+        @is_favorited = {}
         favorite_status = Favorite.stn(@current_uid).where(uid: @current_uid, track_id: track_ids)
         favorite_status.each do |f|
           @is_favorited[f.track_id] = true
         end
       end
-    else
-      @users = {}
-      @track_plays_counts = []
-      @track_favorites_counts = []
-      @track_shares_counts = []
-      @track_comments_counts = []
     end
 
     @my_newest_albums =  Album.stn(@current_uid).where(uid: @current_uid, status: [0, 1], is_deleted: false).order('created_at desc').limit(6)

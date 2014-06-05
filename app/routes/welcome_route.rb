@@ -15,4 +15,15 @@ class WelcomeRoute < WelcomeController
   route :get, :post, '/sitemap/silian_album.txt'    do dispatch(:silian_album) end
   route :get, :post, '/sitemap/silian_u.txt'        do dispatch(:silian_user) end
 
+  route :get,        '/cache/file'                  do dispatch(:cache_file) end
+
+  route :get,        '/cache/nil'                   do dispatch(:cache_nil) end
+
+  route :get,        '/cache/redis'                 do dispatch(:cache_redis) end
+
+  route :get,        '/cache/redis/set'             do dispatch(:set_redis_cache) end
+
+  route :get,        '/cache/redis/del'             do dispatch(:del_redis_cache) end
+
 end
+

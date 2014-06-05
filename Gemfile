@@ -3,6 +3,10 @@ source 'http://ruby.ximalaya.com/'
 
 gem 'thin'
 
+gem 'activerecord', '~> 3.2',require: ['active_record']
+
+gem 'ting_model', '0.3.2'
+
 if RUBY_PLATFORM =~ /mingw/
   gem 'redis', '3.0.6'
 else
@@ -57,4 +61,3 @@ gem 'xunch', '>=0.0.6'
 
 #rake tasks
 gem 'rake'
-gem 'activerecord', '~> 3.2', require: []

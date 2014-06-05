@@ -71,4 +71,24 @@ class WelcomeController < ApplicationController
     deads.map{|dead| "#{request.protocol}#{request.host_with_port}/#{dead.uid}" }.join("\n")
   end
 
+  def cache_file
+    File.read("#{Sinarey.root}/app/views/welcome/cache_page.erb")
+  end
+
+  def cache_nil
+    erb :cache_page,layout:false
+  end
+
+  def cache_redis
+    CMSREDIS.get(:home_sinarey_cache)
+  end
+
+  def set_redis_cache
+    CMSREDIS.set(:home_sinarey_cache,File.read("#{Sinarey.root}/app/views/welcome/cache_page.erb"))
+  end
+
+  def del_redis_cache
+    CMSREDIS.del(:home_sinarey_cache)
+  end
+
 end
