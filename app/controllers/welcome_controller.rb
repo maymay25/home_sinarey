@@ -72,7 +72,8 @@ class WelcomeController < ApplicationController
   end
 
   def cache_file
-    File.read("#{Sinarey.root}/app/views/welcome/cache_page.erb")
+    #File.read("#{Sinarey.root}/app/views/welcome/cache_page.erb")
+    IO.read("#{Sinarey.root}/app/views/welcome/cache_page.erb")
   end
 
   def cache_nil

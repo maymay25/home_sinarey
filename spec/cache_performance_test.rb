@@ -14,6 +14,14 @@ class CachePerformanceTest < Test::Unit::TestCase
   end
 
   def test_cache_performance
+
+    #redis可能需要预热
+    CMSREDIS.get(:abc)
+    CMSREDIS.get(:abc)
+    CMSREDIS.get(:abc)
+    CMSREDIS.get(:abc)
+    CMSREDIS.get(:abc)
+
     puts "\n"
     puts "test cache_file"
     t0 = Time.now
@@ -39,7 +47,7 @@ class CachePerformanceTest < Test::Unit::TestCase
     CMSREDIS.get(:home_sinarey_cache)
     t1 = Time.now
     puts (t1-t0)*1000.0
-    
+
     assert_equal 0, 0
   end
 
