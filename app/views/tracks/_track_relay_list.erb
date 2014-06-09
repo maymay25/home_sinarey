@@ -1,5 +1,5 @@
 <%
-all_relays = TrackInRecord.stn(params[:id]).where(track_id: params[:id], op_type: 2, is_deleted: false).select('uid, nickname, avatar_path, comment_id, comment_content, created_at').order("created_at desc")
+all_relays = TrackRepost.stn(params[:id]).where(track_id: params[:id], is_deleted: false).order("id desc")
 
 page = ( tmp=params[:page].to_i )>0 ? tmp : 1
 per_page = 10

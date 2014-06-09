@@ -51,10 +51,10 @@ class AlbumsController < ApplicationController
       if @album.is_crawler
         order = @album.is_records_desc ? 'order_num desc, created_at desc' : 'order_num, created_at'
       else
-        if @album.tracks_order.nil? || @album.tracks_order.empty?
+        if @album.records_order.blank?
           order = 'created_at desc'
         else
-          order = "field(id,#{@album.tracks_order})"
+          order = "field(id,#{@album.records_order})"
         end
       end
     end
@@ -121,7 +121,7 @@ class AlbumsController < ApplicationController
 
     halt_403 if @current_user.isLoginBan or is_user_banned?(@current_uid)
 
-    @list = TrackRecord.stn(@current_uid).where(uid: @current_uid, op_type: TrackRecordOrigin::OP_TYPE[:UPLOAD], album_id: nil, is_public: true, is_deleted: false).order('id desc')
+    @list = TrackRecord.stn(@current_uid).where(uid: @current_uid, op_type: TrackRecordTemp::OP_TYPE[:UPLOAD], album_id: nil, is_public: true, is_deleted: false).order('id desc')
 
     category_id = 1 #默认为 "其他"
     @user_tags = UserTag.stn(@current_uid).where(uid: @current_uid).order("num desc").limit(15)
@@ -434,7 +434,7 @@ class AlbumsController < ApplicationController
     
     halt render_json([]) unless @current_uid
 
-    records_list = TrackRecord.stn(@current_uid).where(uid: @current_uid, op_type: TrackRecordOrigin::OP_TYPE[:UPLOAD], album_id: nil, is_public: true, is_deleted: false).order('id desc').limit(100)
+    records_list = TrackRecord.stn(@current_uid).where(uid: @current_uid, op_type: TrackRecordTemp::OP_TYPE[:UPLOAD], album_id: nil, is_public: true, is_deleted: false).order('id desc').limit(100)
     response = []
     records_list.each do |r|
       data = {}

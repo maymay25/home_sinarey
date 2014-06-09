@@ -17,21 +17,21 @@ class TracksController < ApplicationController
 
     set_no_cache_header
 
-    @tir = TrackInRecord.fetch(params[:id])
+    @track = Track.fetch(params[:id])
 
-    halt_404 if @tir.nil? or @tir.is_deleted
+    halt_404 if @track.nil? or @track.is_deleted
 
-    is_own = @tir.uid == @current_uid
+    is_own = @track.uid == @current_uid
 
-    if @tir.is_public
-      return halt_status0 if @tir.status == 0 && !is_own
-      return halt_status2 if @tir.status == 2
+    if @track.is_public
+      return halt_status0 if @track.status == 0 && !is_own
+      return halt_status2 if @track.status == 2
     else
       return halt_404 if !is_own
     end
 
     # 是否已收藏
-    @is_favorited = @current_uid ? Favorite.stn(@current_uid).where(uid: @current_uid, track_id: @tir.id).any? : false
+    @is_favorited = @current_uid ? Favorite.stn(@current_uid).where(uid: @current_uid, track_id: @track.id).any? : false
 
     # 声音相关计数
     @comments_count, @favorites_count, @plays_count, @shares_count = $counter_client.getByNames([
@@ -39,23 +39,23 @@ class TracksController < ApplicationController
         Settings.counter.track.favorites,
         Settings.counter.track.plays,
         Settings.counter.track.shares
-      ], @tir.track_id)
+      ], @track.id)
 
     @category_name,@category_title = nil,nil
-    if @tir.category_id
-      category = Category.where(id: @tir.category_id).first
+    if @track.category_id
+      category = Category.where(id: @track.category_id).first
       if category
         @category_name = category.name 
         @category_title = category.title
       end
     end
 
-    @track_user = get_profile_user_basic_info(@tir.track_uid)
+    @track_user = get_profile_user_basic_info(@track.uid)
 
     check_follow_status(@track_user.uid)
 
     set_no_cache_header
-    @this_title = "#{@tir.title} 喜马拉雅-听我想听"
+    @this_title = "#{@track.title} 喜马拉雅-听我想听"
 
     halt erb_js(:show_js) if request.xhr?
     erb :show
@@ -150,29 +150,29 @@ class TracksController < ApplicationController
 
     halt_400 unless @current_uid
 
-    tir = TrackInRecord.fetch(params[:track_id])
-    halt render_json({res: false, message: "", msg: '该声音不存在'}) if tir.nil? or tir.is_deleted
+    $xunch["track_set"].evict(params[:track_id])
 
-    halt render_json({res: false, message: "", msg: '抱歉，该声音正在审核中'}) if tir.status == 0
+    track = Track.fetch(params[:track_id])
+    halt render_json({res: false, message: "", msg: '该声音不存在'}) if track.nil? or track.is_deleted
 
-    halt render_json({res: false, message: "", msg: '该声音已经下架'}) if tir.status != 1
+    halt render_json({res: false, message: "", msg: '抱歉，该声音正在审核中'}) if track.status == 0
 
-    halt render_json({res: false, message: "", msg: '私密声音不能赞'}) unless tir.is_public
+    halt render_json({res: false, message: "", msg: '该声音已经下架'}) if track.status != 1
+
+    halt render_json({res: false, message: "", msg: '私密声音不能赞'}) unless track.is_public
 
     #黑名单
-    halt render_json({res: false, message: "", msg: '由于对方的设置，无法进行此操作'}) if BlackUser.where(uid: tir.uid, black_uid: @current_uid).first
+    halt render_json({res: false, message: "", msg: '由于对方的设置，无法进行此操作'}) if BlackUser.where(uid: track.uid, black_uid: @current_uid).first
 
-    unless Favorite.stn(@current_uid).where(uid: @current_uid, track_id: tir.track_id).any?
+    unless Favorite.stn(@current_uid).where(uid: @current_uid, track_id: track.id).any?
+
       fav = Favorite.create(uid: @current_uid,
-        nickname: @current_user.nickname,
-        avatar_path: @current_user.logoPic, 
-        track_id: tir.track_id,
-        track_uid: tir.uid,
-        track_upload_source: tir.upload_source,
-        is_v: tir.is_v,
+        track_id: track.id,
+        track_uid: track.uid,
+        track_upload_source: track.upload_source,
         upload_source: 2,
-        waveform: tir.waveform,
-        upload_id: tir.upload_id
+        waveform: track.waveform,
+        upload_id: track.upload_id
       )
 
       topic_hash = fav.to_topic_hash
@@ -301,38 +301,9 @@ class TracksController < ApplicationController
     record_hash = {
       track_id: track.id,
       track_uid: track.uid, # 原声音发布者
-      track_upload_source: track.upload_source,
-      uid: @current_uid,  # RECORD拥有者
-      nickname: @current_user.nickname,
-      is_v: @current_user.isVerified,
-      dig_status: calculate_defualt_dig_status(@current_user),
-      human_category_id: @current_user.vCategoryId,
-      approved_at: Time.now,
-      avatar_path: @current_user.logoPic,
-      op_type: TrackRecordOrigin::OP_TYPE[:RELAY],
-      is_crawler: track.is_crawler,
-      upload_source: track.upload_source,
-      user_source: track.user_source,
-      category_id: track.category_id,
-      music_category: track.music_category,
-      download_path: track.download_path,
-      duration: track.duration,
-      play_path: track.play_path,
-      play_path_32: track.play_path_32,
-      play_path_64: track.play_path_64,
-      play_path_128: track.play_path_128,
-      transcode_state: track.transcode_state,
-      mp3size: track.mp3size,
-      mp3size_32: track.mp3size_32,
-      mp3size_64: track.mp3size_64,
-      tags: track.tags,
-      title: track.title,
-      intro: track.intro,
-      short_intro: track.short_intro,
-      rich_intro: track.rich_intro,
-      lyric: track.lyric,
-      is_public: track.is_public,
-      is_publish: track.is_publish,
+      op_type: TrackRecordTemp::OP_TYPE[:RELAY],
+      is_public: true,
+      is_publish: true,
       singer: track.singer,
       singer_category: track.singer_category,
       author: track.author,
@@ -552,7 +523,7 @@ class TracksController < ApplicationController
       end
     end
 
-    if record.op_type == TrackRecordOrigin::OP_TYPE[:UPLOAD]
+    if record.op_type == TrackRecordTemp::OP_TYPE[:UPLOAD]
       track = Track.stn(record.track_id).where(id: record.track_id, is_deleted: false).first
       if track
         old_is_deleted = track.is_deleted
@@ -563,7 +534,7 @@ class TracksController < ApplicationController
         bunny_logger ||= ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
         bunny_logger.info "track.destroyed.topic #{track.id} #{track.title} #{track.nickname} #{track.updated_at.strftime('%R')}"
       end
-    elsif record.op_type == TrackRecordOrigin::OP_TYPE[:RELAY]
+    elsif record.op_type == TrackRecordTemp::OP_TYPE[:RELAY]
       $counter_client.decr(Settings.counter.user.tracks, record.uid, 1)
       $counter_client.decr(Settings.counter.track.shares, record.track_id, 1)
 
@@ -585,14 +556,14 @@ class TracksController < ApplicationController
 
     set_no_cache_header
 
-    @tir = TrackInRecord.fetch(params[:id])
+    @track = Track.fetch(params[:id])
 
-    halt '' if @tir.nil? or @tir.is_deleted or @tir.status != 1
+    halt '' if @track.nil? or @track.is_deleted or @track.status != 1
 
     @page = ( tmp=params[:page].to_i )>0 ? tmp : 1
     @per_page = Settings.per_page.track_comments
 
-    all_comments = Comment.stn(@tir.track_id).where(track_id: @tir.track_id, parent_id: nil, is_deleted:false).order('id desc')
+    all_comments = Comment.stn(@track.id).where(track_id: @track.id, parent_id: nil, is_deleted:false).order('id desc')
 
     @comments_count = all_comments.count
     @comments = all_comments.offset((@page-1)*@per_page).limit(@per_page)
@@ -603,11 +574,11 @@ class TracksController < ApplicationController
 
     sql_list = []
     @comments.each do |comment|
-      sql = Comment.stn(@tir.track_id).where(track_id: @tir.track_id, parent_id: comment.id, is_deleted:false).limit(50).to_sql
+      sql = Comment.stn(@track.id).where(track_id: @track.id, parent_id: comment.id, is_deleted:false).limit(50).to_sql
       sql_list << sql
     end
     union_sql = sql_list.collect{|sql| "(#{sql})" }.join(" union all ")
-    all_replies = Comment.find_by_sql(union_sql)
+    all_replies = union_sql.present? ? Comment.find_by_sql(union_sql) : []
 
     @replies = {}
     all_replies.each do |c|
@@ -637,10 +608,14 @@ class TracksController < ApplicationController
 
     set_no_cache_header
 
-    @tir = TrackInRecord.fetch(params[:id])
-    halt '' if @tir.nil? or @tir.is_deleted or @tir.status != 1
-    @comments_count = Comment.stn(@tir.track_id).where(track_id: @tir.track_id).count
-    @comments = Comment.stn(@tir.track_id).where(track_id: @tir.track_id).order('id desc').limit(10)
+    @track = Track.fetch(params[:id])
+    halt '' if @track.nil? or @track.is_deleted or @track.status != 1
+    @comments_count = Comment.stn(@track.id).where(track_id: @track.id).count
+    @comments = Comment.stn(@track.id).where(track_id: @track.id).order('id desc').limit(10)
+
+    uids = @comments.map(&:uid)
+    @users = $profile_client.getMultiUserBasicInfos(uids)
+
     render_to_string(partial: :_feed_comment_list)
   end
 
@@ -649,10 +624,11 @@ class TracksController < ApplicationController
 
     set_no_cache_header
 
-    @tir = TrackInRecord.fetch(params[:id])
-    halt '' if @tir.nil? or @tir.is_deleted or @tir.status != 1
-    @relays_count = TrackInRecord.stn(@tir.track_id).where(track_id: @tir.track_id, op_type: 2).count
-    @relays = TrackInRecord.stn(@tir.track_id).where(track_id: @tir.track_id, op_type: 2).order("created_at desc").limit(10)
+    @track = Track.fetch(params[:id])
+    halt '' if @track.nil? or @track.is_deleted or @track.status != 1
+    all_reposts = TrackRepost.stn(@track.id).where(track_id: @track.id, op_type: 2)
+    @relays_count = all_reposts.count
+    @relays = all_reposts.order("id desc").limit(10)
     render_to_string(partial: :_feed_relay_list)
   end
 
@@ -661,10 +637,10 @@ class TracksController < ApplicationController
 
     set_no_cache_header
 
-    tir = TrackInRecord.fetch(params[:id])
-    halt '' if tir.nil? or tir.is_deleted or tir.status != 1
+    track = Track.fetch(params[:id])
+    halt '' if track.nil? or track.is_deleted or track.status != 1
 
-    render_to_string(partial: :_maybe_like_list, locals: { category_id: tir.category_id || 0 })
+    render_to_string(partial: :_maybe_like_list, locals: { category_id: track.category_id || 0 })
   end
 
   # 右侧 他的其它声音，广告，收录专辑，喜欢该声音的人，扫一扫
@@ -672,10 +648,10 @@ class TracksController < ApplicationController
 
     set_no_cache_header
 
-    tir = TrackInRecord.fetch(params[:id])
-    halt '' if tir.nil? or tir.is_deleted or tir.status != 1
+    track = Track.fetch(params[:id])
+    halt '' if track.nil? or track.is_deleted or track.status != 1
     
-    render_to_string(partial: :_right, locals: {tir: tir})
+    render_to_string(partial: :_right, locals: {track: track})
   end
 
   # 声音详细展开
@@ -683,9 +659,11 @@ class TracksController < ApplicationController
 
     set_no_cache_header
 
-    @tir = TrackInRecord.fetch(params[:id])
-    halt '' if @tir.nil? or @tir.is_deleted or @tir.status != 1
+    @track = Track.fetch(params[:id])
+    halt '' if @track.nil? or @track.is_deleted or @track.status != 1
     
+    @track_user = get_profile_user_basic_info(@track.uid)
+
     render_to_string(partial: :_rich_intro)
   end
 
@@ -805,52 +783,60 @@ class TracksController < ApplicationController
 
   def get_track_json
     set_no_cache_header
-    tir = TrackInRecord.fetch(params[:id])
-    halt '' if tir.nil? or (!tir.is_public && tir.track_uid != @current_uid) or tir.is_deleted or tir.status == 2 or (tir.status == 0 && tir.track_uid != @current_uid)
+    track = Track.fetch(params[:id])
 
-    uid = @current_uid || params[:uid]
+    halt '' if (track.nil? or track.is_deleted or track.status == 2 or ( (track.status == 0 or !track.is_public) and track.uid != @current_uid) )
 
-    this_category = CATEGORIES[tir.category_id]
+    this_category = CATEGORIES[track.category_id]
 
     play_count, comments_count, shares_count, favorites_count = $counter_client.getByNames([
         Settings.counter.track.plays,
         Settings.counter.track.comments,
         Settings.counter.track.shares,
         Settings.counter.track.favorites
-      ], tir.track_id)
+      ], track.id)
 
-    tir_hash = {
-      id: tir.track_id,
-      play_path_64: tir.play_path_64,
-      play_path_32: tir.play_path_32,
-      play_path_128: tir.play_path_128,
-      play_path: tir.play_path,
-      duration: tir.duration,
-      title: tir.title,
-      nickname: tir.nickname,
-      uid: tir.uid,
-      waveform: tir.waveform,
-      upload_id: tir.upload_id,
-      cover_url: file_url(tir.cover_path),
-      cover_url_142: picture_url('track', tir.cover_path, '180'),
-      formatted_created_at: tir.created_at.strftime('%-m月%-d日 %H:%M'),
+    if track.uid==@current_uid
+      user = @current_user
+    else
+      user = get_profile_user_basic_info(track.uid)
+    end
+
+    album = TrackSet.fetch(track.album_id) if track.album_id
+
+    track_hash = {
+      id: track.id,
+      play_path_64: track.play_path_64,
+      play_path_32: track.play_path_32,
+      play_path_128: track.play_path_128,
+      play_path: track.play_path,
+      duration: track.duration,
+      title: track.title,
+      nickname: user && user.nickname,
+      uid: track.uid,
+      waveform: track.waveform,
+      upload_id: track.upload_id,
+      cover_url: file_url(track.cover_path),
+      cover_url_142: picture_url('track', track.cover_path, '180'),
+      formatted_created_at: track.created_at.strftime('%-m月%-d日 %H:%M'),
       is_favorited: nil,
       play_count: play_count,
       comments_count: comments_count,
       shares_count: shares_count,
       favorites_count: favorites_count,
-      title: tir.title ? CGI::escapeHTML(tir.title) : '',
-      album_title: tir.album_title ? CGI::escapeHTML(tir.album_title) : '',
-      intro: tir.intro ? CGI::escapeHTML(tir.intro) : '',
-      short_intro: tir.short_intro ? CGI::escapeHTML(tir.short_intro) : '',
-      have_more_intro: tir.intro ? tir.intro.length > 100 : false,
-      time_until_now: parse_time_until_now(tir.created_at),
+      title: track.title,
+      album_id: track.album_id,
+      album_title: album && album.title,
+      intro: track.intro,
+      short_intro: track.short_intro,
+      have_more_intro: track.intro ? track.intro.length > 100 : false,
+      time_until_now: parse_time_until_now(track.created_at),
       category_name: this_category.name,
       category_title: this_category.title,
       played_secs: nil
     }
 
-    render_json(tir_hash)
+    render_json(track_hash)
   end
 
   def get_multi_tracks_json
@@ -902,7 +888,7 @@ class TracksController < ApplicationController
 
     @record = TrackRecord.stn(@current_uid).where(uid: @current_uid, id: params[:id], is_deleted: false).first
 
-    halt_error('声音已删除或者不存在') if @record.nil? or @record.op_type != TrackRecordOrigin::OP_TYPE[:UPLOAD]
+    halt_error('声音已删除或者不存在') if @record.nil? or @record.op_type != TrackRecordTemp::OP_TYPE[:UPLOAD]
 
     set_no_cache_header
 
@@ -1008,7 +994,7 @@ class TracksController < ApplicationController
     end
 
     record = TrackRecord.stn(@current_uid).where(uid: @current_uid, id: params[:id], is_deleted: false).first
-    halt_error("声音已删除或者不存在") unless record or record.op_type != TrackRecordOrigin::OP_TYPE[:UPLOAD]
+    halt_error("声音已删除或者不存在") unless record or record.op_type != TrackRecordTemp::OP_TYPE[:UPLOAD]
 
     track = Track.stn(record.track_id).where(id: record.track_id, is_deleted: false).first
     halt_error("声音源数据不存在") unless track

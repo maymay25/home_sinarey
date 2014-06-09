@@ -1,45 +1,53 @@
 
 <ul class="commentList">
   <% @comments.each do |cmt| %>
+  <% 
+     comment_user = @profile_users[cmt.uid]
+     next if comment_user.nil? or comment_user.isLoginBan
+   %>
   <li class="listItem">
     <div class="comment2">
       <div class="left">
         <a class="userface" href="<%= link_his_path(cmt.uid) %>" card="<%= cmt.uid %>">
-          <img alt="<%= cmt.nickname %>" src="<%= picture_url('header', cmt.avatar_path, 60) %>" data-options="defaultImg:person_60">
+          <img alt="<%= comment_user.nickname %>" src="<%= picture_url('header', comment_user.logoPic, 60) %>" data-options="defaultImg:person_60">
         </a>
       </div>
       <div class="right">
         <a href="javascript:;" class="reportBtn" title="举报" data-options="<%= {track_id:cmt.track_id,comment_id:cmt.id,uid:@current_uid,to_uid:cmt.uid,content_title:cmt.content,content_type:ReportInformation::TYPE["comment"]}.to_json %>"></a>
         <div>
-          <a href="<%= link_his_path(cmt.uid) %>" card="<%= cmt.uid %>"><%= cmt.nickname %><% if @profile_users[cmt.uid].isVerified %><i class="VIcon">&nbsp;</i><% end %></a>&nbsp;<span><% if cmt.second %>在声音 <%= parse_duration cmt.second %> 处<% end %>评论</span>
+          <a href="<%= link_his_path(cmt.uid) %>" card="<%= cmt.uid %>"><%= comment_user.nickname %><% if comment_user.isVerified %><i class="VIcon">&nbsp;</i><% end %></a>&nbsp;<span><% if cmt.second %>在声音 <%= parse_duration cmt.second %> 处<% end %>评论</span>
         </div>
         <div class="comment_content"><%== simple_format(puts_face(cmt.content)) %></div>
         <div class="comment_bottom">
           <span class="comment_createtime"><%= cmt.created_at.strftime('%-m月%-d日 %H:%M') %></span>
-          <a href="javascript:;" class="replyBtn" data-options="<%= {c_id: cmt.id, c_second: cmt.second,c_nickname: cmt.nickname}.to_json %>">回复</a>
+          <a href="javascript:;" class="replyBtn" data-options="<%= {c_id: cmt.id, c_second: cmt.second,c_nickname: comment_user.nickname}.to_json %>">回复</a>
           <% if cmt.uid==@current_uid or @tir.uid==@current_uid %>
           <a class="delBtn" data-options="<%= {comment_id:cmt.id,track_id:cmt.track_id}.to_json %>">删除</a>
           <% end %>
         </div>
         <div class="reply_box_entry"></div>
-        <% if (replies=@replies[cmt.id]).size > 0 %>
+        <% if (replies=@replies[cmt.id]) && replies.size > 0 %>
         <div class="commentReply mgT10 is-comment-onReplay">
         <% replies.each_with_index do |reply, i| %>
+          <% 
+            reply_user = @profile_users[reply.uid]
+            next if reply_user.nil? or reply_user.isLoginBan
+           %>
           <div class="comment <% if i > 0 %>mgT20<% end %>">
             <div class="left">
               <a class="userface" href="<%= link_his_path(reply.uid) %>" card="<%= reply.uid %>">
-                <img alt="<%= reply.nickname %>" src="<%= picture_url('header', reply.avatar_path, 60) %>" data-options="defaultImg:person_60">
+                <img alt="<%= reply_user.nickname %>" src="<%= picture_url('header', reply_user.logoPic, 60) %>" data-options="defaultImg:person_60">
               </a>
             </div>
             <div class="right">
               <a href="javascript:;" class="reportBtn" title="举报" data-options="<%= {track_id:cmt.track_id,comment_id:reply.id,uid:@current_uid,to_uid:reply.uid,content_title:reply.content,content_type:ReportInformation::TYPE["comment"]}.to_json %>"></a>
               <div>
-                <a href="<%= link_his_path(reply.uid) %>" card="<%= reply.uid %>"><%= reply.nickname %><% if @profile_users[reply.uid].isVerified %><i class="VIcon">&nbsp;</i><% end %></a>
+                <a href="<%= link_his_path(reply.uid) %>" card="<%= reply.uid %>"><%= reply_user.nickname %><% if reply_user.isVerified %><i class="VIcon">&nbsp;</i><% end %></a>
               </div>
               <div class="comment_content"><%== simple_format(puts_face(reply.content)) %></div>
               <div class="comment_bottom">
                 <span class="comment_createtime"><%= reply.created_at.strftime('%-m月%-d日 %H:%M') %></span>
-                <a href="javascript:;" class="replyBtn" data-options="<%= {c_id: reply.id, c_second: reply.second, c_nickname: reply.nickname}.to_json %>">回复</a>
+                <a href="javascript:;" class="replyBtn" data-options="<%= {c_id: reply.id, c_second: reply.second, c_nickname: reply_user.nickname}.to_json %>">回复</a>
                 <% if reply.uid==@current_uid or @tir.uid==@current_uid %>
                 <a class="delBtn" data-options="<%= {comment_id:reply.id,track_id:cmt.track_id}.to_json %>">删除</a>
                 <% end %>

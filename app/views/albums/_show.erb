@@ -97,7 +97,7 @@
 
           </div>
 
-          <% if @album.rich_intro && @album.is_v %>
+          <% if @album.rich_intro && @u.isVerified %>
           <div class="detailContent_intro">
             <div class="mid_intro">
               <article><%= @album.rich_intro.html_safe %></article>
@@ -202,7 +202,7 @@
                 <a class="title" href="<%= link_path("/#{r.track_uid}/sound/#{r.track_id}") %>"><%= r.title %></a>
                 <% if check_current_user %>
                 <div class="album_soundlist_operate">
-                  <% if r.op_type==TrackRecordOrigin::OP_TYPE[:UPLOAD] %>
+                  <% if r.op_type==TrackRecordTemp::OP_TYPE[:UPLOAD] %>
                   <a href="<%= "/edit_track/#{r.id}" %>">编辑</a>
                   <% end %>
                   <a class="destroyBtn" href="javascript:;" destroy_id="<%= r.id %>">删除</a>

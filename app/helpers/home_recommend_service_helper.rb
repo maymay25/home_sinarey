@@ -7,9 +7,9 @@ module HomeRecommendServiceHelper
 
     users = collect_users(data.ids)
 
-    if ( not_exist_list = data.ids - users.collect{ |u|u.uid } ).length>0
-      $backend_client.delHotRadio(category_id, not_exist_list)
-    end
+    # if ( not_exist_list = data.ids - users.collect{ |u|u.uid } ).length>0
+    #   $backend_client.delHotRadio(category_id, not_exist_list)
+    # end
 
     { count: data.count, list: users }
   end
@@ -21,9 +21,9 @@ module HomeRecommendServiceHelper
 
     users = collect_users(data.ids)
 
-    if ( not_exist_list = data.ids - users.collect{ |u|u.uid } ).length>0
-      $backend_client.delMostFollowedUser(category_id, not_exist_list)
-    end
+    # if ( not_exist_list = data.ids - users.collect{ |u|u.uid } ).length>0
+    #   $backend_client.delMostFollowedUser(category_id, not_exist_list)
+    # end
 
     { count: data.count, list: users }
   end
@@ -35,9 +35,9 @@ module HomeRecommendServiceHelper
 
     users = collect_users(data.ids)
 
-    if ( not_exist_list = data.ids - users.collect{ |u|u.uid } ).length>0
-      $backend_client.delNewv(category_id, not_exist_list)
-    end
+    # if ( not_exist_list = data.ids - users.collect{ |u|u.uid } ).length>0
+    #   $backend_client.delNewv(category_id, not_exist_list)
+    # end
 
     { count: data.count, list: users }
   end
@@ -49,9 +49,9 @@ module HomeRecommendServiceHelper
 
     users = collect_users(data.ids)
 
-    if ( not_exist_list = data.ids - users.collect{ |u|u.uid } ).length>0
-      $backend_client.delDayHotRadio(category_id, not_exist_list)
-    end
+    # if ( not_exist_list = data.ids - users.collect{ |u|u.uid } ).length>0
+    #   $backend_client.delDayHotRadio(category_id, not_exist_list)
+    # end
 
     { count: data.count, list: users }
   end
@@ -63,9 +63,9 @@ module HomeRecommendServiceHelper
 
     tracks = collect_tracks(data.ids)
 
-    if ( not_exist_list = data.ids - tracks.collect{ |t|t.track_id } ).length>0
-      $backend_client.delHotSound(category_id, tag_name, not_exist_list)
-    end
+    # if ( not_exist_list = data.ids - tracks.collect{ |t|t.track_id } ).length>0
+    #   $backend_client.delHotSound(category_id, tag_name, not_exist_list)
+    # end
 
     {count: data.count, list:tracks}
   end
@@ -77,9 +77,9 @@ module HomeRecommendServiceHelper
 
     tracks = collect_tracks(data.ids)
 
-    if ( not_exist_list = data.ids - tracks.collect{ |t|t.track_id } ).length>0
-      $backend_client.delRecentVTrack(category_id, tag_name, not_exist_list)
-    end
+    # if ( not_exist_list = data.ids - tracks.collect{ |t|t.track_id } ).length>0
+    #   $backend_client.delRecentVTrack(category_id, tag_name, not_exist_list)
+    # end
     
     {count: data.count, list:tracks}
   end
@@ -91,9 +91,9 @@ module HomeRecommendServiceHelper
 
     tracks = collect_tracks(data.ids)
 
-    if ( not_exist_list = data.ids - tracks.collect{ |t|t.track_id } ).length>0
-      $backend_client.delMostFavoritSound(category_id, tag_name, not_exist_list)
-    end
+    # if ( not_exist_list = data.ids - tracks.collect{ |t|t.track_id } ).length>0
+    #   $backend_client.delMostFavoritSound(category_id, tag_name, not_exist_list)
+    # end
 
     {count: data.count, list:tracks}
   end
@@ -105,9 +105,9 @@ module HomeRecommendServiceHelper
 
     tracks = collect_tracks(data.ids)
 
-    if ( not_exist_list = data.ids - tracks.collect{ |t|t.track_id } ).length>0
-      $backend_client.delDayHotSound(category_id, tag_name, not_exist_list)
-    end
+    # if ( not_exist_list = data.ids - tracks.collect{ |t|t.track_id } ).length>0
+    #   $backend_client.delDayHotSound(category_id, tag_name, not_exist_list)
+    # end
 
     {count: data.count, list:tracks}
   end
@@ -119,9 +119,9 @@ module HomeRecommendServiceHelper
 
     albums = collect_albums(data.ids)
 
-    if ( not_exist_list = data.ids - albums.collect{ |a|a.id } ).length>0
-      $backend_client.delHotAlbum(category_id, tag_name, not_exist_list)
-    end
+    # if ( not_exist_list = data.ids - albums.collect{ |a|a.id } ).length>0
+    #   $backend_client.delHotAlbum(category_id, tag_name, not_exist_list)
+    # end
 
     return {count: data.count, list: albums}
   end
@@ -133,9 +133,9 @@ module HomeRecommendServiceHelper
 
     albums = collect_albums(data.ids)
 
-    if ( not_exist_list = data.ids - albums.collect{ |a|a.id } ).length>0
-      $backend_client.delHotFinishedAlbum(category_id, tag_name, not_exist_list)
-    end
+    # if ( not_exist_list = data.ids - albums.collect{ |a|a.id } ).length>0
+    #   $backend_client.delHotFinishedAlbum(category_id, tag_name, not_exist_list)
+    # end
 
     return {count: data.count, list: albums}
   end
@@ -147,9 +147,9 @@ module HomeRecommendServiceHelper
 
     albums = collect_albums(data.ids)
 
-    if ( not_exist_list = data.ids - albums.collect{ |a|a.id } ).length>0
-      $backend_client.delHotUnfinishedAlbum(category_id, tag_name, not_exist_list)
-    end
+    # if ( not_exist_list = data.ids - albums.collect{ |a|a.id } ).length>0
+    #   $backend_client.delHotUnfinishedAlbum(category_id, tag_name, not_exist_list)
+    # end
 
     return {count: data.count, list: albums}
   end
@@ -161,9 +161,9 @@ module HomeRecommendServiceHelper
 
     albums = collect_albums(data.ids)
 
-    if ( not_exist_list = data.ids - albums.collect{ |a|a.id } ).length>0
-      $backend_client.delMostPlayAlbum(category_id, tag_name, not_exist_list)
-    end
+    # if ( not_exist_list = data.ids - albums.collect{ |a|a.id } ).length>0
+    #   $backend_client.delMostPlayAlbum(category_id, tag_name, not_exist_list)
+    # end
 
     return {count: data.count, list: albums}
   end
@@ -175,9 +175,9 @@ module HomeRecommendServiceHelper
 
     albums = collect_albums(data.ids)
 
-    if ( not_exist_list = data.ids - albums.collect{ |a|a.id } ).length>0
-      $backend_client.delMostPlayFinishedAlbum(category_id, tag_name, not_exist_list)
-    end
+    # if ( not_exist_list = data.ids - albums.collect{ |a|a.id } ).length>0
+    #   $backend_client.delMostPlayFinishedAlbum(category_id, tag_name, not_exist_list)
+    # end
 
     return {count: data.count, list: albums}
   end
@@ -189,9 +189,9 @@ module HomeRecommendServiceHelper
 
     albums = collect_albums(data.ids)
 
-    if ( not_exist_list = data.ids - albums.collect{ |a|a.id } ).length>0
-      $backend_client.delMostPlayUnfinishedAlbum(category_id, tag_name, not_exist_list)
-    end
+    # if ( not_exist_list = data.ids - albums.collect{ |a|a.id } ).length>0
+    #   $backend_client.delMostPlayUnfinishedAlbum(category_id, tag_name, not_exist_list)
+    # end
 
     return {count: data.count, list: albums}
   end
@@ -203,9 +203,9 @@ module HomeRecommendServiceHelper
 
     albums = collect_albums(data.ids)
 
-    if ( not_exist_list = data.ids - albums.collect{ |a|a.id } ).length>0
-      $backend_client.delRecentAlbum(category_id, tag_name, not_exist_list)
-    end
+    # if ( not_exist_list = data.ids - albums.collect{ |a|a.id } ).length>0
+    #   $backend_client.delRecentAlbum(category_id, tag_name, not_exist_list)
+    # end
 
     return {count: data.count, list: albums}
   end
@@ -217,9 +217,9 @@ module HomeRecommendServiceHelper
 
     albums = collect_albums(data.ids)
 
-    if ( not_exist_list = data.ids - albums.collect{ |a|a.id } ).length>0
-      $backend_client.delRecentFinishedAlbum(category_id, tag_name, not_exist_list)
-    end
+    # if ( not_exist_list = data.ids - albums.collect{ |a|a.id } ).length>0
+    #   $backend_client.delRecentFinishedAlbum(category_id, tag_name, not_exist_list)
+    # end
 
     return {count: data.count, list: albums}
   end
@@ -231,9 +231,9 @@ module HomeRecommendServiceHelper
 
     albums = collect_albums(data.ids)
 
-    if ( not_exist_list = data.ids - albums.collect{ |a|a.id } ).length>0
-      $backend_client.delRecentUnfinishedAlbum(category_id, tag_name, not_exist_list)
-    end
+    # if ( not_exist_list = data.ids - albums.collect{ |a|a.id } ).length>0
+    #   $backend_client.delRecentUnfinishedAlbum(category_id, tag_name, not_exist_list)
+    # end
 
     return {count: data.count, list: albums}
   end
@@ -253,13 +253,13 @@ module HomeRecommendServiceHelper
   def collect_albums(arr=[])
     return [] unless arr.size > 0
     albums = TrackSet.mfetch(arr, true)
-    albums = albums.delete_if{|album| album.is_publish==false or album.is_public==false or album.is_deleted==true }
+    albums = albums.delete_if{|album| album.status!=1 or album.is_public==false or album.is_deleted==true }
   end
 
   def collect_tracks(arr=[])
     return [] unless arr.size > 0
-    tracks = TrackInRecord.mfetch(arr, true)
-    tracks = tracks.delete_if{|track| track.is_publish==false or track.is_public==false or track.is_deleted==true }
+    tracks = Track.mfetch(arr, true)
+    tracks = tracks.delete_if{|track| track.staus!=1 or track.is_public==false or track.is_deleted==true }
   end
 
   #批量获取单分类多标签下的专辑列表
@@ -327,10 +327,10 @@ module HomeRecommendServiceHelper
   def collect_sound_hash(arr = [])
     track_hash = {}
 
-    tracks = TrackInRecord.mfetch(arr).select{|track| track}
+    tracks = Track.mfetch(arr,true)
 
     tracks.each do |t|
-      track_hash[t.track_id] = t
+      track_hash[t.id] = t
     end
 
     return track_hash

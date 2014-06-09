@@ -354,10 +354,12 @@ class CenterController < ApplicationController
       @listeneds = []
     end
     track_ids = @listeneds.map{|listened_at, track_id| track_id}
-    @tirs = TrackInRecord.mfetch(track_ids)
+
+    @tracks = Track.mfetch(track_ids,true)
+    track_ids = @tracks.collect{|t| t.id }
 
     if track_ids.size > 0
-      @users = $profile_client.getMultiUserBasicInfos(@tirs.map{|tir| tir.uid})
+      @users = $profile_client.getMultiUserBasicInfos(@tracks.map{|track| track.uid})
       @track_plays_counts = $counter_client.getByIds(Settings.counter.track.plays, track_ids)
       @track_favorites_counts = $counter_client.getByIds(Settings.counter.track.favorites, track_ids)
       @track_shares_counts = $counter_client.getByIds(Settings.counter.track.shares, track_ids)
@@ -801,7 +803,7 @@ class CenterController < ApplicationController
     cond1 = {uid: @current_uid, status: [0, 1], is_deleted: false}
     if params[:user_source]
       cond1[:user_source] = params[:user_source]
-      cond1[:op_type] = TrackRecordOrigin::OP_TYPE[:UPLOAD]
+      cond1[:op_type] = TrackRecordTemp::OP_TYPE[:UPLOAD]
     end
     cond1[:op_type] = params[:op_type].to_i if params[:op_type]
     cond1[:is_public] = params[:is_public].to_s!="0" if params[:is_public]
@@ -809,7 +811,7 @@ class CenterController < ApplicationController
     @page = (tmp = params[:page].to_i )>0 ? tmp : 1
     @per_page = Settings.per_page.my_tracks
 
-    order = (["created_at desc" , "created_at asc"].include?(params[:order]) && params[:order]) || "created_at desc"
+    order = (["id desc" , "id asc"].include?(params[:order]) && params[:order]) || "id desc"
     all_track_records = TrackRecord.stn(@current_uid).where(cond1).where(query)
     @track_records_count = all_track_records.count
     @track_records = all_track_records.order(order).offset((@page-1)*@per_page).limit(@per_page)
@@ -838,8 +840,8 @@ class CenterController < ApplicationController
       @track_shares_counts = $counter_client.getByIds(Settings.counter.track.shares, track_ids)
       @track_comments_counts = $counter_client.getByIds(Settings.counter.track.comments, track_ids)
 
+      @is_favorited = {}
       if @current_uid
-        @is_favorited = {}
         favorite_status = Favorite.stn(@current_uid).where(uid: @current_uid, track_id: track_ids)
         favorite_status.each do |f|
           @is_favorited[f.track_id] = true
@@ -847,7 +849,7 @@ class CenterController < ApplicationController
       end
     end
 
-    @my_newest_albums =  Album.stn(@current_uid).where(uid: @current_uid, status: [0, 1], is_deleted: false).order('created_at desc').limit(6)
+    @my_newest_albums =  Album.stn(@current_uid).where(uid: @current_uid, status: [0, 1], is_deleted: false).order('id desc').limit(6)
     album_ids = @my_newest_albums.collect{ |a| a.id }
     if album_ids.count > 0
       @album_tracks_count = $counter_client.getByIds(Settings.counter.album.tracks, album_ids)
@@ -860,41 +862,54 @@ class CenterController < ApplicationController
   def init_his_sound_page
     cond1 = {uid: @u.uid, status: 1, is_deleted: false}
     cond1[:is_public] = true if @u.uid != @current_uid
-    query = ["title like ?", "%#{params[:q]}%"] if params[:q] and !params[:q].empty?  #搜索条件
-    order = (["created_at desc" , "created_at asc"].include?(params[:order]) && params[:order]) || "created_at desc"
+    query = ["title like ?", "%#{params[:q]}%"] if params[:q].present?
+    order = (["id desc" , "id asc"].include?(params[:order]) && params[:order]) || "id desc"
 
     @page = (tmp = params[:page].to_i )>0 ? tmp : 1
     @per_page = Settings.per_page.my_tracks
 
     all_track_records = TrackRecord.stn(@u.uid).where(cond1).where(query)
     @track_records_count = all_track_records.count
+
     @track_records = all_track_records.order(order).offset((@page-1)*@per_page).limit(@per_page)
     
-    track_ids = @track_records.collect{|r| r.track_id}
-    track_uids = @track_records.collect{|r| r.track_uid || r.uid }.uniq
+    if @track_records.length > 0
 
-    @is_favorited = {}
-    if track_ids.size > 0
-      @users = track_uids.count>0 ? $profile_client.getMultiUserBasicInfos(track_uids) : {}
+      @tracks = {}
+      track_ids = @track_records.collect{|r| r.track_id }.compact.uniq
+
+      ori_tracks = Track.mfetch(track_ids,true)
+      ori_tracks.each do |t|
+        @tracks[t.id] = t
+      end
+
+      track_uids = ori_tracks.collect{|t| t.uid }.compact.uniq
+      @users = track_uids.present? ? $profile_client.getMultiUserBasicInfos(track_uids) : {}
+
+      @albums = {}
+      album_ids = @track_records.collect{|r| r.album_id }.compact.uniq
+
+      ori_albums = album_ids.present? ? TrackSet.mfetch(album_ids,true) : []
+
+      ori_albums.each do |album|
+        @albums[album.id] = album
+      end
+
       @track_plays_counts = $counter_client.getByIds(Settings.counter.track.plays, track_ids)
       @track_favorites_counts = $counter_client.getByIds(Settings.counter.track.favorites, track_ids)
       @track_shares_counts = $counter_client.getByIds(Settings.counter.track.shares, track_ids)
       @track_comments_counts = $counter_client.getByIds(Settings.counter.track.comments, track_ids)
+
+      @is_favorited = {}
       if @current_uid
         favorite_status = Favorite.stn(@current_uid).where(uid: @current_uid, track_id: track_ids)
         favorite_status.each do |f|
           @is_favorited[f.track_id] = true
         end
       end
-    else
-      @users = {}
-      @track_plays_counts = []
-      @track_favorites_counts = []
-      @track_shares_counts = []
-      @track_comments_counts = []
     end
 
-    @his_newest_albums =  Album.stn(@u.uid).where(uid: @u.uid, status: 1, is_deleted: false).order('created_at desc').limit(6)
+    @his_newest_albums =  Album.stn(@u.uid).where(uid: @u.uid, status: 1, is_deleted: false).order('id desc').limit(6)
 
     album_ids = @his_newest_albums.collect{ |a| a.id }
     if album_ids.count > 0

@@ -5,7 +5,7 @@
     <div class="personal_container">  
       <div class="personal_header">
         <div class="picture">
-          <a href="<%= link_path("/#{@tir.uid}/") %>">
+          <a href="<%= link_path("/#{@track.uid}/") %>">
             <img src="<%= picture_url('header', @track_user.logoPic, '60') %>">
           </a>
         </div>
@@ -23,51 +23,51 @@
 
           </div>
           <ul class="nav_list">
-            <li class="nav_item"><a href="<%= link_path("/#{@tir.uid}/") %>">主页</a></li>
-            <li class="nav_item"><a href="<%= link_path("/#{@tir.uid}/sound/") %>">声音</a></li>
-            <li class="nav_item"><a href="<%= link_path("/#{@tir.uid}/album/") %>">专辑</a></li>
-            <li class="nav_item"><a href="<%= link_path("/#{@tir.uid}/favorites/") %>">赞过的</a></li>
-            <li class="nav_item"><a href="<%= link_path("/#{@tir.uid}/follow/") %>">关注</a></li>
-            <li class="nav_item"><a href="<%= link_path("/#{@tir.uid}/fans/") %>">粉丝</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@track.uid}/") %>">主页</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@track.uid}/sound/") %>">声音</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@track.uid}/album/") %>">专辑</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@track.uid}/favorites/") %>">赞过的</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@track.uid}/follow/") %>">关注</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@track.uid}/fans/") %>">粉丝</a></li>
           </ul>
         </div>
       </div>
       <div class="personal_body">
         <div class="detailContent">
 
-          <% if @current_uid and @tir.uid == @current_uid %>
-            <a href="/edit_track/<%= @tir.id %>" class="editBtn2" title="编辑">编辑</a>
+          <% if @current_uid and @track.uid == @current_uid %>
+            <a href="/edit_track/<%= @track.id %>" class="editBtn2" title="编辑">编辑</a>
           <% end %>
 
-          <a href="javascript:;" class="reportBtn2" title="举报" data-options="<%= {track_id:@tir.track_id,uid:@current_uid,to_uid:@tir.uid,content_title:@tir.title,content_type:ReportInformation::TYPE["track"]}.to_json %>"></a>
+          <a href="javascript:;" class="reportBtn2" title="举报" data-options="<%= {track_id:@track.id,uid:@current_uid,to_uid:@track.uid,content_title:@track.title,content_type:ReportInformation::TYPE["track"]}.to_json %>"></a>
           <div class="left">
             <a class="soundface180">
-              <img alt="<%= @tir.title %>" <% if @tir.cover_path and @tir.cover_path!="" %>sound_popsrc="<%= @tir.track_id %>"<% end %> src="<%= picture_url('track', @tir.cover_path, '180') %>" data-options="defaultImg:track_180">
+              <img alt="<%= @track.title %>" <% if @track.cover_path and @track.cover_path!="" %>sound_popsrc="<%= @track.id %>"<% end %> src="<%= picture_url('track', @track.cover_path, '180') %>" data-options="defaultImg:track_180">
             </a>
           </div>
           <div class="right">
             <div class="detailContent_title">
-              <h1><%= @tir.title %></h1>
-              <% if !@tir.is_public %>
-                <a class="privacyIcon" record_id="<%= @tir.id %>" title="私密声音"></a>
+              <h1><%= @track.title %></h1>
+              <% if !@track.is_public %>
+                <a class="privacyIcon" record_id="<%= @track.id %>" title="私密声音"></a>
               <% end %>
             </div>
-            <% category = @tir.category_id ? Category.where(id: @tir.category_id).first : nil %>
+            <% category = @track.category_id ? Category.where(id: @track.category_id).first : nil %>
             <div class="detailContent_category">
             <% if category %>
                 类别:&nbsp;<a href="<%= link_path "/#{category.name}/" %>">【<%= category.title %>】</a>
             <% end %>
-                &nbsp;来源：<%= @tir.user_source == 1 ? "原创" : @tir.user_source == 2 ? "采集" : "未知" %>
-              <% if @tir.singer.present? %>&nbsp;原唱：<%= @tir.singer %><%= "(#{@tir.singer_category})" if @tir.singer_category %><% end %>
-              <% if @tir.singer.present? %>&nbsp;翻唱：<%= @tir.resinger %><% end %>
-              <% if @tir.announcer.present? %>&nbsp;播音：<%= @tir.announcer %><% end %>
-              <% if @tir.author.present? %>&nbsp;作者：<%= @tir.author %><% end %>
-              <% if @tir.composer.present? %>&nbsp;作曲：<%= @tir.composer %><% end %>
-              <% if @tir.arrangement.present? %>&nbsp;编曲：<%= @tir.arrangement %><% end %>
-              <% if @tir.post_production.present? %>&nbsp;后期：<%= @tir.post_production %><% end %>
+                &nbsp;来源：<%= @track.user_source == 1 ? "原创" : @track.user_source == 2 ? "采集" : "未知" %>
+              <% if @track.singer.present? %>&nbsp;原唱：<%= @track.singer %><%= "(#{@track.singer_category})" if @track.singer_category %><% end %>
+              <% if @track.singer.present? %>&nbsp;翻唱：<%= @track.resinger %><% end %>
+              <% if @track.announcer.present? %>&nbsp;播音：<%= @track.announcer %><% end %>
+              <% if @track.author.present? %>&nbsp;作者：<%= @track.author %><% end %>
+              <% if @track.composer.present? %>&nbsp;作曲：<%= @track.composer %><% end %>
+              <% if @track.arrangement.present? %>&nbsp;编曲：<%= @track.arrangement %><% end %>
+              <% if @track.post_production.present? %>&nbsp;后期：<%= @track.post_production %><% end %>
             </div>
 
-            <% track_tags = @tir.tags && @tir.tags.split(",") %>
+            <% track_tags = @track.tags && @track.tags.split(",") %>
             <% if track_tags.present? %>
             <div class="tagBtnList">
               <% track_tags.each do |tag| %>
@@ -76,7 +76,7 @@
             </div>
             <% end %>
 
-            <% if @tir.status == 0 %>
+            <% if @track.status == 0 %>
             <div class="listenhelp is-review">
               <span class="tit">待审核</span>
               <a class="grouphelp"></a>
@@ -90,9 +90,9 @@
 
               <div class="soundContent_playcount"><%= @plays_count %>次播放</div>
               
-              <% if @tir.is_public %>
+              <% if @track.is_public %>
               <!-- Baidu Button BEGIN -->
-              <div id="bdshare" class="mgT20 bdshare_t bds_tools get-codes-bdshare" data="{url:'<%= "#{Settings.home_root}/#{@tir.track_uid}/sound/#{@tir.track_id}" %>',pic:'<%= picture_url('track', @tir.cover_path, '180') %>'}">
+              <div id="bdshare" class="mgT20 bdshare_t bds_tools get-codes-bdshare" data="{url:'<%= "#{Settings.home_root}/#{@track.uid}/sound/#{@track.id}" %>',pic:'<%= picture_url('track', @track.cover_path, '180') %>'}">
                 <span class="bds_more">分享到：</span>
                 <a class="bds_qzone"></a>
                 <a class="bds_tsina"></a>
@@ -101,16 +101,16 @@
               </div>
               <!-- Baidu Button END -->
               <% end %>
-              <a href="javascript:;" track_id="<%= @tir.track_id %>" track_uid="<%= @tir.uid %>" class="shareLink">获取声音链接</a>
+              <a href="javascript:;" track_id="<%= @track.id %>" track_uid="<%= @track.uid %>" class="shareLink">获取声音链接</a>
             <% end %>
 
           </div>
 
-          <% if @tir.rich_intro && @tir.is_v %>
+          <% if @track.rich_intro && @track_user && @track_user.isVerified %>
           <div class="detailContent_intro">
               <div class="mid_intro">
-                <article><%= @tir.rich_intro.html_safe %></article>
-                <% if @tir.rich_intro[-3, 3] == '...' %>
+                <article><%= @track.rich_intro.html_safe %></article>
+                <% if @track.rich_intro[-3, 3] == '...' %>
                 <div><a class="arrow">展开更多</a></div>
                 <% end %>
               </div>
@@ -122,12 +122,12 @@
 
         </div>
       
-        <div class="detail_soundBox2" sound_id="<%= @tir.track_id %>">
+        <div class="detail_soundBox2" sound_id="<%= @track.id %>">
           <div class="sound">
             <div class="sound_unexpandBox">
               <div class="sound_titlebar">
                 <span class="sound_playcount" title="播放<%= @plays_count %>次"><%= @plays_count %>次</span>
-                <div class="fr"><span class="sound_position">00:00</span>/<span class="sound_duration"><%= parse_duration @tir.duration %></span></div>
+                <div class="fr"><span class="sound_position">00:00</span>/<span class="sound_duration"><%= parse_duration @track.duration %></span></div>
               </div>
               <div class="feed_middlePlayerBox">
                 <div class="middlePlayer">
@@ -140,7 +140,7 @@
                       <div class="player_progressbarBg"></div>
                       <div class="player_seekbar"></div>
                       <div class="player_playbar"></div>
-                      <div class="player_wavebox" sound_uploadid="<%= @tir.upload_id %>" sound_wave="<%= file_url @tir.waveform %>"></div>
+                      <div class="player_wavebox" sound_uploadid="<%= @track.upload_id %>" sound_wave="<%= file_url @track.waveform %>"></div>
                       <div class="player_progressbarCoverBg"></div>
                       <div class="player_nonius">
                         <div class="player_nonius_cover"></div>
@@ -161,8 +161,8 @@
             </div>
             <div class="sound_content">
               <div class="sound_bottom">
-                <span class="createtime"><%= parse_time_until_now(@tir.created_at) %></span>
-                <% is_favorited = @current_uid ? Favorite.stn(@current_uid).where(uid: @current_uid, track_id: @tir.track_id).any? : false %>
+                <span class="createtime"><%= parse_time_until_now(@track.created_at) %></span>
+                <% is_favorited = @current_uid ? Favorite.stn(@current_uid).where(uid: @current_uid, track_id: @track.id).any? : false %>
                 <div class="fr">
                   <a class="downloadToMobile link1">下载到手机</a>
                   <a class="likeBtn link1 <%= 'is-sound-liked' if is_favorited %>" href="javascript:;">赞(<span class="count"><%= @favorites_count %></span>)</a>
@@ -182,7 +182,7 @@
           </div>
           
           <div class="recommendSound_body <%= 'loadingMore' if @current_uid %>">
-            <%== erb :_maybe_like_list, locals: {category_id: @tir.category_id || 0} unless @current_uid %>
+            <%== erb :_maybe_like_list, locals: {category_id: @track.category_id || 0} unless @current_uid %>
           </div>
         </div>
         
@@ -280,7 +280,7 @@
   </div>
 
   <div class="mainbox_right <% if @current_uid -%>loadingMore<% end -%>">
-    <%== erb :_right, locals: {tir: @tir} unless @current_uid %>
+    <%== erb :_right, locals: {track: @track} unless @current_uid %>
   </div>
 
 </div>

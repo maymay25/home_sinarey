@@ -173,15 +173,17 @@ class MsgcenterController < ApplicationController
       end
     end
 
-    tir = TrackInRecord.fetch(params[:track_id])
+    track = Track.fetch(params[:track_id])
 
-    halt render_json({res: false, message: "", msg: '该声音不存在'}) if tir.nil? or tir.is_deleted
+    track_user = get_profile_user_basic_info(track.uid)
 
-    halt render_json({res: false, message: "", msg: '抱歉，该声音正在审核中'}) if tir.status == 0
+    halt render_json({res: false, message: "", msg: '该声音不存在'}) if track.nil? or track.is_deleted
 
-    halt render_json({res: false, message: "", msg: '该声音已经下架'}) if tir.status != 1
+    halt render_json({res: false, message: "", msg: '抱歉，该声音正在审核中'}) if track.status == 0
 
-    halt render_json({res: false, message: "", msg: '私密声音不能评论'}) unless tir.is_public
+    halt render_json({res: false, message: "", msg: '该声音已经下架'}) if track.status != 1
+
+    halt render_json({res: false, message: "", msg: '私密声音不能评论'}) unless track.is_public
 
     if params[:parent_id] and !params[:parent_id].empty?
       # 回复评论
@@ -191,19 +193,19 @@ class MsgcenterController < ApplicationController
     end
 
     #黑名单
-    halt render_json({res: false, message: "", msg: '由于对方的设置，无法进行此操作'}) if BlackUser.where(uid: tir.uid, black_uid: @current_uid).first
+    halt render_json({res: false, message: "", msg: '由于对方的设置，无法进行此操作'}) if BlackUser.where(uid: track.uid, black_uid: @current_uid).first
 
-    track_ps = PersonalSetting.where(uid: tir.uid).first
+    track_ps = PersonalSetting.where(uid: track.uid).first
     if track_ps
-      u = get_profile_user_basic_info(tir.uid)
+      u = get_profile_user_basic_info(track.uid)
       res = {res: false, message: "", msg: '由于对方的隐私设置，发送失败'}
       case track_ps.allow_comment
       when 2
-        if !@current_user.isVerified and !Following.stn(tir.uid).where(uid: tir.uid, following_uid: @current_uid).any? and !Follower.stn(tir.uid).where(uid: @current_uid, following_uid: tir.uid).any?
+        if !@current_user.isVerified and !Following.stn(track.uid).where(uid: track.uid, following_uid: @current_uid).any? and !Follower.stn(track.uid).where(uid: @current_uid, following_uid: track.uid).any?
           halt render_json(res)
         end
       when 3
-        unless Following.stn(tir.uid).where(uid: tir.uid, following_uid: @current_uid).any?
+        unless Following.stn(track.uid).where(uid: track.uid, following_uid: @current_uid).any?
           render_json(res)
         end
       when 4
@@ -216,101 +218,70 @@ class MsgcenterController < ApplicationController
 
       # 评论
       comment = Comment.create(uid: @current_uid,
-        track_id: tir.track_id,
-        track_uid: tir.uid,
-        track_upload_source: tir.upload_source,
-        track_nickname: tir.nickname,
-        track_title: tir.title,
-        track_duration: tir.duration,
-        track_created_at: tir.created_at,
-        track_avatar_path: tir.avatar_path,
-        upload_source: 2,
+        track_id: track.id,
         second: params[:second],
         parent_id: master_comment_id,
-        content: params[:content],
-        nickname: @current_user.nickname,
-        avatar_path: @current_user.logoPic,
-        play_path: tir.play_path,
-        play_path_32: tir.play_path_32,
-        play_path_64: tir.play_path_64,
-        play_path_128: tir.play_path_128,
-        user_source: tir.user_source,
-        cover_path: tir.cover_path
+        content: params[:content]
       )
 
       # 发件箱 我评论的 评论回复
 
       Outbox.create(uid: @current_uid,
         nickname: @current_user.nickname,
-        to_uid: tir.uid,
-        to_nickname: tir.nickname,
+        to_uid: track.uid,
+        to_nickname: track_user.nickname,
         message_type: 3,
         upload_source: 2,
         content: params[:content],
-        track_id: tir.track_id, 
-        track_title: tir.title, 
-        track_cover_path: tir.cover_path, 
-        track_uid: tir.uid, 
-        track_nickname: tir.nickname, 
+        track_id: track.id, 
+        track_title: track.title, 
+        track_cover_path: track.cover_path, 
+        track_uid: track.uid, 
+        track_nickname: track_user.nickname, 
         comment_id: comment.id, 
         pcomment_id: master_comment_id, 
         pcomment_content: pcomment.content[0, 59],
         second: params[:second],
         avatar_path: @current_user.logoPic,
         extra_json: { 
-          track_id: tir.track_id, track_title: tir.title, track_cover_path: tir.cover_path, 
-          track_uid: tir.uid, track_nickname: tir.nickname, comment_id: comment.id, 
+          track_id: track.id, track_title: track.title, track_cover_path: track.cover_path, 
+          track_uid: track.uid, track_nickname: track_user.nickname, comment_id: comment.id, 
           pcomment_id: master_comment_id, pcomment_content: pcomment.content[0, 59], second: params[:second]
         }.to_json,
-        to_avatar_path: tir.avatar_path
+        to_avatar_path: track_user.logoPic
       )
     else
       # 评论声音
       # 评论
       comment = Comment.create(uid: @current_uid,
-        track_id: tir.track_id,
-        track_uid: tir.uid,
-        track_upload_source: tir.upload_source,
-        track_nickname: tir.nickname,
-        track_title: tir.title,
-        track_duration: tir.duration,
-        track_created_at: tir.created_at,
-        track_avatar_path: tir.avatar_path,
+        track_id: track.id,
         upload_source: 2,
         second: params[:second],
         parent_id: nil,
-        content: params[:content],
-        nickname: @current_user.nickname,
-        avatar_path: @current_user.logoPic,
-        play_path: tir.play_path,
-        play_path_32: tir.play_path_32,
-        play_path_64: tir.play_path_64,
-        play_path_128: tir.play_path_128,
-        user_source: tir.user_source,
-        cover_path: tir.cover_path
+        content: params[:content]
       )
 
       # 发件箱 我评论的 
       Outbox.create(uid: @current_uid,
         nickname: @current_user.nickname,
-        to_uid: tir.uid,
-        to_nickname: tir.nickname,
+        to_uid: track.uid,
+        to_nickname: track_user.nickname,
         message_type: 2,
         upload_source: 2,
         content: params[:content],
-        track_id: tir.track_id, 
-        track_title: tir.title, 
-        track_cover_path: tir.cover_path, 
-        track_uid: tir.uid, 
-        track_nickname: tir.nickname, 
+        track_id: track.id, 
+        track_title: track.title, 
+        track_cover_path: track.cover_path, 
+        track_uid: track.uid, 
+        track_nickname: track_user.nickname, 
         comment_id: comment.id, 
         second: params[:second],
         avatar_path: @current_user.logoPic,
         extra_json: {
-          track_id: tir.track_id, track_title: tir.title, track_cover_path: tir.cover_path, 
-              track_uid: tir.uid, track_nickname: tir.nickname, comment_id: comment.id, second: params[:second] 
+          track_id: track.id, track_title: track.title, track_cover_path: track.cover_path, 
+              track_uid: track.uid, track_nickname: track_user.nickname, comment_id: comment.id, second: params[:second] 
             }.to_json,
-        to_avatar_path: tir.avatar_path
+        to_avatar_path: track_user.logoPic
       )
     end
 
@@ -337,8 +308,8 @@ class MsgcenterController < ApplicationController
       content: puts_face(comment.content), 
       created_at: comment.created_at, 
       id: comment.id, 
-      nickname: comment.nickname, 
-      avatar_url: file_url(comment.avatar_path),
+      nickname: @current_user.nickname, 
+      avatar_url: file_url(@current_user.logoPic),
       parent_id: comment.parent_id, 
       second: comment.second, 
       track_id: comment.track_id, 

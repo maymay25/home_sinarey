@@ -35,11 +35,11 @@
                         <ul class="sub_nav_list">
                             <li class="item first">
                                 <% 
-                                order = params[:order]=="created_at asc" ? "created_at desc" : "created_at asc"
+                                order = params[:order]=="id asc" ? "id desc" : "id asc"
                                 q = {q:params[:q],order:order}.delete_if{ |key,value| value.nil? or value=="" }
                                 link_params = q.collect{|key,value| "#{key}=#{value}" }.join("&")
                                  %>
-                                <a href="<%= link_path "/#{@u.uid}/sound/?#{link_params}" %>" class="sort_icon <%= params[:order]=="created_at asc" ? 'down' : 'up' %>">发布时间</a>
+                                <a href="<%= link_path "/#{@u.uid}/sound/?#{link_params}" %>" class="sort_icon <%= params[:order]=="id asc" ? 'down' : 'up' %>">发布时间</a>
                             </li>
                         </ul>
                     </div>
@@ -59,27 +59,30 @@
                         <ul class="body_list" sound_ids="<%= @track_records.collect{|r|r.track_id}.join(",") %>">
                             <% @track_records.each_with_index do |r,i| %>
                             <%
-                              user = @users[r.track_uid]
-                              is_favorited = @is_favorited[r.track_id]
+                              t = @tracks[r.track_id]
+                              next if t.nil? or t.is_deleted
+                              album = @albums[t.album_id]
+                              user = @users[t.uid]
+                              is_favorited = @is_favorited[t.id]
                             %>
                             <li class="item">
-                                <div class="content_wrap" sound_id="<%= r.track_id %>">
+                                <div class="content_wrap" sound_id="<%= t.id %>">
                                     <div class="sound">
 
                                         <div class="sound_unexpandBox">
                                             <div class="sound_titlebar">
-                                                <a href="<%= link_path "/#{r.track_uid}/sound/#{r.track_id}" %>" class="sound_title"><%= r.title %></a>
-                                                <% if r.album_id %><span>&nbsp;&nbsp;来自<a href="<%= link_path "/#{r.track_uid}/album/#{r.album_id}" %>">《<%= r.album_title %>》</a></span><% end %>
+                                                <a href="<%= link_path "/#{t.uid}/sound/#{t.id}" %>" class="sound_title"><%= t.title %></a>
+                                                <% if album %><span>&nbsp;&nbsp;来自<a href="<%= link_path "/#{album.uid}/album/#{album.id}" %>">《<%= album.title %>》</a></span><% end %>
                                                 <% if r.op_type == 2 %><span>【转采】</span><% end %>
                                                 <span class="sound_playcount" title="<%= @track_plays_counts[i] %>次播放"><%= @track_plays_counts[i] %></span>
                                             </div>
-                                            <div class="smallPlayer" sound_uploadid="<%= r.upload_id %>" sound_wave="<%= file_url r.waveform %>">
+                                            <div class="smallPlayer" sound_uploadid="<%= t.upload_id %>" sound_wave="<%= file_url t.waveform %>">
                                                 <a href="javascript:;" class="playBtn"></a>
-                                                <span class="duration"><%= parse_duration r.duration %></span>
-                                                <% if r.cover_path and r.cover_path!="" %>
-                                                <div class="pin" sound_popsrc="<%= r.track_id %>">
-                                                    <a href="<%= link_path "/#{r.track_uid}/sound/#{r.track_id}" %>" class="soundface">
-                                                        <img alt="" src="<%= picture_url('track', r.cover_path, '60') %>" data-options="defaultImg:track_60">
+                                                <span class="duration"><%= parse_duration t.duration %></span>
+                                                <% if t.cover_path and t.cover_path!="" %>
+                                                <div class="pin" sound_popsrc="<%= t.id %>">
+                                                    <a href="<%= link_path "/#{t.uid}/sound/#{t.id}" %>" class="soundface">
+                                                        <img alt="" src="<%= picture_url('track', t.cover_path, '60') %>" data-options="defaultImg:track_60">
                                                         <span></span>
                                                     </a>
                                                 </div>
@@ -89,9 +92,9 @@
 
                                         <div class="sound_expandBox">
                                             <div class="sound_titlebar">
-                                                <a class="sound_title" href="<%= link_path "/#{r.track_uid}/sound/#{r.track_id}" %>"><%= r.title %></a>
+                                                <a class="sound_title" href="<%= link_path "/#{t.uid}/sound/#{t.id}" %>"><%= t.title %></a>
                                                 <span class="sound_playcount" title="<%= @track_plays_counts[i] %>次播放"><%= @track_plays_counts[i] %></span>
-                                                <div class="fr"><span class="sound_position">00:00</span>/<span class="sound_duration"><%= parse_duration r.duration %></span></div>
+                                                <div class="fr"><span class="sound_position">00:00</span>/<span class="sound_duration"><%= parse_duration t.duration %></span></div>
                                             </div>
                                             <div class="feed_middlePlayerBox">
                                                 <div class="middlePlayer">
@@ -104,8 +107,8 @@
                                                             <div class="player_progressbarBg"></div>
                                                             <div class="player_seekbar"></div>
                                                             <div class="player_playbar"></div>
-                                                            <% if r.waveform %>
-                                                                <div class="player_wavebox" sound_wave="<%= get_wave_url r.waveform %>" sound_uploadid="<%= r.upload_id %>"></div>
+                                                            <% if t.waveform %>
+                                                                <div class="player_wavebox" sound_wave="<%= get_wave_url t.waveform %>" sound_uploadid="<%= t.upload_id %>"></div>
                                                             <% end %>
                                                              <div class="player_progressbarCoverBg"></div>
                                                             <div class="player_nonius">
@@ -123,10 +126,10 @@
                                                         </div>
                                                     </div>
 
-                                                    <% if r.cover_path and r.cover_path!="" %>
-                                                    <div class="pin" sound_popsrc="<%= r.track_id %>">
-                                                        <a href="<%= link_path "/#{r.track_uid}/sound/#{r.track_id}" %>" class="soundface">
-                                                            <img alt="" src="<%= picture_url('track', r.cover_path, '60') %>" data-options="defaultImg:track_60">
+                                                    <% if t.cover_path and t.cover_path!="" %>
+                                                    <div class="pin" sound_popsrc="<%= t.id %>">
+                                                        <a href="<%= link_path "/#{t.uid}/sound/#{t.id}" %>" class="soundface">
+                                                            <img alt="" src="<%= picture_url('track', t.cover_path, '60') %>" data-options="defaultImg:track_60">
                                                             <span></span>
                                                         </a>
                                                     </div>
@@ -135,7 +138,7 @@
                                                 </div>
                                             </div>
                                             <div class="sound_content">
-                                              <%= r.intro.truncate(160) if r.intro %>
+                                              <%= t.intro.truncate(160) if t.intro %>
                                             </div>
                                         </div>
 
@@ -149,10 +152,10 @@
                                                 <a href="javascript:;" class="forwardBtn link1">转采(<span class="count"><%= @track_shares_counts[i] %></span>)</a>
                                                 <% bds_config = {
                                                     bdDes:"喜马拉雅好声音",
-                                                    text:"#{r.intro.truncate(80) if r.intro} 我觉得《#{r.title}》听起来挺不错的，你觉得呢？（分享自 @喜马拉雅好声音 ）",
-                                                    title:r.title,
-                                                    pic:picture_url('track', r.cover_path, '180'),
-                                                    url:"#{Settings.home_root}/#{r.track_uid}/sound/#{r.track_id}"
+                                                    text:"#{t.intro.truncate(80) if t.intro} 我觉得《#{t.title}》听起来挺不错的，你觉得呢？（分享自 @喜马拉雅好声音 ）",
+                                                    title:t.title,
+                                                    pic:picture_url('track', t.cover_path, '180'),
+                                                    url:"#{Settings.home_root}/#{t.uid}/sound/#{t.id}"
                                                 } %>
                                                 <a href="javascript:;" class="bdShareBtn link1" data="<%= oj_dump(bds_config) %>">分享</a>
                                             </div>

@@ -131,11 +131,11 @@
                         </div>
                         <div class="disSoundlist mgT20">
                             <% @wall_new_sound.each do |track| %>
-                            <div class="listItem mgB30" sound_id="<%= track[:track_id] %>">
+                            <div class="listItem mgB30" sound_id="<%= track.id %>">
                                 <div class="disSoundPanel">
                                     <div class="left">
-                                        <a class="userface40" href="<%= link_his_path "#{track[:uid]}" %>"> 
-                                            <img card="<%= track[:uid] %>" src="<%= picture_url('header', track[:avatar_path], '60') %>" alt="">
+                                        <a class="userface40" href="<%= link_his_path "#{track.uid}" %>"> 
+                                            <img card="<%= track.uid %>" src="<%= picture_url('header', track.avatar_path, '60') %>" alt="">
                                         </a>
                                     </div>
                                     <div class="right">
@@ -145,9 +145,9 @@
                                                     <a class="playBtn"></a>
                                                 </div>
                                                 <div class="right">
-                                                    <a class="title" href="<%= link_path "/#{track[:uid]}/sound/#{track[:track_id]}" %>" title="<%= track[:title] %>"><%= track[:title].truncate(30) %></a>
+                                                    <a class="title" href="<%= link_path "/#{track['uid']}/sound/#{track.id}" %>" title="<%= track.title %>"><%= track.title.truncate(30) %></a>
                                                     <span class="fr mgR5">
-                                                        <%= parse_time_until_now track[:created_at] %>
+                                                        <%= parse_time_until_now track.created_at %>
                                                     </span>
                                                 </div>
                                             </div>
@@ -155,7 +155,7 @@
                                                 <div class="player_progressbarBg"></div>
                                                 <div class="player_seekbar"></div>
                                                 <div class="player_playbar"></div>
-                                                <div class="player_wavebox" sound_uploadid="<%= track[:upload_id] %>" sound_wave="<%= get_wave_url track[:waveform] %>"></div>
+                                                <div class="player_wavebox" sound_uploadid="<%= track.upload_id %>" sound_wave="<%= get_wave_url track.waveform %>"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -249,13 +249,13 @@
                                     <p class="cl"></p>
                                 </div>
                                 <% if lastest_track -%>
-                                <div class="miniPlayer2 mgLR15 mgT10" sound_id="<%= lastest_track.track_id %>">
+                                <div class="miniPlayer2 mgLR15 mgT10" sound_id="<%= lastest_track.id %>">
                                     <div class="player_titleBar">
                                         <div class="left">
                                             <a class="playBtn"></a>
                                         </div>
                                         <div class="right">
-                                            <a class="title" href="<%= link_path("/#{lastest_track.uid}/sound/#{lastest_track.track_id}") %>" title="<%= lastest_track.track_title %>"><%= lastest_track.track_title %></a>
+                                            <a class="title" href="<%= link_path("/#{lastest_track.uid}/sound/#{lastest_track.id}") %>" title="<%= lastest_track.track_title %>"><%= lastest_track.track_title %></a>
                                             <%= '【转采】' if lastest_track.is_resend %>
                                         </div>
                                     </div>

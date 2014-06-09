@@ -44,7 +44,7 @@ class ExploreController < ApplicationController
     end
 
     if server_data
-      @wall_new_sound = TrackInRecord.mfetch(server_data.ids, true)
+      @wall_new_sound = Track.mfetch(server_data.ids, true)
 
       #通知删除不存在的声音
       miss_sum = server_data.ids.length-@wall_new_sound.length-1
@@ -58,20 +58,21 @@ class ExploreController < ApplicationController
     end
 
     category_ids = [1,2,3,4,5,6,7,8,9,10,11]
-    _categories = []
-    Category.where(id:category_ids).order("order_num asc").each{ |c|
-        _categories << {id:c.id, name:c.name, title:c.title} 
-    }
-    
+
+    @category_datas = []
+    category_ids.each do |cid|
+      category = CATEGORIES[cid]
+      next if category.nil?
+      @category_datas << {id:category.id,name:category.id,title:category.title}
+    end
+
     datas = get_hot_user_and_sound(category_ids)
 
-    _categories.each do |category|
+    @category_datas.each do |category|
         category[:tags] = get_recommend_category_tag(category[:id]).limit(5)
         category[:users] = datas[:users][category[:id]] || []
         category[:tracks] = datas[:tracks][category[:id]] || []
     end
-    @category_datas = _categories
-
 
     editor_recommends = EditorRecommend.where(["start_time < ?",Time.now]).where(["end_time is null or end_time > ?",Time.now]).where(is_expired:0)
     @editor_recommend1 = editor_recommends.where(position:1).first
@@ -161,49 +162,47 @@ class ExploreController < ApplicationController
 
     track_count,track_ids = server_data.count,server_data.ids
 
-    src_track_list = track_ids.count > 0 ? TrackInRecord.mfetch(track_ids).select{|track| track} : []
+    src_tracks = track_ids.count > 0 ? Track.mfetch(track_ids,true) : []
 
-    #mfetch中没有过滤is_public,is_publish,is_deleted字段
-    src_track_list = src_track_list.delete_if{|t| t.is_publish==false or t.is_public==false or t.is_deleted==true }
+    src_tracks = src_tracks.delete_if{|t| t.status!=1 or t.is_public==false or t.is_deleted==true }
 
     #通知删除不存在的声音
-    miss_sum = track_ids.length-src_track_list.length
-    if miss_sum > 0
-      not_exist_list = track_ids - src_track_list.collect{|t|t.track_id}
-      if condition=="zuixinshangchuan"
-        $backend_client.delRecentVTrack(category, tag, not_exist_list)
-      elsif condition=="zuiduoshoucang"
-        $backend_client.delMostFavoritSound(category, tag, not_exist_list)
-      elsif condition=="jincaituijian"
-        $backend_client.delHotSound(category, tag, not_exist_list)
-      else
-        $backend_client.delDayHotSound(category, tag, not_exist_list)
-      end
-    end
-
-    src_track_ids = src_track_list.collect{|t| t.track_id}
-    if src_track_ids.size > 0
+    # miss_sum = track_ids.length-src_tracks.length
+    # if miss_sum > 0
+    #   not_exist_list = track_ids - src_tracks.collect{|t|t.id}
+    #   if condition=="zuixinshangchuan"
+    #     $backend_client.delRecentVTrack(category, tag, not_exist_list)
+    #   elsif condition=="zuiduoshoucang"
+    #     $backend_client.delMostFavoritSound(category, tag, not_exist_list)
+    #   elsif condition=="jincaituijian"
+    #     $backend_client.delHotSound(category, tag, not_exist_list)
+    #   else
+    #     $backend_client.delDayHotSound(category, tag, not_exist_list)
+    #   end
+    # end
+ 
+    if src_tracks.length > 0
+      src_track_ids = src_tracks.collect{|t| t.id}
       track_plays_counts = $counter_client.getByIds(Settings.counter.track.plays, src_track_ids)
       track_shares_counts = $counter_client.getByIds(Settings.counter.track.shares, src_track_ids)
       track_comments_counts = $counter_client.getByIds(Settings.counter.track.comments, src_track_ids)
       track_favorites_counts = $counter_client.getByIds(Settings.counter.track.favorites, src_track_ids)
-    else
-      track_plays_counts = []
-      track_shares_counts = []
-      track_comments_counts = []
-      track_favorites_counts = []
+
+      track_uids = src_tracks.map(&:uid)
+      @users = track_uids.present? ? $profile_client.getMultiUserBasicInfos(track_uids) : {}
     end
 
     track_list = []
-    src_track_list.each_with_index do |t,i|
+    src_tracks.each_with_index do |t,i|
+      user = @users[t.uid]
       track_list << {
-        id:t.track_id,
+        id:t.id,
         category_id:t.category_id,
         short_intro:t.short_intro,
-        nickname:t.nickname,
+        nickname:user && user.nickname,
         title:t.title,
         uid:t.uid,
-        waterfall_image:t.cover_path && picture_url('track', t["cover_path"], '180n'),
+        waterfall_image:t.cover_path && picture_url('track', t.cover_path, '180n'),
         explore_height:t.explore_height,
         upload_id:t.upload_id,
         waveform:t.waveform,

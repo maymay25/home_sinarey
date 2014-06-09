@@ -51,10 +51,11 @@
     <% end %>
 
     <!--他最新的声音-->
-    <% track_records = TrackRecord.stn(@u.uid).where(uid: @u.uid, is_deleted: false, status: 1).order('created_at desc').select('track_id,track_uid,title').limit(10) %>
+    <% track_records = TrackRecord.stn(@u.uid).where(uid: @u.uid, is_deleted: false, status: 1).order('id desc').limit(10) %>
     <% if track_records.size > 0 %>
     <%
         track_ids = track_records.collect{ |r| r.track_id }
+        tracks = Track.mfetch(track_ids,true)
         track_plays_counts = $counter_client.getByIds(Settings.counter.track.plays, track_ids)
     %>
     <div class="soundBar mgT30">
@@ -63,10 +64,10 @@
             <h2 class="title">他最新的声音</h2>
         </div>
         <ul>
-            <% track_records.each_with_index do |r,i| %>
+            <% tracks.each_with_index do |t,i| %>
             <li>
                 <div class="soundPanelBar3">
-                    <a class="title" href="<%= link_path "/#{r.track_uid}/sound/#{r.track_id}" %>"><%= r.title %></a>
+                    <a class="title" href="<%= link_path "/#{t.uid}/sound/#{t.id}" %>"><%= t.title %></a>
                     <span class="times"><%= track_plays_counts[i] %>次</span>
                 </div>
             </li>

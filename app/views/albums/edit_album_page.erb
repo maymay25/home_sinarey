@@ -33,11 +33,11 @@
                       <div class="soundInfo">
                         <div class="unedit">
                           <span class="tit" title="<%= track["title"] %>"><%= track["title"].truncate(30) %></span>
-                          <% if track.op_type == TrackRecordOrigin::OP_TYPE[:UPLOAD] %>
+                          <% if track.op_type == TrackRecordTemp::OP_TYPE[:UPLOAD] %>
                           <a class="editBtn forbid-drag"></a>
                           <% end %>
                         </div>
-                        <% if track.op_type == TrackRecordOrigin::OP_TYPE[:UPLOAD] %>
+                        <% if track.op_type == TrackRecordTemp::OP_TYPE[:UPLOAD] %>
                         <div class="edit forbid-drag">
                           <input type="text" value="<%= track["title"] %>" name="files[]"/>   
                           <a class="editConfirm" href="javascript:;">确认</a>

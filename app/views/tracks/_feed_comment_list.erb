@@ -1,27 +1,28 @@
-<% if @comments and !@comments.empty? %>
+<% if @comments.present? %>
     <% @comments.each do |comment| %>
+    <% user = @users[comment.uid] %>
     <li class="listItem">
         <div class="comment">
             <div class="left">
-                <a class="userface" card="<%= comment['uid'] %>" href="<%= link_his_path(comment['uid']) %>">
-                    <img src="<%= picture_url('header', comment['avatar_path'], '60') %>" alt="" data-options="defaultImg:person_60">
+                <a class="userface" card="<%= comment.uid %>" href="<%= link_his_path(comment.uid) %>">
+                    <img src="<%= picture_url('header', user&&user.logoPic, '60') %>" alt="" data-options="defaultImg:person_60">
                 </a>
             </div>
             <div class="right">
                 <div class="comment_titleBar">
-                    <a href="<%= link_his_path(comment['uid']) %>"><%= comment['nickname'] %></a>
-                    <span><% if comment['second'] %>在声音 <%= parse_duration comment['second'] %> 处<% end %>的评论</span>
+                    <a href="<%= link_his_path(comment.uid) %>"><%= user && user.nickname %></a>
+                    <span><% if comment.second %>在声音 <%= parse_duration comment.second %> 处<% end %>的评论</span>
                 </div>
-                <div class="comment_content"><%= puts_face(comment['content']).html_safe %>
+                <div class="comment_content"><%= puts_face(comment.content).html_safe %>
                 </div>
                 <div>
                     <span class="comment_createtime">
-                        <%= comment['created_at'].strftime('%-m月%-d日 %H:%M') %>
+                        <%= comment.created_at.strftime('%-m月%-d日 %H:%M') %>
                         <span class="comment_operate">
-                        <% if @current_uid == comment['uid'] %>
-                        <a class="comment_delete" href="javascript:;" data-options="<%= oj_dump({comment_id: comment.id,track_id: @tir['track_id']}) %>">删除</a>
+                        <% if @current_uid == comment.uid %>
+                        <a class="comment_delete" href="javascript:;" data-options="<%= oj_dump({comment_id: comment.id,track_id: @track.id}) %>">删除</a>
                         <% end %>
-                        <a href="javascript:;" class="replyBtn" data-options="<%= oj_dump({c_id: comment.id, c_second: comment.second, c_nickname: comment.nickname}) %>">回复</a>
+                        <a href="javascript:;" class="replyBtn" data-options="<%= oj_dump({c_id: comment.id, c_second: comment.second, c_nickname: user && user.nickname}) %>">回复</a>
                         </span>
                     </span>
                 </div>
@@ -32,7 +33,7 @@
     <% end %>
 
     <% if @comments_count > @comments.length %>
-    <a href="<%= link_path "/#{@tir['uid']}/sound/#{@tir['track_id']}" %>" class="fr">更多评论</a>
+    <a href="<%= link_path "/#{@track.uid}/sound/#{@track.id}" %>" class="fr">更多评论</a>
     <% end %>
     
 <% end %>
