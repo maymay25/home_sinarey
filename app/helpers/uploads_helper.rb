@@ -942,18 +942,23 @@ module UploadsHelper
     response[:destroy] = destroy_album_tracks(album,record_ids_to_destroy)
 
     all_records,new_fileid_idx = [],0
+    all_tracks = {}
     zipfiles.each do |fid, title|
       case fid[0] when 'r'
         next unless (record_id=fid[1..-1].to_i) > 0
         if result = update_album_track(album,record_id,title)
           response[:update] << result[:update] if result[:update] #maybe not change
           all_records << result[:record]
+          track = result[:track]
+          all_tracks[track.id] = track
         end
       when 'm'
         next unless (record_id=fid[1..-1].to_i) > 0
         if result = move_album_track(album,record_id,title)
           response[:move] << result[:move]
           all_records << result[:record]
+          track = result[:track]
+          all_tracks[track.id] = track
         end
       else
         transcode_data = p_transcode_res['data'][new_fileid_idx]
@@ -961,6 +966,8 @@ module UploadsHelper
         if result = create_album_track(album,fid,title,transcode_data,default_cover_path,default_cover_exlore_height,cleaned_rich_intro)
           response[:create] << result[:create]
           all_records << result[:record]
+          track = result[:track]
+          all_tracks[track.id] = track
         end
       end
     end
@@ -968,11 +975,12 @@ module UploadsHelper
     # 更新专辑声音排序和最新更新声音
     if all_records.size > 0
       album.records_order = all_records.map{|r| r.id}.join(',')
-      latest_record = all_records.sort{|x, y| y.created_at <=> x.created_at }.first
-      album.last_uptrack_at = latest_record.created_at
-      album.last_uptrack_id = latest_record.track_id
-      album.last_uptrack_title = latest_record.title
-      album.last_uptrack_cover_path = latest_record.cover_path
+      latest_track_id = all_records.sort{|x, y| y.created_at <=> x.created_at }.first.track_id
+      latest_track = all_tracks[latest_track_id]
+      album.last_uptrack_at = latest_track.created_at
+      album.last_uptrack_id = latest_track.track_id
+      album.last_uptrack_title = latest_track.title
+      album.last_uptrack_cover_path = latest_track.cover_path
     else
       album.records_order = nil
       album.last_uptrack_at = nil
@@ -1013,7 +1021,7 @@ module UploadsHelper
       track = Track.shard(record.track_id).where(uid: record.track_uid, id: record.track_id).first
       return false unless track
 
-      record.title = title if title.present?
+      #record.title = title if title.present?
       #record.album_title = album.title
       #record.album_cover_path = album.cover_path
       record.is_public = album.is_public
@@ -1029,6 +1037,7 @@ module UploadsHelper
       end
     end
     response[:record] = record
+    response[:track] = track
     response
   end
 
@@ -1050,7 +1059,7 @@ module UploadsHelper
     #track.album_cover_path = album.cover_path
     track.is_public = album.is_public
 
-    record.title = title
+    #record.title = title
     record.album_id = album.id
     #record.album_title = album.title
     #record.album_cover_path = album.cover_path
@@ -1061,7 +1070,7 @@ module UploadsHelper
 
     response[:move] = [ record.id, cache_album_id ]
     response[:record] = record
-
+    response[:track] = track
     response
   end
 
@@ -1130,7 +1139,7 @@ module UploadsHelper
 
     response[:create] = record.id
     response[:record] = record
-
+    response[:track] = track
     response
   end
 
