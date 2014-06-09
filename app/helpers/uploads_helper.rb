@@ -33,7 +33,7 @@ module UploadsHelper
     track.resinger = resinger
     track.announcer = announcer
     track.composer = composer
-    track.is_publish = true
+    #track.is_publish = true
     track.is_public = is_public
     #track.allow_download =  true
     #track.allow_comment = true
@@ -177,7 +177,7 @@ module UploadsHelper
     track_origin.resinger = resinger
     track_origin.announcer = announcer
     track_origin.composer = composer
-    track_origin.is_publish = true
+    #track_origin.is_publish = true
     track_origin.is_public = is_public
     #track_origin.allow_download =  true
     #track_origin.allow_comment = true
@@ -273,7 +273,7 @@ module UploadsHelper
     track.resinger = track_origin.resinger
     track.announcer = track_origin.announcer
     track.composer = track_origin.composer
-    track.is_publish = track_origin.is_publish
+    #track.is_publish = track_origin.is_publish
     track.is_public = track_origin.is_public
     track.lyric = track_origin.lyric
     #track.allow_download =  track_origin.allow_download
@@ -311,7 +311,7 @@ module UploadsHelper
       dalbum.cover_path = album.cover_path
       dalbum.is_records_desc = album.is_records_desc
       dalbum.is_public = album.is_public
-      dalbum.is_publish = true
+      #dalbum.is_publish = true
       dalbum.publish_at = datetime
       dalbum.status = default_status
       dalbum.rich_intro = cut_intro(rich_intro)
@@ -369,7 +369,7 @@ module UploadsHelper
     album.category_id = category_id
     album.music_category = music_category
     album.cover_path = default_cover_path
-    album.is_publish = true
+    #album.is_publish = true
     album.is_public = true
     album.is_records_desc = is_records_desc
     album.is_finished = is_finished
@@ -424,7 +424,7 @@ module UploadsHelper
     album.is_finished = is_finished
     album.cover_path = default_cover_path
     album.is_public = true
-    album.is_publish = true
+    #album.is_publish = true
     album.is_records_desc = is_records_desc
     album.publish_at = datetime
     album.status = calculate_default_status(@current_user)
@@ -476,7 +476,7 @@ module UploadsHelper
       track.cover_path = default_cover_path
       track.explore_height = default_cover_exlore_height
       track.is_public = album.is_public
-      track.is_publish = true
+      #track.is_publish = true
       track.delayed_album_id = album.id
       track.publish_at = datetime
       track.fileid = fid.to_i
@@ -854,7 +854,7 @@ module UploadsHelper
     dalbum.cover_path = album.cover_path
     dalbum.is_public = album.is_public
     dalbum.is_records_desc = is_records_desc || album.is_records_desc
-    dalbum.is_publish = album.is_publish
+    #dalbum.is_publish = album.is_publish
     dalbum.publish_at = datetime
     dalbum.status = album.status
     dalbum.rich_intro = album.rich_intro
@@ -906,7 +906,7 @@ module UploadsHelper
       track.cover_path = default_cover_path
       track.explore_height = default_cover_exlore_height
       track.is_public = album.is_public
-      track.is_publish = true
+      #track.is_publish = true
       track.publish_at = datetime
       track.fileid = fid.to_i
       track.inet_aton_ip = inet_aton(get_client_ip)
@@ -1106,7 +1106,7 @@ module UploadsHelper
     track.cover_path = default_cover_path
     track.explore_height = default_cover_exlore_height
     track.is_public = album.is_public
-    track.is_publish = true
+    #track.is_publish = true
 
     track.inet_aton_ip = inet_aton(get_client_ip)
     track.status = album.status
@@ -1153,7 +1153,7 @@ module UploadsHelper
       short_intro: track.short_intro,
       rich_intro: track.rich_intro,
       is_public: track.is_public,
-      is_publish: track.is_publish,
+      #is_publish: track.is_publish,
       singer: track.singer,
       singer_category: track.singer_category,
       author: track.author,
