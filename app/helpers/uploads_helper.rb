@@ -11,11 +11,11 @@ module UploadsHelper
     track.upload_source = 2 # 网站
     track.is_crawler = false
     track.uid = @current_uid # 源发布者
-    track.nickname = @current_user.nickname
-    track.avatar_path = @current_user.logoPic
-    track.is_v = @current_user.isVerified
-    track.dig_status = calculate_dig_status(@current_user)
-    track.human_category_id = @current_user.vCategoryId
+    #track.nickname = @current_user.nickname
+    #track.avatar_path = @current_user.logoPic
+    #track.is_v = @current_user.isVerified
+    #track.dig_status = calculate_dig_status(@current_user)
+    #track.human_category_id = @current_user.vCategoryId
     track.approved_at = current_now if default_status == 1
     track.title = title
     track.user_source = user_source
@@ -35,10 +35,10 @@ module UploadsHelper
     track.composer = composer
     track.is_publish = true
     track.is_public = is_public
-    track.allow_download =  true
-    track.allow_comment = true
+    #track.allow_download =  true
+    #track.allow_comment = true
     track.transcode_state = transcode_data['transcode_state']
-    track.mp3size = transcode_data['paths']['origin_size']
+    track.origin_size = transcode_data['paths']['origin_size']
     track.upload_id = transcode_data['upload_id']
     track.download_path = transcode_data['paths']['aacplus32']
     track.download_size = transcode_data['paths']['aacplus32_size']
@@ -71,8 +71,8 @@ module UploadsHelper
 
     if album
       track.album_id = album.id
-      track.album_title = album.title
-      track.album_cover_path = album.cover_path
+      #track.album_title = album.title
+      #track.album_cover_path = album.cover_path
     end
 
     track.inet_aton_ip = inet_aton(get_client_ip)
@@ -105,58 +105,13 @@ module UploadsHelper
     TrackBlock.create(track_id: track.id, duration: track.duration) if track.duration
     # 声音记录
     track_record = TrackRecord.create(
-      track_id: track.id,
-      track_uid: @current_uid, # 原声音发布者
-      track_upload_source: track.upload_source,
       uid: @current_uid,  
-      nickname: @current_user.nickname,
-      avatar_path: @current_user.logoPic,
-      is_v: @current_user.isVerified,
-      dig_status: track.dig_status,
-      human_category_id: @current_user.vCategoryId,
-      approved_at: track.approved_at,
+      track_id: track.id,
       op_type: 1,
-      is_crawler: track.is_crawler,
-      upload_source: track.upload_source,
-      user_source: track.user_source,
-      category_id: track.category_id,
-      music_category: track.music_category,
-      download_path: track.download_path,
-      duration: track.duration,
-      play_path: track.play_path,
-      play_path_32: track.play_path_32,
-      play_path_64: track.play_path_64,
-      play_path_128: track.play_path_128,
-      transcode_state: track.transcode_state,
-      mp3size: track.mp3size,
-      mp3size_32: track.mp3size_32,
-      mp3size_64: track.mp3size_64,
-      tags: track.tags,
-      title: track.title,
-      intro: track.intro,
-      short_intro: track.short_intro,
-      rich_intro: track.rich_intro,
-      is_public: track.is_public,
-      is_publish: track.is_publish,
-      singer: track.singer,
-      singer_category: track.singer_category,
-      author: track.author,
-      arrangement: track.arrangement,
-      post_production: track.post_production,
-      resinger: track.resinger,
-      announcer: track.announcer,
-      composer: track.composer,
-      allow_download: track.allow_download,
-      allow_comment: track.allow_comment,
-      cover_path: track.cover_path,
-      album_id: track.album_id,
-      album_title: track.album_title,
-      album_cover_path: track.album_cover_path,
-      waveform: track.waveform,
-      upload_id: track.upload_id,
-      inet_aton_ip: track.inet_aton_ip,
       status: track.status,
-      explore_height: track.explore_height
+      is_public: track.is_public,
+      album_id: track.album_id,
+      upload_source: track.upload_source
     )
 
     if track.is_public && track.status == 1
@@ -200,11 +155,11 @@ module UploadsHelper
     track_origin.upload_source = 2 # 网站
     track_origin.is_crawler = false
     track_origin.uid = @current_uid # 源发布者
-    track_origin.nickname = @current_user.nickname
-    track_origin.avatar_path = @current_user.logoPic
-    track_origin.is_v = @current_user.isVerified
-    track_origin.dig_status = calculate_dig_status(@current_user)
-    track_origin.human_category_id = @current_user.vCategoryId
+    #track_origin.nickname = @current_user.nickname
+    #track_origin.avatar_path = @current_user.logoPic
+    #track_origin.is_v = @current_user.isVerified
+    #track_origin.dig_status = calculate_dig_status(@current_user)
+    #track_origin.human_category_id = @current_user.vCategoryId
     track_origin.approved_at = current_now if default_status == 1
     track_origin.title = title
     track_origin.user_source = user_source
@@ -224,10 +179,10 @@ module UploadsHelper
     track_origin.composer = composer
     track_origin.is_publish = true
     track_origin.is_public = is_public
-    track_origin.allow_download =  true
-    track_origin.allow_comment = true
+    #track_origin.allow_download =  true
+    #track_origin.allow_comment = true
     track_origin.transcode_state = transcode_data['transcode_state']
-    track_origin.mp3size = transcode_data['paths']['origin_size']
+    track_origin.origin_size = transcode_data['paths']['origin_size']
     track_origin.upload_id = transcode_data['upload_id']
     track_origin.download_path = transcode_data['paths']['aacplus32']
     track_origin.download_size = transcode_data['paths']['aacplus32_size']
@@ -250,8 +205,8 @@ module UploadsHelper
       end
 
       track_origin.album_id = album.id
-      track_origin.album_title = album.title
-      track_origin.album_cover_path = album.cover_path
+      #track_origin.album_title = album.title
+      #track_origin.album_cover_path = album.cover_path
       track_origin.cover_path = default_cover_path
       track_origin.explore_height = default_cover_exlore_height
     end
@@ -296,11 +251,11 @@ module UploadsHelper
     track.upload_source = track_origin.upload_source
     track.is_crawler = track_origin.is_crawler
     track.uid = track_origin.uid
-    track.nickname = track_origin.nickname
-    track.avatar_path = track_origin.avatar_path
-    track.is_v = track_origin.is_v
-    track.dig_status = track_origin.dig_status
-    track.human_category_id = track_origin.human_category_id
+    #track.nickname = track_origin.nickname
+    #track.avatar_path = track_origin.avatar_path
+    #track.is_v = track_origin.is_v
+    #track.dig_status = track_origin.dig_status
+    #track.human_category_id = track_origin.human_category_id
     track.approved_at = track_origin.approved_at
     track.title = track_origin.title
     track.user_source = track_origin.user_source
@@ -321,10 +276,10 @@ module UploadsHelper
     track.is_publish = track_origin.is_publish
     track.is_public = track_origin.is_public
     track.lyric = track_origin.lyric
-    track.allow_download =  track_origin.allow_download
-    track.allow_comment = track_origin.allow_comment
+    #track.allow_download =  track_origin.allow_download
+    #track.allow_comment = track_origin.allow_comment
     track.transcode_state = track_origin.transcode_state
-    track.mp3size = track_origin.mp3size
+    track.origin_size = track_origin.origin_size
     track.upload_id = track_origin.upload_id
     track.download_path = track_origin.download_path
     track.download_size = track_origin.download_size
@@ -340,11 +295,11 @@ module UploadsHelper
     if album
       dalbum = DelayedAlbum.new
       dalbum.uid = @current_uid
-      dalbum.nickname = album.nickname
-      dalbum.avatar_path = album.avatar_path
-      dalbum.is_v = album.is_v
-      dalbum.dig_status = album.dig_status
-      dalbum.human_category_id = album.human_category_id
+      #dalbum.nickname = album.nickname
+      #dalbum.avatar_path = album.avatar_path
+      #dalbum.is_v = album.is_v
+      #dalbum.dig_status = album.dig_status
+      #dalbum.human_category_id = album.human_category_id
       dalbum.title = album.title
       dalbum.intro = album.intro
       dalbum.short_intro = album.short_intro
@@ -400,11 +355,11 @@ module UploadsHelper
   def create_album_and_tracks(zipfiles,category_id,title,tags,user_source,intro,rich_intro,is_records_desc,music_category,is_finished,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height)
     album = Album.new
     album.uid = @current_uid
-    album.nickname = @current_user.nickname
-    album.avatar_path = @current_user.logoPic
-    album.is_v = @current_user.isVerified
-    album.dig_status = calculate_dig_status(@current_user)
-    album.human_category_id = @current_user.vCategoryId
+    #album.nickname = @current_user.nickname
+    #album.avatar_path = @current_user.logoPic
+    #album.is_v = @current_user.isVerified
+    #album.dig_status = calculate_dig_status(@current_user)
+    #album.human_category_id = @current_user.vCategoryId
     album.title = title
     album.intro = intro
     album.short_intro = intro ? intro[0, 100] : nil
@@ -454,11 +409,11 @@ module UploadsHelper
 
     album = DelayedAlbum.new
     album.uid = @current_uid
-    album.nickname = @current_user.nickname
-    album.avatar_path = @current_user.logoPic
-    album.is_v = @current_user.isVerified
-    album.dig_status = calculate_dig_status(@current_user)
-    album.human_category_id = @current_user.vCategoryId
+    #album.nickname = @current_user.nickname
+    #album.avatar_path = @current_user.logoPic
+    #album.is_v = @current_user.isVerified
+    #album.dig_status = calculate_dig_status(@current_user)
+    #album.human_category_id = @current_user.vCategoryId
     album.title = title
     album.intro = intro
     album.short_intro = intro && intro[0, 100]
@@ -487,7 +442,7 @@ module UploadsHelper
       track.task_count_tag = task_count_tag
       d = p_transcode_res['data'][new_fileid_idx]
       track.transcode_state = d['transcode_state']
-      track.mp3size = d['paths']['origin_size']
+      track.origin_size = d['paths']['origin_size']
       track.upload_id = d['upload_id']
       track.download_path = d['paths']['aacplus32']
       track.download_size = d['paths']['aacplus32_size']
@@ -501,11 +456,11 @@ module UploadsHelper
       track.is_crawler = false
       track.upload_source = 2 # 网站上传
       track.uid = album.uid # 源发布者id
-      track.nickname = album.nickname # 源发布者昵称
-      track.avatar_path = album.avatar_path #源发布者头像
-      track.is_v = album.is_v
-      track.dig_status = album.dig_status # 发现页可见
-      track.human_category_id = album.human_category_id
+      #track.nickname = album.nickname # 源发布者昵称
+      #track.avatar_path = album.avatar_path #源发布者头像
+      #track.is_v = album.is_v
+      #track.dig_status = album.dig_status # 发现页可见
+      #track.human_category_id = album.human_category_id
       track.approved_at = Time.now
       track.album_id = album.id # 源专辑id
       track.album_title = album.title # 源专辑标题
@@ -621,12 +576,12 @@ module UploadsHelper
 
     if album # 更新专辑信息
       temp[:album_id] = album.id
-      temp[:album_title] = album.title
-      temp[:album_cover_path] = album.cover_path
+      #temp[:album_title] = album.title
+      #temp[:album_cover_path] = album.cover_path
     elsif cache_album_id
       temp[:album_id] = nil
-      temp[:album_title] = nil
-      temp[:album_cover_path] = nil
+      #temp[:album_title] = nil
+      #temp[:album_cover_path] = nil
     end
 
     track.update_attributes(temp)
@@ -688,9 +643,9 @@ module UploadsHelper
       if track.is_public && track.status == 1 && !@current_user.isVerified
         ApprovingTrack.where(track_id: track.id, is_update: true).destroy_all
         uag = UidApproveGroup.where(uid: track.uid).first
-        ApprovingTrack.create(album_cover_path: track.album_cover_path,
+        ApprovingTrack.create(album_cover_path: album && album.cover_path,
+          album_title: album && album.title,
           album_id: track.album_id,
-          album_title: track.album_title,
           approve_group_id: uag && uag.approve_group_id,
           category_id: track.category_id,
           cover_path: track.cover_path,
@@ -822,7 +777,7 @@ module UploadsHelper
     
     tmp_attrs = {
       title: title,
-      nickname: @current_user.nickname,
+      #nickname: @current_user.nickname,
       intro: intro,
       short_intro: intro && intro[0, 100],
       rich_intro: cut_intro(rich_intro),
@@ -883,11 +838,11 @@ module UploadsHelper
 
     dalbum = DelayedAlbum.new
     dalbum.uid = @current_uid
-    dalbum.nickname = @current_user.nickname
-    dalbum.avatar_path = @current_user.logoPic
-    dalbum.is_v = @current_user.isVerified
-    dalbum.dig_status = calculate_dig_status(@current_user)
-    dalbum.human_category_id = @current_user.vCate
+    #dalbum.nickname = @current_user.nickname
+    #dalbum.avatar_path = @current_user.logoPic
+    #dalbum.is_v = @current_user.isVerified
+    #dalbum.dig_status = calculate_dig_status(@current_user)
+    #dalbum.human_category_id = @current_user.vCate
     dalbum.title = album.title
     dalbum.intro = album.intro
     dalbum.short_intro = album.short_intro
@@ -916,7 +871,7 @@ module UploadsHelper
       track = DelayedTrack.new
       track.task_count_tag = task_count_tag
       track.transcode_state = transcode_data['transcode_state']
-      track.mp3size = transcode_data['paths']['origin_size']
+      track.origin_size = transcode_data['paths']['origin_size']
       track.upload_id = transcode_data['upload_id']
       track.download_path = transcode_data['paths']['aacplus32']
       track.download_size = transcode_data['paths']['aacplus32_size']
@@ -930,16 +885,16 @@ module UploadsHelper
       track.is_crawler = false
       track.upload_source = 2 # 网站上传
       track.uid = @current_user..uid # 源发布者id
-      track.nickname = @current_user.nickname # 源发布者昵称
-      track.avatar_path = @current_user.logoPic #源发布者头像
-      track.is_v = @current_user.isVerified
-      track.dig_status = calculate_dig_status(@current_user) # 发现页可见
-      track.human_category_id = @current_user.vCategoryId
+      #track.nickname = @current_user.nickname # 源发布者昵称
+      #track.avatar_path = @current_user.logoPic #源发布者头像
+      #track.is_v = @current_user.isVerified
+      #track.dig_status = calculate_dig_status(@current_user) # 发现页可见
+      #track.human_category_id = @current_user.vCategoryId
       track.approved_at = Time.now
       track.album_id = album.id # 源专辑id
       track.delayed_album_id = dalbum.id # 临时专辑id
-      track.album_title = album.title # 源专辑标题
-      track.album_cover_path = album.cover_path
+      #track.album_title = album.title # 源专辑标题
+      #track.album_cover_path = album.cover_path
       track.title = title
       track.category_id = album.category_id
       track.music_category = album.music_category
@@ -1117,7 +1072,7 @@ module UploadsHelper
 
     track = Track.new
     track.transcode_state = transcode_data['transcode_state']
-    track.mp3size = transcode_data['paths']['origin_size']
+    track.origin_size = transcode_data['paths']['origin_size']
     track.upload_id = transcode_data['upload_id']
     track.download_path = transcode_data['paths']['aacplus32']
     track.download_size = transcode_data['paths']['aacplus32_size']
