@@ -3,7 +3,7 @@
   <%== erb :_advertise, locals: { id: 728786, width:'200px',height:'80px' } %>
 </div>
 <%
-tag_followers = FollowerTag.stn(params[:tname]).where(tname: params[:tname]).order("created_at desc")
+tag_followers = FollowerTag.shard(params[:tname]).where(tname: params[:tname]).order("created_at desc")
 follower_uids = tag_followers.limit(6).collect{|t| t.uid}
 profile_users = $profile_client.getMultiUserBasicInfos(follower_uids)
 right_tagfollowers = follower_uids.collect{ |uid| profile_users[uid] }
@@ -18,7 +18,7 @@ right_tagfollowers = follower_uids.collect{ |uid| profile_users[uid] }
   if uids.size > 0
     @tracks_counts = $counter_client.getByIds(Settings.counter.user.tracks, uids)
     @followers_counts = $counter_client.getByIds(Settings.counter.user.followers, uids)
-    follows = Following.stn(@current_uid).where(uid: @current_uid, following_uid: uids).select('following_uid, is_mutual')
+    follows = Following.shard(@current_uid).where(uid: @current_uid, following_uid: uids).select('following_uid, is_mutual')
     follows.each do |f|
       @follow_status[user.following_uid] = [true,user.is_mutual]
     end

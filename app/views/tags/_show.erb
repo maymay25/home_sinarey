@@ -58,7 +58,7 @@
     <% if @tagtracks and @tagtracks.size > 0 %>
     <ul class="feedList" sound_ids="<%= @tagtracks.collect{|t| t["trackid"] }.join(",") %>">
       <% @tagtracks.each do |t| %>
-      <% is_favorited = @current_uid ? Favorite.stn(@current_uid).where(uid: @current_uid, track_id: t["trackid"]).any? : false %>
+      <% is_favorited = @current_uid ? Favorite.shard(@current_uid).where(uid: @current_uid, track_id: t["trackid"]).any? : false %>
       <li class="listItem">
         <div class="feed" sound_id="<%= t["trackid"] %>">
           <div class="left">
@@ -156,7 +156,7 @@
                 <div class="sound_bottom">
                   <span class="createtime"><%= parse_time_until_now(t['created_at']) %></span>
 
-                  <% is_favorited = @current_uid ? Favorite.stn(@current_uid).where(uid: @current_uid, track_id: t["trackid"]).any? : false %>
+                  <% is_favorited = @current_uid ? Favorite.shard(@current_uid).where(uid: @current_uid, track_id: t["trackid"]).any? : false %>
                   <div class="fr">
                     <a class="downloadToMobile link1">下载到手机</a>
                     <a class="likeBtn link1 <%= 'is-sound-liked' if is_favorited %>" href="javascript:;">赞(<span class="count"><%= t['count_like'] %></span>)</a>

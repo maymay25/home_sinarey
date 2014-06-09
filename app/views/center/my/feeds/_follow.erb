@@ -41,7 +41,7 @@
                          li_class = ''
                      end
                      if @current_uid
-                       following = Following.stn(@current_uid).where(uid: @current_uid, following_uid: event.toUid).select('following_uid, is_mutual').first
+                       following = Following.shard(@current_uid).where(uid: @current_uid, following_uid: event.toUid).select('following_uid, is_mutual').first
                        is_follow = following.present?
                        be_followed = following && following.is_mutual
                      else

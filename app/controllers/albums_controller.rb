@@ -29,7 +29,7 @@ class AlbumsController < ApplicationController
 
     @u = get_profile_user_basic_info(@album.uid)
     
-    setrich = TrackSetRich.stn(@album.id).where(track_set_id: @album.id).select('rich_intro').first
+    setrich = TrackSetRich.shard(@album.id).where(track_set_id: @album.id).select('rich_intro').first
     @rich_intro = setrich ? clean_html(setrich.rich_intro) : clean_html(@album.intro)
 
     @page = (tmp=params[:page].to_i)>0 ? tmp : 1
@@ -59,9 +59,9 @@ class AlbumsController < ApplicationController
       end
     end
 
-    @all_tracks_count = TrackRecord.stn(@album.uid).where(tracks_conds).count
+    @all_tracks_count = TrackRecord.shard(@album.uid).where(tracks_conds).count
 
-    @tracks = TrackRecord.stn(@album.uid).where(tracks_conds).order(order).offset((@page - 1) * @per_page).limit(@per_page)
+    @tracks = TrackRecord.shard(@album.uid).where(tracks_conds).order(order).offset((@page - 1) * @per_page).limit(@per_page)
 
     #专辑下的声音，每一个的播放计数都要
     track_ids = @tracks.collect{|r| r.track_id }
@@ -121,10 +121,10 @@ class AlbumsController < ApplicationController
 
     halt_403 if @current_user.isLoginBan or is_user_banned?(@current_uid)
 
-    @list = TrackRecord.stn(@current_uid).where(uid: @current_uid, op_type: TrackRecordTemp::OP_TYPE[:UPLOAD], album_id: nil, is_public: true, is_deleted: false).order('id desc')
+    @list = TrackRecord.shard(@current_uid).where(uid: @current_uid, op_type: TrackRecordTemp::OP_TYPE[:UPLOAD], album_id: nil, is_public: true, is_deleted: false).order('id desc')
 
     category_id = 1 #默认为 "其他"
-    @user_tags = UserTag.stn(@current_uid).where(uid: @current_uid).order("num desc").limit(15)
+    @user_tags = UserTag.shard(@current_uid).where(uid: @current_uid).order("num desc").limit(15)
     @tags = HumanRecommendCategoryTag.where("category_id = :category_id",{:category_id=>category_id})
     
     @checkCaptcha = true
@@ -254,15 +254,15 @@ class AlbumsController < ApplicationController
 
     redirect_to_login unless @current_uid
 
-    @album = Album.stn(@current_uid).where(uid: @current_uid, id: params[:id], is_deleted: false).first
+    @album = TrackSet.shard(params[:id]).where(uid: @current_uid, id: params[:id], is_deleted: false).first
     halt_error("专辑已删除或者不存在") if @album.nil?
 
-    @album_rich = TrackSetRich.stn(@album.id).where(track_set_id: @album.id).first
+    @album_rich = TrackSetRich.shard(@album.id).where(track_set_id: @album.id).first
     if @album.is_crawler || @album.records_order.nil? || @album.records_order.empty? 
       direction = @album.is_records_desc ? 'desc' : 'asc'
-      @tracks = TrackRecord.stn(@current_uid).where(uid: @current_uid, album_id: @album.id, is_public: true, is_deleted: false, status: [0, 1]).order("order_num #{direction}, created_at #{direction}")
+      @tracks = TrackRecord.shard(@current_uid).where(uid: @current_uid, album_id: @album.id, is_public: true, is_deleted: false, status: [0, 1]).order("order_num #{direction}, created_at #{direction}")
     else
-      @tracks = TrackRecord.stn(@current_uid).where(uid: @current_uid, album_id: @album.id, is_public: true, is_deleted: false, status: [0, 1]).order("field(id,#{@album.records_order})")
+      @tracks = TrackRecord.shard(@current_uid).where(uid: @current_uid, album_id: @album.id, is_public: true, is_deleted: false, status: [0, 1]).order("field(id,#{@album.records_order})")
     end
 
     @category = CATEGORIES[@album.category_id]
@@ -290,7 +290,7 @@ class AlbumsController < ApplicationController
 
     halt_400 unless @current_uid
 
-    album = Album.stn(@current_uid).where(uid: @current_uid, id: params[:id], is_deleted: false).first
+    album = TrackSet.shard(params[:id]).where(uid: @current_uid, id: params[:id], is_deleted: false).first
     halt_error("专辑已删除或者不存在") unless album
 
     if params[:codeid] and !@current_user.isVerified
@@ -324,7 +324,7 @@ class AlbumsController < ApplicationController
     catch_errors = catch_upload_basic_errors(title, 1, category_id, intro, '')
     halt render_json({res: false, errors: errors}) if catch_errors.size > 0
 
-    album_track_count = TrackRecord.stn(@current_uid).where(uid: @current_uid, album_id: album.id, is_deleted: false).count
+    album_track_count = TrackRecord.shard(@current_uid).where(uid: @current_uid, album_id: album.id, is_deleted: false).count
     delayed_track_count = DelayedTrack.where(uid: @current_uid, is_deleted: false, album_id: album.id).count
     temp_track_count = TempAlbumForm.where(uid: @current_uid, state: 0, album_id: album.id).sum('add_tracks') # 专辑缓存表中的数据也算上
     allcount = delayed_track_count + new_fileids_size + album_track_count + temp_track_count
@@ -402,7 +402,7 @@ class AlbumsController < ApplicationController
 
     halt_400 unless @current_uid
 
-    album = Album.stn(@current_uid).where(uid: @current_uid, id: params[:id], is_deleted: false).first
+    album = TrackSet.shard(params[:id]).where(uid: @current_uid, id: params[:id], is_deleted: false).first
     halt render_json({}) unless album
 
     album.update_attribute(:is_deleted,true)
@@ -434,7 +434,7 @@ class AlbumsController < ApplicationController
     
     halt render_json([]) unless @current_uid
 
-    records_list = TrackRecord.stn(@current_uid).where(uid: @current_uid, op_type: TrackRecordTemp::OP_TYPE[:UPLOAD], album_id: nil, is_public: true, is_deleted: false).order('id desc').limit(100)
+    records_list = TrackRecord.shard(@current_uid).where(uid: @current_uid, op_type: TrackRecordTemp::OP_TYPE[:UPLOAD], album_id: nil, is_public: true, is_deleted: false).order('id desc').limit(100)
     response = []
     records_list.each do |r|
       data = {}

@@ -31,7 +31,7 @@ class TracksController < ApplicationController
     end
 
     # 是否已收藏
-    @is_favorited = @current_uid ? Favorite.stn(@current_uid).where(uid: @current_uid, track_id: @track.id).any? : false
+    @is_favorited = @current_uid ? Favorite.shard(@current_uid).where(uid: @current_uid, track_id: @track.id).any? : false
 
     # 声音相关计数
     @comments_count, @favorites_count, @plays_count, @shares_count = $counter_client.getByNames([
@@ -86,17 +86,17 @@ class TracksController < ApplicationController
 
     @u = get_profile_user_basic_info(@tir.uid)
 
-    @track_record = TrackRecord.stn(@tir.uid).where(uid: @tir.uid, track_id: @tir.track_id, is_deleted: false).first
-    @track_rich = TrackRich.stn(@tir.track_id).where(track_id: @tir.track_id).first
+    @track_record = TrackRecord.shard(@tir.uid).where(uid: @tir.uid, track_id: @tir.track_id, is_deleted: false).first
+    @track_rich = TrackRich.shard(@tir.track_id).where(track_id: @tir.track_id).first
 
-    @all_track_records = TrackInRecord.stn(@tir.track_id).where("album_id is not null and track_id = ?", @tir.track_id).limit(6)
+    @all_track_records = TrackInRecord.shard(@tir.track_id).where("album_id is not null and track_id = ?", @tir.track_id).limit(6)
 
-    @is_favorited = @current_uid ? Favorite.stn(@current_uid).where(uid: @current_uid, track_id: @tir.track_id).any? : false
+    @is_favorited = @current_uid ? Favorite.shard(@current_uid).where(uid: @current_uid, track_id: @tir.track_id).any? : false
 
     @page = ( tmp=params[:page].to_i )>0 ? tmp : 1
     @per_page = 10
 
-    all_lover = Lover.stn(@tir.track_id).where(track_id: @tir.track_id)
+    all_lover = Lover.shard(@tir.track_id).where(track_id: @tir.track_id)
 
     @lovers_count = all_lover.count
     lovers = all_lover.select('id, uid').order("created_at desc").offset((@page-1)*@per_page).limit(@per_page)
@@ -110,7 +110,7 @@ class TracksController < ApplicationController
       @lover_followers_counts = $counter_client.getByIds(Settings.counter.user.followers, lover_uids)
       @lover_followings_counts = $counter_client.getByIds(Settings.counter.user.followings, lover_uids)
       if @current_uid
-        follows = Following.stn(@current_uid).where(uid: @current_uid, following_uid: lover_uids).select('following_uid, is_mutual')
+        follows = Following.shard(@current_uid).where(uid: @current_uid, following_uid: lover_uids).select('following_uid, is_mutual')
         follows.each do |follow|
           @follow_status[follow.following_uid] = [true,follow.is_mutual]
         end
@@ -125,7 +125,7 @@ class TracksController < ApplicationController
     @track_play_count = $counter_client.get(Settings.counter.track.plays, @tir.track_id.to_s)
     @track_share_count = $counter_client.get(Settings.counter.track.shares, @tir.track_id.to_s)
 
-    @track_favorite_count = Lover.stn(@tir.track_id).where(track_id: @tir.track_id).count
+    @track_favorite_count = Lover.shard(@tir.track_id).where(track_id: @tir.track_id).count
     lovers_counter = $counter_client.get(Settings.counter.track.favorites, @tir.track_id.to_s)
     if lovers_counter != @track_favorite_count
       $counter_client.set(Settings.counter.track.favorites, @tir.track_id, @track_favorite_count)
@@ -164,7 +164,7 @@ class TracksController < ApplicationController
     #黑名单
     halt render_json({res: false, message: "", msg: '由于对方的设置，无法进行此操作'}) if BlackUser.where(uid: track.uid, black_uid: @current_uid).first
 
-    unless Favorite.stn(@current_uid).where(uid: @current_uid, track_id: track.id).any?
+    unless Favorite.shard(@current_uid).where(uid: @current_uid, track_id: track.id).any?
 
       fav = Favorite.create(uid: @current_uid,
         track_id: track.id,
@@ -202,7 +202,7 @@ class TracksController < ApplicationController
 
     halt_400 unless @current_uid
 
-    fav = Favorite.stn(@current_uid).where(uid: @current_uid, track_id: params[:track_id]).first
+    fav = Favorite.shard(@current_uid).where(uid: @current_uid, track_id: params[:track_id]).first
     if fav
       fav.destroy
 
@@ -268,7 +268,7 @@ class TracksController < ApplicationController
     
     halt_403({res: false, message: "", msg: '对不起，您已被暂时禁止发表内容'}) if @current_user.isLoginBan or is_user_banned?(@current_uid)
 
-    track = Track.stn(params[:id]).where(id: params[:id]).first
+    track = Track.shard(params[:id]).where(id: params[:id]).first
     halt render_json({res:false, error:"failure", msg:"声音不存在或者已经被删除"}) if track.nil? or track.is_deleted
 
     # 自己的声音不能转发
@@ -281,7 +281,7 @@ class TracksController < ApplicationController
     halt render_json({res: false, message: "", msg: '私密声音不能转发'}) unless track.is_public
 
     # 只能转发一次
-    my_trackrecords_count = TrackRecord.stn(@current_uid).where(uid: @current_uid, track_id: track.id, is_public: true, is_deleted: false, status: 1).count
+    my_trackrecords_count = TrackRecord.shard(@current_uid).where(uid: @current_uid, track_id: track.id, is_public: true, is_deleted: false, status: 1).count
     halt render_json({res: false, error: 2,msg: "你已经转采了该声音"}) if my_trackrecords_count > 0
 
     #黑名单
@@ -364,10 +364,10 @@ class TracksController < ApplicationController
 
     halt render_json({res: false}) unless params[:record_id]
 
-    record = TrackRecord.stn(@current_uid).where(uid: @current_uid, id: params[:record_id], is_deleted: false).first
+    record = TrackRecord.shard(@current_uid).where(uid: @current_uid, id: params[:record_id], is_deleted: false).first
     halt render_json({res: false}) unless record
 
-    track = Track.stn(record.track_id).where(id: record.track_id, is_deleted: false).first
+    track = Track.shard(record.track_id).where(id: record.track_id, is_deleted: false).first
     halt render_json({res: false}) if track.nil? or track.uid != @current_uid or track.is_public
 
     record.update_attribute(:is_public, true)
@@ -393,7 +393,7 @@ class TracksController < ApplicationController
     set_no_cache_header
 
     list = []
-    albums = Album.stn(@current_uid).where(uid: @current_uid, is_deleted: false, status: 1)
+    albums = Album.shard(@current_uid).where(uid: @current_uid, is_deleted: false, status: 1)
     albums.each do |album|
       list << {id: album.id, title: CGI::escapeHTML(album.title ? album.title[0..30] : '')}
     end
@@ -408,19 +408,19 @@ class TracksController < ApplicationController
     
     halt render_json({res: false, error: "failure"}) unless params[:record_id]
 
-    record = TrackRecord.stn(@current_uid).where(uid: @current_uid, id: params[:record_id], is_deleted: false, status: 1).first
+    record = TrackRecord.shard(@current_uid).where(uid: @current_uid, id: params[:record_id], is_deleted: false, status: 1).first
     halt render_json({res: false, error: "failure"}) unless record
     
     old_album_id = record.album_id
-    track = Track.stn(record.track_id).where(id: record.track_id, is_public: true, is_deleted: false, status: 1).first if record
+    track = Track.shard(record.track_id).where(id: record.track_id, is_public: true, is_deleted: false, status: 1).first if record
     halt render_json({res: false,  error: 'track not exsit'}) unless track
 
     if params[:album_id] # 选择已存在的专辑
 
-      album = Album.stn(@current_uid).where(uid: @current_uid, id: params[:album_id], is_deleted: false, status: 1).first
+      album = TrackSet.shard(params[:album_id]).where(uid: @current_uid, id: params[:album_id], is_deleted: false, status: 1).first
       halt render_json({res: false, error: "failure"}) if album.nil?
 
-      album_track_count = TrackRecord.stn(@current_uid).where(uid: @current_uid, album_id: album.id, is_deleted: false, status: [0,1]).count
+      album_track_count = TrackRecord.shard(@current_uid).where(uid: @current_uid, album_id: album.id, is_deleted: false, status: [0,1]).count
       delayed_track_count = DelayedTrack.where(uid: @current_uid, is_deleted: false, album_id: album.id).count
       temp_track_count = TempAlbumForm.where(uid: @current_uid, state: 0, album_id: album.id).sum('add_tracks') # 专辑缓存表中的数据也算上
       allcount = album_track_count + delayed_track_count + temp_track_count + 1
@@ -506,13 +506,13 @@ class TracksController < ApplicationController
 
     halt_400 unless @current_uid
 
-    record = TrackRecord.stn(@current_uid).where(uid: @current_uid, id: params[:record_id], is_deleted: false).first
+    record = TrackRecord.shard(@current_uid).where(uid: @current_uid, id: params[:record_id], is_deleted: false).first
     halt render_json({res: false, msg: "该声音已删除"}) unless record
 
     record.update_attribute(:is_deleted,true)
 
     if record.album_id
-      album = Album.stn(@current_uid).where(uid: @current_uid, id: record.album_id, is_deleted: false).first
+      album = TrackSet.shard(record.album_id).where(uid: @current_uid, id: record.album_id, is_deleted: false).first
       #更新专辑的声音排序   #维护专辑的'最后更新声音'(在异步脚本中实现)
       if album
         if album.records_order
@@ -524,7 +524,7 @@ class TracksController < ApplicationController
     end
 
     if record.op_type == TrackRecordTemp::OP_TYPE[:UPLOAD]
-      track = Track.stn(record.track_id).where(id: record.track_id, is_deleted: false).first
+      track = Track.shard(record.track_id).where(id: record.track_id, is_deleted: false).first
       if track
         old_is_deleted = track.is_deleted
         track.update_attribute(:is_deleted, true)
@@ -563,7 +563,7 @@ class TracksController < ApplicationController
     @page = ( tmp=params[:page].to_i )>0 ? tmp : 1
     @per_page = Settings.per_page.track_comments
 
-    all_comments = Comment.stn(@track.id).where(track_id: @track.id, parent_id: nil, is_deleted:false).order('id desc')
+    all_comments = Comment.shard(@track.id).where(track_id: @track.id, parent_id: nil, is_deleted:false).order('id desc')
 
     @comments_count = all_comments.count
     @comments = all_comments.offset((@page-1)*@per_page).limit(@per_page)
@@ -574,7 +574,7 @@ class TracksController < ApplicationController
 
     sql_list = []
     @comments.each do |comment|
-      sql = Comment.stn(@track.id).where(track_id: @track.id, parent_id: comment.id, is_deleted:false).limit(50).to_sql
+      sql = Comment.shard(@track.id).where(track_id: @track.id, parent_id: comment.id, is_deleted:false).limit(50).to_sql
       sql_list << sql
     end
     union_sql = sql_list.collect{|sql| "(#{sql})" }.join(" union all ")
@@ -610,8 +610,8 @@ class TracksController < ApplicationController
 
     @track = Track.fetch(params[:id])
     halt '' if @track.nil? or @track.is_deleted or @track.status != 1
-    @comments_count = Comment.stn(@track.id).where(track_id: @track.id).count
-    @comments = Comment.stn(@track.id).where(track_id: @track.id).order('id desc').limit(10)
+    @comments_count = Comment.shard(@track.id).where(track_id: @track.id).count
+    @comments = Comment.shard(@track.id).where(track_id: @track.id).order('id desc').limit(10)
 
     uids = @comments.map(&:uid)
     @users = $profile_client.getMultiUserBasicInfos(uids)
@@ -626,7 +626,7 @@ class TracksController < ApplicationController
 
     @track = Track.fetch(params[:id])
     halt '' if @track.nil? or @track.is_deleted or @track.status != 1
-    all_reposts = TrackRepost.stn(@track.id).where(track_id: @track.id, op_type: 2)
+    all_reposts = TrackRepost.shard(@track.id).where(track_id: @track.id, op_type: 2)
     @relays_count = all_reposts.count
     @relays = all_reposts.order("id desc").limit(10)
     render_to_string(partial: :_feed_relay_list)
@@ -676,7 +676,7 @@ class TracksController < ApplicationController
     halt '' if @tir.nil? or @tir.is_deleted or @tir.status != 1
 
     # 是否已收藏
-    @is_favorited = @current_uid && Favorite.stn(@current_uid).where(uid: @current_uid, track_id: @tir.track_id).any?
+    @is_favorited = @current_uid && Favorite.shard(@current_uid).where(uid: @current_uid, track_id: @tir.track_id).any?
 
     # 声音相关计数
     @comments_count, @favorites_count, @plays_count, @shares_count = $counter_client.getByNames([
@@ -697,7 +697,7 @@ class TracksController < ApplicationController
     track_id = params[:id].to_i
     halt render_json({ret:0,msg:'缺少参数 id'}) unless track_id>0
     
-    track_pictures = TrackPicture.stn(track_id).where(track_id:track_id).order("order_num asc")
+    track_pictures = TrackPicture.shard(track_id).where(track_id:track_id).order("order_num asc")
     if track_pictures.length==0
       tir = TrackInRecord.fetch(track_id)
       track_pictures = [{'picture_path'=>tir.cover_path}] if tir
@@ -729,11 +729,11 @@ class TracksController < ApplicationController
 
     res = {}
     params[:track_ids].split(',').each do |track_id|
-      tb = TrackBlock.stn(track_id).where(track_id: track_id).first
+      tb = TrackBlock.shard(track_id).where(track_id: track_id).first
       halt '' unless tb
 
       bash = {}
-      BlockAvatar.stn(track_id).where(track_id: track_id).select('block_id, avatar_path, created_at').order('created_at desc').each do |ba|
+      BlockAvatar.shard(track_id).where(track_id: track_id).select('block_id, avatar_path, created_at').order('created_at desc').each do |ba|
         if bash.key?(ba.block_id)
           bash[ba.block_id] << picture_url('header', ba.avatar_path, 16)
         else
@@ -752,7 +752,7 @@ class TracksController < ApplicationController
 
     set_no_cache_header
     block_idx = params[:block_idx].to_i # 第几块
-    tb = TrackBlock.stn(params[:track_id]).where(track_id: params[:track_id]).first
+    tb = TrackBlock.shard(params[:track_id]).where(track_id: params[:track_id]).first
 
     halt render_json({ count: 0, comments: nil, msg: print_message(:record_not_found, "track_id: #{params[:track_id]}") }) unless tb
 
@@ -760,7 +760,7 @@ class TracksController < ApplicationController
 
     comments_count = tb.send("b#{block_idx}")
 
-    comments = Comment.stn(tb.track_id).where(track_id: tb.track_id, block: block_idx).order('created_at desc').limit(Settings.per_page.track_block_comments).select('content, created_at, id, nickname, avatar_path, parent_id, second, track_id, uid')
+    comments = Comment.shard(tb.track_id).where(track_id: tb.track_id, block: block_idx).order('created_at desc').limit(Settings.per_page.track_block_comments).select('content, created_at, id, nickname, avatar_path, parent_id, second, track_id, uid')
 
     comments_h = [].tap do |arr|
       comments.each do |comment|
@@ -862,7 +862,7 @@ class TracksController < ApplicationController
           cover_url: file_url(tir.cover_path),
           cover_url_142: picture_url('track', tir.cover_path, '180'),
           formatted_created_at: tir.created_at.strftime('%-m月%-d日 %H:%M'),
-          is_favorited: @current_uid ? Favorite.stn(@current_uid).where(uid: @current_uid, track_id: tir.track_id).any? : false,
+          is_favorited: @current_uid ? Favorite.shard(@current_uid).where(uid: @current_uid, track_id: tir.track_id).any? : false,
           play_count: play_counts[i],
           comments_count: comments_counts[i],
           shares_count: shares_counts[i],
@@ -886,13 +886,13 @@ class TracksController < ApplicationController
 
     return redirect_to_login unless @current_uid
 
-    @record = TrackRecord.stn(@current_uid).where(uid: @current_uid, id: params[:id], is_deleted: false).first
+    @record = TrackRecord.shard(@current_uid).where(uid: @current_uid, id: params[:id], is_deleted: false).first
 
     halt_error('声音已删除或者不存在') if @record.nil? or @record.op_type != TrackRecordTemp::OP_TYPE[:UPLOAD]
 
     set_no_cache_header
 
-    trackrich = TrackRich.stn(@record.track_id).where(track_id: @record.track_id).first
+    trackrich = TrackRich.shard(@record.track_id).where(track_id: @record.track_id).first
     if trackrich
       @lyric = Sanitize.clean(CGI.unescapeHTML(trackrich.lyric), { elements: %w(br) }) if trackrich.lyric.presence
       @rich_intro = CGI.unescapeHTML(trackrich.rich_intro)
@@ -900,9 +900,9 @@ class TracksController < ApplicationController
 
     @category = CATEGORIES[@record.category_id]
 
-    @track_pictures = TrackPicture.stn(@record.track_id).where(track_id:@record.track_id).order("order_num asc")
+    @track_pictures = TrackPicture.shard(@record.track_id).where(track_id:@record.track_id).order("order_num asc")
 
-    @album_list = Album.stn(@current_uid).where(uid: @current_uid, is_deleted: false, status: 1)
+    @album_list = Album.shard(@current_uid).where(uid: @current_uid, is_deleted: false, status: 1)
 
     @this_title = "编辑声音 喜马拉雅-听我想听"
 
@@ -922,12 +922,12 @@ class TracksController < ApplicationController
 
     set_no_cache_header
 
-    @user_tags = UserTag.stn(@current_uid).where(uid: @current_uid).order("num desc").limit(15)
+    @user_tags = UserTag.shard(@current_uid).where(uid: @current_uid).order("num desc").limit(15)
 
     @default_category = CHOOSE_CATEGORIES[0]
     @tags = HumanRecommendCategoryTag.where(category_id: @default_category.id).limit(40)
     
-    @album_list = Album.stn(@current_uid).where(uid: @current_uid, is_deleted: false, status: 1) if @current_uid
+    @album_list = Album.shard(@current_uid).where(uid: @current_uid, is_deleted: false, status: 1) if @current_uid
 
     #容量限制
     if @current_user.isRobot or @current_user.isVerified  #机器人没有容量限制
@@ -960,7 +960,7 @@ class TracksController < ApplicationController
     @page = (tmp=params[:page].to_i)>0 ? tmp : 1
     @per_page = 12
 
-    all_albums = Album.stn(@current_uid).where(uid: @current_uid, is_deleted: false, status: 1)
+    all_albums = Album.shard(@current_uid).where(uid: @current_uid, is_deleted: false, status: 1)
     @albums_count = all_albums.count
     @albums = all_albums.order("id desc").offset((@page-1)*@per_page).limit(@per_page)
 
@@ -993,10 +993,10 @@ class TracksController < ApplicationController
       halt render_json({res: false, errors: [['page', '图片正在上传中，请稍侯']]}) if img.blank?
     end
 
-    record = TrackRecord.stn(@current_uid).where(uid: @current_uid, id: params[:id], is_deleted: false).first
+    record = TrackRecord.shard(@current_uid).where(uid: @current_uid, id: params[:id], is_deleted: false).first
     halt_error("声音已删除或者不存在") unless record or record.op_type != TrackRecordTemp::OP_TYPE[:UPLOAD]
 
-    track = Track.stn(record.track_id).where(id: record.track_id, is_deleted: false).first
+    track = Track.shard(record.track_id).where(id: record.track_id, is_deleted: false).first
     halt_error("声音源数据不存在") unless track
 
     if Settings.is_check_mobile
@@ -1042,9 +1042,9 @@ class TracksController < ApplicationController
     halt render_json({res: false, errors: [['dirty_words', track_dirts]]}) if track_dirts.size > 0
 
     if album_id
-      album = Album.stn(@current_uid).where(uid: @current_uid, id: album_id, is_deleted: false).first
+      album = TrackSet.shard(album_id).where(uid: @current_uid, id: album_id, is_deleted: false).first
       if album and track.album_id != album.id
-        album_track_count = TrackRecord.stn(@current_uid).where(uid: @current_uid, album_id: album.id, is_deleted: false, status: [0,1]).count
+        album_track_count = TrackRecord.shard(@current_uid).where(uid: @current_uid, album_id: album.id, is_deleted: false, status: [0,1]).count
         delayed_track_count = DelayedTrack.where(uid: @current_uid, is_deleted: false, album_id: album.id).count
         temp_track_count = TempAlbumForm.where(uid: @current_uid, state: 0, album_id: album.id).sum('add_tracks') # 专辑缓存表中的数据也算上
         allcount = album_track_count + delayed_track_count + temp_track_count + 1
@@ -1142,9 +1142,9 @@ class TracksController < ApplicationController
     return render_json({res: false, errors: [['dirty_words', track_dirts]]}) if track_dirts.size > 0
 
     if is_public and album_id
-      album = Album.stn(@current_uid).where(uid: @current_uid, id: album_id, is_deleted: false).first
+      album = TrackSet.shard(album_id).where(uid: @current_uid, id: album_id, is_deleted: false).first
       halt render_json({res: false, errors: [['page', '所选专辑已删除或者不存在']]}) if album.nil?
-      album_track_count = TrackRecord.stn(@current_uid).where(uid: @current_uid, album_id: params[:album_id], is_deleted: false, status: [0,1]).count
+      album_track_count = TrackRecord.shard(@current_uid).where(uid: @current_uid, album_id: params[:album_id], is_deleted: false, status: [0,1]).count
       delayed_track_count = DelayedTrack.where(uid: @current_uid, is_deleted: false, album_id: album.id).count
       temp_track_count = TempAlbumForm.where(uid: @current_uid, state: 0, album_id: album.id).sum('add_tracks')
       allcount = album_track_count + delayed_track_count + temp_track_count
@@ -1277,7 +1277,7 @@ class TracksController < ApplicationController
   end
 
   def upload_choose_album_action(album_id)
-    album = Album.stn(@current_uid).where(uid: @current_uid, id: album_id, is_deleted: false).first
+    album = TrackSet.shard(album_id).where(uid: @current_uid, id: album_id, is_deleted: false).first
     halt render_json({res: false, errors: [['page', '抱歉,无法添加到该专辑']]}) unless album
     
     files = Array.wrap(params[:files]).take(200)
@@ -1292,7 +1292,7 @@ class TracksController < ApplicationController
     new_fileids_size = new_fileids.size
     halt_403({res: false, errors: [['page', '对不起，您已被暂时禁止发布声音']]}) if new_fileids_size>0 and ( @current_user.isLoginBan or is_user_banned?(@current_uid) )
 
-    album_track_count = TrackRecord.stn(@current_uid).where(uid: @current_uid, album_id: album.id, is_deleted: false, status: [0,1]).count
+    album_track_count = TrackRecord.shard(@current_uid).where(uid: @current_uid, album_id: album.id, is_deleted: false, status: [0,1]).count
     delayed_track_count = DelayedTrack.where(uid: @current_uid, is_deleted: false, album_id: album.id).count
     temp_track_count = TempAlbumForm.where(uid: @current_uid, state: 0, album_id: album.id).sum('add_tracks') # 专辑缓存表中的数据也算上
     allcount = delayed_track_count + new_fileids_size + album_track_count + temp_track_count

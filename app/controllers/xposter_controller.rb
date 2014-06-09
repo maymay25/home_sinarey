@@ -29,13 +29,13 @@ class XposterController < ApplicationController
     @per_page = 12
 
     if params[:sort]=='new'
-      all_tirs = TrackRecord.stn(uid).where(cond1)
+      all_tirs = TrackRecord.shard(uid).where(cond1)
       @all_tirs_count = all_tirs.count
       @tirs = all_tirs.order('id desc').offset((@page-1)*@per_page).limit(@per_page)
       hit_ids = @tirs.map{|tir| tir.track_id }
       @favorites_counts = $counter_client.getByIds(Settings.counter.track.favorites, hit_ids)
     else
-      all_tirs = TrackRecord.stn(uid).where(cond1).all.to_a
+      all_tirs = TrackRecord.shard(uid).where(cond1).all.to_a
       @all_tirs_count = all_tirs.length
 
       hit_ids = all_tirs.map{|tir| tir.track_id }
@@ -64,7 +64,7 @@ class XposterController < ApplicationController
 
       @is_favorited = {}
       if @current_uid
-        favorite_status = Favorite.stn(@current_uid).where(uid: @current_uid, track_id: track_ids)
+        favorite_status = Favorite.shard(@current_uid).where(uid: @current_uid, track_id: track_ids)
         favorite_status.each do |f|
           @is_favorited[f.track_id] = 1
         end
@@ -100,13 +100,13 @@ class XposterController < ApplicationController
     @per_page = 12
 
     if params[:sort]=='new'
-      all_tirs = TrackRecord.stn(uid).where(cond1)
+      all_tirs = TrackRecord.shard(uid).where(cond1)
       @all_tirs_count = all_tirs.count
       @tirs = all_tirs.order('id desc').offset((@page-1)*@per_page).limit(@per_page)
       hit_ids = @tirs.map{|tir| tir.track_id }
       @favorites_counts = $counter_client.getByIds(Settings.counter.track.favorites, hit_ids)
     else
-      all_tirs = TrackRecord.stn(uid).where(cond1).all.to_a
+      all_tirs = TrackRecord.shard(uid).where(cond1).all.to_a
       @all_tirs_count = all_tirs.length
 
       hit_ids = all_tirs.map{|tir| tir.track_id }
@@ -135,7 +135,7 @@ class XposterController < ApplicationController
 
       @is_favorited = {}
       if @current_uid
-        favorite_status = Favorite.stn(@current_uid).where(uid: @current_uid, track_id: track_ids)
+        favorite_status = Favorite.shard(@current_uid).where(uid: @current_uid, track_id: track_ids)
         favorite_status.each do |f|
           @is_favorited[f.track_id] = 1
         end
@@ -184,7 +184,7 @@ class XposterController < ApplicationController
     all_hit_ids = (hit_ids + hit_ids2).uniq
     if all_hit_ids.length >0
       if @current_uid
-        favorite_status2 = Favorite.stn(@current_uid).where(uid: @current_uid, track_id: all_hit_ids)
+        favorite_status2 = Favorite.shard(@current_uid).where(uid: @current_uid, track_id: all_hit_ids)
         favorite_status2.each do |f|
           @is_favorited[f.track_id] = 1
         end

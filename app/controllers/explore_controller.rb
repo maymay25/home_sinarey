@@ -20,7 +20,7 @@ class ExploreController < ApplicationController
       WebDiscoveryPage.where(is_expired: false).order('position').limit(6).each do |ad|
         if ad.content_type == 2
           id = ad.link_url.split('%2F').last
-          track = Track.stn(id).where(id: id, is_public: true, is_deleted: false, is_publish: true).select('id, upload_id, waveform').first
+          track = Track.shard(id).where(id: id, is_public: true, is_deleted: false, is_publish: true).select('id, upload_id, waveform').first
           if track
             track_id = track.id
             track_uploadid = track.upload_id
@@ -368,7 +368,7 @@ class ExploreController < ApplicationController
       hash[uid] = {}
       fuids << uid
     end
-    following = Following.stn(@current_uid)
+    following = Following.shard(@current_uid)
     followings = following.select('following_uid,is_mutual').where(uid: @current_uid, following_uid:fuids)
     followings.each do |follow|
       hash[follow.following_uid] = {is_follow:true,be_followed:follow.is_mutual==true}

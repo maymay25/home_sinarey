@@ -4,7 +4,7 @@
     track_album = feed.albumId
     track_upload_des = track_album ? '上传了一个声音到' : '上传了一个声音'
     track_url = link_path("/#{user.uid}/sound/#{feed.toTid}")
-    is_favorited = @current_uid && Favorite.stn(@current_uid).where(uid: @current_uid, track_id: feed.toTid).any?
+    is_favorited = @current_uid && Favorite.shard(@current_uid).where(uid: @current_uid, track_id: feed.toTid).any?
   %>
     <%
     if feed.toTid

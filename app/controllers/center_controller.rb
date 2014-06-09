@@ -217,7 +217,7 @@ class CenterController < ApplicationController
   def do_del_feed
 
     # 查询用户的所有分组信息
-    groups = FollowingGroup.stn(@current_uid).where(uid: @current_uid)
+    groups = FollowingGroup.shard(@current_uid).where(uid: @current_uid)
     # 删除指定feed
     res = $feed_client.deleteFeed(@current_uid.to_s, params[:feed_id], params[:feedType], groups.map{|g| g['id'].to_s})
 
@@ -372,7 +372,7 @@ class CenterController < ApplicationController
       @track_comments_counts = []
     end
 
-    favorites = Favorite.stn(@current_uid).where(uid: @current_uid, track_id: track_ids).select("track_id").collect {|f| f.track_id}
+    favorites = Favorite.shard(@current_uid).where(uid: @current_uid, track_id: track_ids).select("track_id").collect {|f| f.track_id}
     @categories = {}.tap{ |h| Category.order("order_num asc").each{ |c| h[c.id] = [c.name, c.title] } }
     @this_title = "我听过的声音 喜马拉雅-听我想听"
 
@@ -433,7 +433,7 @@ class CenterController < ApplicationController
     page = (tmp=params[:page].to_i)>0 ? tmp : 1
     per_page = (tmp=params[:per_page].to_i)>0 ? tmp : Settings.per_page.my_tracks 
 
-    all_track_records = TrackRecord.stn(params[:uid]).where(uid: params[:uid], status: 1, is_deleted: false)
+    all_track_records = TrackRecord.shard(params[:uid]).where(uid: params[:uid], status: 1, is_deleted: false)
     response = {}
     response[:count] = all_track_records.count
     response[:page] = page
@@ -474,7 +474,7 @@ class CenterController < ApplicationController
       ], user.uid)
 
       if @current_uid
-        following = Following.stn(@current_uid).where(uid: @current_uid, following_uid: user.uid).first
+        following = Following.shard(@current_uid).where(uid: @current_uid, following_uid: user.uid).first
         is_follow = following.present?
         be_followed = is_follow && following.is_mutual==true
       else
@@ -508,7 +508,7 @@ class CenterController < ApplicationController
 
     set_no_cache_header
 
-    @track_records = TrackRecord.stn(params[:uid]).where(uid: params[:uid], transcode_state: 2, is_deleted: false, status: 1).order('created_at desc').page(params[:page]).per(Settings.per_page.my_tracks)
+    @track_records = TrackRecord.shard(params[:uid]).where(uid: params[:uid], transcode_state: 2, is_deleted: false, status: 1).order('created_at desc').page(params[:page]).per(Settings.per_page.my_tracks)
     @sound_ids = @track_records.collect{|r| r.track_id } || []
 
     render_json(@sound_ids)
@@ -565,7 +565,7 @@ class CenterController < ApplicationController
   def get_quan_suggest
     halt_400 unless @current_uid
       
-    nicknames = Following.stn(@current_uid).where('following_nickname like ? and uid = ?', "%#{params[:q]}%", @current_uid).select('following_nickname').limit(10).map{|f| f.following_nickname}
+    nicknames = Following.shard(@current_uid).where('following_nickname like ? and uid = ?', "%#{params[:q]}%", @current_uid).select('following_nickname').limit(10).map{|f| f.following_nickname}
     halt '' unless nicknames.size > 0
 
     halt nicknames.join(',')
@@ -631,7 +631,7 @@ class CenterController < ApplicationController
     @aplts = all_aplts.offset((page-1)*10).limit(10)
     if @aplts.length>0
       albums_ids = @aplts.collect{|a|a.album_id}
-      albums = Album.stn(@current_uid).where(uid: @current_uid, status: [0, 1], is_deleted: false,id:albums_ids)
+      albums = Album.shard(@current_uid).where(uid: @current_uid, status: [0, 1], is_deleted: false,id:albums_ids)
       @albums_hash = {}
       albums.each do |album|
         @albums_hash[album.id] = album
@@ -657,7 +657,7 @@ class CenterController < ApplicationController
 
     halt render_json({next_page: false, html:''}) if !options[:init] and @current_uid.nil?
     page = ( tmp=params[:page].to_i ) > 0 ? tmp : 1
-    all_albums = Album.stn(@current_uid).where(uid: @current_uid, status: [0, 1], is_deleted: false).order('last_uptrack_at desc')
+    all_albums = Album.shard(@current_uid).where(uid: @current_uid, status: [0, 1], is_deleted: false).order('last_uptrack_at desc')
     @next_page = (all_albums.count>page*10) && (page+1)
     @albums = all_albums.offset((page-1)*10).limit(10)
 
@@ -747,7 +747,7 @@ class CenterController < ApplicationController
     @aplt = AlbumPodApplication.where(id:params[:id],uid:@current_uid).first
     redirect '/podcast/record' if @aplt.nil?
 
-    @album = Album.stn(@current_uid).where(uid: @current_uid, id: @aplt.album_id, status: [0, 1], is_deleted: false).first
+    @album = TrackSet.shard(@aplt.album_id).where(uid: @current_uid, id: @aplt.album_id, status: [0, 1], is_deleted: false).first
     redirect '/podcast/record' if @album.nil?
 
     erb :podcast_apply_result
@@ -770,7 +770,7 @@ class CenterController < ApplicationController
     @latest_favorite = LatestFavorite.where(uid: @u.uid).first
 
 
-    all_followers = Follower.stn(@u.uid).where(following_uid: @u.uid).select('id, uid').order('id desc')
+    all_followers = Follower.shard(@u.uid).where(following_uid: @u.uid).select('id, uid').order('id desc')
     @followers = all_followers.limit(14)
 
     follower_uids = @followers.collect{|f| f.uid}
@@ -812,7 +812,7 @@ class CenterController < ApplicationController
     @per_page = Settings.per_page.my_tracks
 
     order = (["id desc" , "id asc"].include?(params[:order]) && params[:order]) || "id desc"
-    all_track_records = TrackRecord.stn(@current_uid).where(cond1).where(query)
+    all_track_records = TrackRecord.shard(@current_uid).where(cond1).where(query)
     @track_records_count = all_track_records.count
     @track_records = all_track_records.order(order).offset((@page-1)*@per_page).limit(@per_page)
     
@@ -842,14 +842,14 @@ class CenterController < ApplicationController
 
       @is_favorited = {}
       if @current_uid
-        favorite_status = Favorite.stn(@current_uid).where(uid: @current_uid, track_id: track_ids)
+        favorite_status = Favorite.shard(@current_uid).where(uid: @current_uid, track_id: track_ids)
         favorite_status.each do |f|
           @is_favorited[f.track_id] = true
         end
       end
     end
 
-    @my_newest_albums =  Album.stn(@current_uid).where(uid: @current_uid, status: [0, 1], is_deleted: false).order('id desc').limit(6)
+    @my_newest_albums =  Album.shard(@current_uid).where(uid: @current_uid, status: [0, 1], is_deleted: false).order('id desc').limit(6)
     album_ids = @my_newest_albums.collect{ |a| a.id }
     if album_ids.count > 0
       @album_tracks_count = $counter_client.getByIds(Settings.counter.album.tracks, album_ids)
@@ -868,7 +868,7 @@ class CenterController < ApplicationController
     @page = (tmp = params[:page].to_i )>0 ? tmp : 1
     @per_page = Settings.per_page.my_tracks
 
-    all_track_records = TrackRecord.stn(@u.uid).where(cond1).where(query)
+    all_track_records = TrackRecord.shard(@u.uid).where(cond1).where(query)
     @track_records_count = all_track_records.count
 
     @track_records = all_track_records.order(order).offset((@page-1)*@per_page).limit(@per_page)
@@ -902,14 +902,14 @@ class CenterController < ApplicationController
 
       @is_favorited = {}
       if @current_uid
-        favorite_status = Favorite.stn(@current_uid).where(uid: @current_uid, track_id: track_ids)
+        favorite_status = Favorite.shard(@current_uid).where(uid: @current_uid, track_id: track_ids)
         favorite_status.each do |f|
           @is_favorited[f.track_id] = true
         end
       end
     end
 
-    @his_newest_albums =  Album.stn(@u.uid).where(uid: @u.uid, status: 1, is_deleted: false).order('id desc').limit(6)
+    @his_newest_albums =  Album.shard(@u.uid).where(uid: @u.uid, status: 1, is_deleted: false).order('id desc').limit(6)
 
     album_ids = @his_newest_albums.collect{ |a| a.id }
     if album_ids.count > 0
@@ -930,7 +930,7 @@ class CenterController < ApplicationController
     @per_page = Settings.per_page.my_albums
 
     order = (["last_uptrack_at desc" , "last_uptrack_at asc"].include?(params[:order]) && params[:order]) || "last_uptrack_at desc"
-    all_albums = Album.stn(@current_uid).where(uid: @current_uid, status: [0, 1], is_deleted: false).where(query)
+    all_albums = Album.shard(@current_uid).where(uid: @current_uid, status: [0, 1], is_deleted: false).where(query)
     @albums_count = all_albums.count
     @albums = all_albums.order(order).offset((@page-1)*@per_page).limit(@per_page)
 
@@ -950,7 +950,7 @@ class CenterController < ApplicationController
     @per_page = Settings.per_page.my_albums
 
     order = (["last_uptrack_at desc" , "last_uptrack_at asc"].include?(params[:order]) && params[:order]) || "last_uptrack_at desc"
-    all_albums = Album.stn(@u.uid).where(uid: @u.uid, status: 1, is_deleted: false).where(query)
+    all_albums = Album.shard(@u.uid).where(uid: @u.uid, status: 1, is_deleted: false).where(query)
     @albums_count = all_albums.count
     @albums = all_albums.order(order).offset((@page-1)*@per_page).limit(@per_page)
 
@@ -972,13 +972,13 @@ class CenterController < ApplicationController
     @page = (tmp = params[:page].to_i )>0 ? tmp : 1
     @per_page = Settings.per_page.follows
 
-    @fgs = FollowingGroup.stn(@current_uid).where(uid: @current_uid)
+    @fgs = FollowingGroup.shard(@current_uid).where(uid: @current_uid)
 
-    all_follows = Following.stn(@current_uid).where(uid: @current_uid).where(query)
+    all_follows = Following.shard(@current_uid).where(uid: @current_uid).where(query)
     
     if params[:following_group_id]
       if params[:following_group_id].strip.empty? # 未分组
-        fids = Followingx2Group.stn(@current_uid).where(uid: @current_uid).select('following_id').collect{|fx2g| fx2g.following_id }
+        fids = Followingx2Group.shard(@current_uid).where(uid: @current_uid).select('following_id').collect{|fx2g| fx2g.following_id }
         if fids.size > 0
           all_follows = all_follows.where('is_auto_push = 0 and id not in (?)', fids)
         else
@@ -987,7 +987,7 @@ class CenterController < ApplicationController
       elsif params[:following_group_id].to_i == -1 # 必听
         all_follows = all_follows.where(is_auto_push: true)
       else # 某分组
-        fids = Followingx2Group.stn(@current_uid).where(uid: @current_uid, following_group_id: params[:following_group_id]).collect{|fx2g| fx2g.following_id}
+        fids = Followingx2Group.shard(@current_uid).where(uid: @current_uid, following_group_id: params[:following_group_id]).collect{|fx2g| fx2g.following_id}
         all_follows = all_follows.where(id: fids)
       end
     end
@@ -1013,7 +1013,7 @@ class CenterController < ApplicationController
 
       cache_group_hash = {}
       @follow_group_ids_hash = {}
-      x2_groups = Followingx2Group.stn(@current_uid).where(uid: @current_uid, following_id: following_ids).select('following_id,following_group_id')
+      x2_groups = Followingx2Group.shard(@current_uid).where(uid: @current_uid, following_id: following_ids).select('following_id,following_group_id')
       x2_groups.each do |x2_group|
         cache_group_hash[x2_group.following_group_id] ||= 1
         (@follow_group_ids_hash[x2_group.following_id] ||= []) << x2_group.following_group_id
@@ -1021,7 +1021,7 @@ class CenterController < ApplicationController
 
       @fgs = {}
       all_group_ids = cache_group_hash.keys
-      FollowingGroup.stn(@current_uid).where(uid: @current_uid,id:all_group_ids).each do |fg|
+      FollowingGroup.shard(@current_uid).where(uid: @current_uid,id:all_group_ids).each do |fg|
         @fgs[fg.id] = fg
       end
     end
@@ -1029,13 +1029,13 @@ class CenterController < ApplicationController
   end
 
   def init_his_follow_page
-    @follows_count = Following.stn(@u.uid).where(uid: @u.uid).count
+    @follows_count = Following.shard(@u.uid).where(uid: @u.uid).count
 
     @page = (tmp = params[:page].to_i )>0 ? tmp : 1
     @page=1 if @page > 10 #只显示前10页列表,之后的页码显示第一页列表
     @per_page = Settings.per_page.follows
 
-    @follows = Following.stn(@u.uid).where(uid: @u.uid).select('id, following_uid').order('id desc').offset((@page-1)*@per_page).limit(@per_page)
+    @follows = Following.shard(@u.uid).where(uid: @u.uid).select('id, following_uid').order('id desc').offset((@page-1)*@per_page).limit(@per_page)
 
     if @follows.size > 0
       following_uids = @follows.collect{|f| f.following_uid}
@@ -1044,7 +1044,7 @@ class CenterController < ApplicationController
       @following_followers_counts = $counter_client.getByIds(Settings.counter.user.followers, following_uids)
       @follow_status = {}
       if @current_uid
-        followings = Following.stn(@current_uid).where(uid: @current_uid, following_uid: following_uids).select('following_uid, is_mutual')
+        followings = Following.shard(@current_uid).where(uid: @current_uid, following_uid: following_uids).select('following_uid, is_mutual')
         followings.each do |follow|
           @follow_status[follow.following_uid] = [true,follow.is_mutual]
         end
@@ -1065,7 +1065,7 @@ class CenterController < ApplicationController
 
     @followers_count = $counter_client.get(Settings.counter.user.followers, @current_uid)
 
-    all_follwers = Follower.stn(@current_uid).where(following_uid: @current_uid).where(query)
+    all_follwers = Follower.shard(@current_uid).where(following_uid: @current_uid).where(query)
     @followers = all_follwers.select('id, uid').order('id desc').offset((@page-1)*@per_page).limit(@per_page)
 
     follower_uids = @followers.collect{|f| f.uid}
@@ -1076,7 +1076,7 @@ class CenterController < ApplicationController
       @follower_followers_counts = $counter_client.getByIds(Settings.counter.user.followers, follower_uids)
       @follow_status = {}
       if @current_uid
-        followings = Following.stn(@current_uid).where(uid: @current_uid, following_uid: follower_uids).select('following_uid, is_mutual')
+        followings = Following.shard(@current_uid).where(uid: @current_uid, following_uid: follower_uids).select('following_uid, is_mutual')
         followings.each do |follow|
           @follow_status[follow.following_uid] = [true,follow.is_mutual]
         end
@@ -1101,7 +1101,7 @@ class CenterController < ApplicationController
 
     @followers_count = $counter_client.get(Settings.counter.user.followers, @u.uid)
 
-    all_follwers = Follower.stn(@u.uid).where(following_uid: @u.uid)
+    all_follwers = Follower.shard(@u.uid).where(following_uid: @u.uid)
     @followers = all_follwers.select('id, uid').order('id desc').offset((@page-1)*@per_page).limit(@per_page)
 
     follower_uids = @followers.collect{|f| f.uid}
@@ -1112,7 +1112,7 @@ class CenterController < ApplicationController
       @follower_followers_counts = $counter_client.getByIds(Settings.counter.user.followers, follower_uids)
       @follow_status = {}
       if @current_uid
-        followings = Following.stn(@current_uid).where(uid: @current_uid, following_uid: follower_uids).select('following_uid, is_mutual')
+        followings = Following.shard(@current_uid).where(uid: @current_uid, following_uid: follower_uids).select('following_uid, is_mutual')
         followings.each do |follow|
           @follow_status[follow.following_uid] = [true,follow.is_mutual]
         end
@@ -1137,7 +1137,7 @@ class CenterController < ApplicationController
     @per_page = Settings.per_page.favorites
 
     order = (["created_at desc" , "created_at asc"].include?(params[:order]) && params[:order]) || "created_at desc"
-    all_favorites = Favorite.stn(@current_uid).where(uid: @current_uid).where(query)
+    all_favorites = Favorite.shard(@current_uid).where(uid: @current_uid).where(query)
     @favorites_count = all_favorites.count
     @favorites = all_favorites.order(order).offset((@page-1)*@per_page).limit(@per_page)
     
@@ -1170,7 +1170,7 @@ class CenterController < ApplicationController
     @per_page = Settings.per_page.favorites
 
     order = (["created_at desc" , "created_at asc"].include?(params[:order]) && params[:order]) || "created_at desc"
-    all_favorites = Favorite.stn(@u.uid).where(uid: @u.uid).where(query)
+    all_favorites = Favorite.shard(@u.uid).where(uid: @u.uid).where(query)
     @favorites_count = all_favorites.count
     @favorites = all_favorites.order(order).offset((@page-1)*@per_page).limit(@per_page)
     

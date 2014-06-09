@@ -161,7 +161,7 @@
             </div>
             <div class="sound_bottom">
               <span class="createtime j-sound_timeUntilNow"><%= parse_time_until_now(@tracks[0].created_at) %></span>
-              <% is_favorited = @current_uid ? Favorite.stn(@current_uid).where(uid: @current_uid, track_id: @tracks[0].track_id).any? : false %>
+              <% is_favorited = @current_uid ? Favorite.shard(@current_uid).where(uid: @current_uid, track_id: @tracks[0].track_id).any? : false %>
               <div class="fr">
                 <a class="downloadToMobile link1">下载到手机</a>
                 <a class="likeBtn link1 <%= 'is-sound-liked' if is_favorited %>" href="javascript:;">赞(<span class="count j-sound_favoritesCount"><%= @init_track_favorite_count %></span>)</a>
@@ -195,7 +195,7 @@
           <ul>
             <% check_current_user = @current_uid == @album['uid'] %>
             <%  @tracks.each_with_index do |r,index| %>
-            <% fav = @current_uid ? Favorite.stn(@current_uid).where(uid: @current_uid, track_id: r.track_id).any? : false %>
+            <% fav = @current_uid ? Favorite.shard(@current_uid).where(uid: @current_uid, track_id: r.track_id).any? : false %>
             <li sound_id="<%= r.track_id %>">
               <div class="miniPlayer3">
                 <a class="playBtn"></a>

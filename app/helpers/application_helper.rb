@@ -195,8 +195,8 @@ module ApplicationHelper
   def set_my_counts
     if @current_uid
       # 声音数 专辑数 关注数 粉丝数
-      @my_tracks_count = TrackRecord.stn(@current_uid).where(uid: @current_uid, is_deleted: false, status: 1).count
-      @my_albums_count = Album.stn(@current_uid).where(uid: @current_uid, is_deleted: false, status: 1).count
+      @my_tracks_count = TrackRecord.shard(@current_uid).where(uid: @current_uid, is_deleted: false, status: 1).count
+      @my_albums_count = Album.shard(@current_uid).where(uid: @current_uid, is_deleted: false, status: 1).count
       @followings_count, @followers_count = $counter_client.getByNames([
           Settings.counter.user.followings,
           Settings.counter.user.followers
@@ -233,7 +233,7 @@ module ApplicationHelper
     uid = config[:uid]
 
     if config[:followers]
-      all_followers = Follower.stn(uid).where(following_uid: uid).select('id, uid, created_at')
+      all_followers = Follower.shard(uid).where(following_uid: uid).select('id, uid, created_at')
       @his_right_followers_count = all_followers.count
       @his_right_followers = all_followers.order('created_at desc').limit(6)
       follower_uids = @his_right_followers.collect{|f| f.uid}
@@ -245,7 +245,7 @@ module ApplicationHelper
     end
 
     if config[:followings]
-      all_followings = Following.stn(uid).where(uid: uid).select('id, following_uid, created_at')
+      all_followings = Following.shard(uid).where(uid: uid).select('id, following_uid, created_at')
       @his_right_followings_count = all_followings.count
       @his_right_followings = all_followings.order('created_at desc').limit(6)
       follower_uids = @his_right_followings.collect{|f| f.following_uid}
@@ -261,7 +261,7 @@ module ApplicationHelper
     end
 
     if config[:hot_albums]
-      all_album = Album.stn(uid).where(uid: uid) || []
+      all_album = Album.shard(uid).where(uid: uid) || []
       album_ids = all_album.collect{|a| a.id}
       if album_ids.size > 0
         album_play_counts = $counter_client.getByIds(Settings.counter.album.plays, album_ids)
@@ -274,7 +274,7 @@ module ApplicationHelper
     
     if config[:common_like] & @current_uid
       begin
-        _sql = "SELECT * FROM " << Favorite.stn(@current_uid).table_name << " f1 INNER JOIN " << Favorite.stn(config[:uid]).table_name << " f2 ON f1.track_id = f2.track_id WHERE f1.uid= #{@current_uid} AND f2.uid=" << config[:uid] << " order by f2.created_at desc"
+        _sql = "SELECT * FROM " << Favorite.shard(@current_uid).table_name << " f1 INNER JOIN " << Favorite.shard(config[:uid]).table_name << " f2 ON f1.track_id = f2.track_id WHERE f1.uid= #{@current_uid} AND f2.uid=" << config[:uid] << " order by f2.created_at desc"
         @his_common_like = Favorite.find_by_sql(_sql)
       rescue
         @his_common_like = nil
@@ -446,7 +446,7 @@ module ApplicationHelper
   #获取指定用户的关注状态
   def check_follow_status(uid)
     if @current_uid and uid and @current_uid!=uid
-        following = Following.stn(@current_uid).where(uid: @current_uid, following_uid: uid).select('following_uid, is_mutual').first
+        following = Following.shard(@current_uid).where(uid: @current_uid, following_uid: uid).select('following_uid, is_mutual').first
         @is_follow = following.present? 
         @be_followed = following && following.is_mutual
     else

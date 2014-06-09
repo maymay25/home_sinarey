@@ -6,7 +6,7 @@
 
     <!--他关注的人-->
     <%
-      all_followings = Following.stn(@u.uid).where(uid: @u.uid).select('id, following_uid')
+      all_followings = Following.shard(@u.uid).where(uid: @u.uid).select('id, following_uid')
       followings = all_followings.order('id desc').limit(10)
       following_uids = followings.collect{|f| f.following_uid}
     %>
@@ -29,7 +29,7 @@
 
     <!--他的粉丝-->
     <%
-      all_followers = Follower.stn(@u.uid).where(following_uid: @u.uid).select('id, uid')
+      all_followers = Follower.shard(@u.uid).where(following_uid: @u.uid).select('id, uid')
       followers = all_followers.order('id desc').limit(10)
       follower_uids = followers.collect{|f| f.uid}
     %>
@@ -51,7 +51,7 @@
     <% end %>
 
     <!--他最新的声音-->
-    <% track_records = TrackRecord.stn(@u.uid).where(uid: @u.uid, is_deleted: false, status: 1).order('id desc').limit(10) %>
+    <% track_records = TrackRecord.shard(@u.uid).where(uid: @u.uid, is_deleted: false, status: 1).order('id desc').limit(10) %>
     <% if track_records.size > 0 %>
     <%
         track_ids = track_records.collect{ |r| r.track_id }

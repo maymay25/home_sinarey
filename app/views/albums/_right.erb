@@ -1,5 +1,5 @@
 <%
-other_albums = Album.stn(album.uid).where(uid: album.uid).where("id <>#{album.id}").where(is_deleted: false, status: 1).order("created_at desc").limit(3)
+other_albums = Album.shard(album.uid).where(uid: album.uid).where("id <>#{album.id}").where(is_deleted: false, status: 1).order("created_at desc").limit(3)
 
 album_ids = other_albums.collect{ |a| a.id }
 if album_ids.count > 0

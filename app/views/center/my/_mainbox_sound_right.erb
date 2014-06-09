@@ -6,7 +6,7 @@
 
     <!--我关注的人-->
     <%
-      all_followings = Following.stn(@current_uid).where(uid: @current_uid).select('id, following_uid')
+      all_followings = Following.shard(@current_uid).where(uid: @current_uid).select('id, following_uid')
       followings = all_followings.order('id desc').limit(10)
       following_uids = followings.collect{|f| f.following_uid}
     %>
@@ -29,7 +29,7 @@
 
     <!--我的粉丝-->
     <%
-      all_followers = Follower.stn(@current_uid).where(following_uid: @current_uid).select('id, uid')
+      all_followers = Follower.shard(@current_uid).where(following_uid: @current_uid).select('id, uid')
       followers = all_followers.order('id desc').limit(10)
       follower_uids = followers.collect{|f| f.uid}
     %>

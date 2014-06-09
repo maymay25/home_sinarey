@@ -25,10 +25,10 @@ class FollowController < ApplicationController
 
     halt render_json({res: false, error: "blacklist", msg: "由于对方的设置，无法进行此操作"}) if BlackUser.where(uid: following_user.uid, black_uid: @current_uid).any?
 
-    following = Following.stn(@current_uid).where(uid: @current_uid, following_uid: following_user.uid).first
+    following = Following.shard(@current_uid).where(uid: @current_uid, following_uid: following_user.uid).first
     
     unless following
-      follower = Follower.stn(@current_uid).where(uid: following_user.uid, following_uid: @current_uid).first
+      follower = Follower.shard(@current_uid).where(uid: following_user.uid, following_uid: @current_uid).first
       is_mutual = !follower.nil?
 
       following = Following.create(uid: @current_user.uid, 
@@ -114,13 +114,13 @@ class FollowController < ApplicationController
 
     groups,res = [],{}
     
-    following = Following.stn(@current_uid).where(uid: @current_uid, following_uid: params[:following_uid]).first
+    following = Following.shard(@current_uid).where(uid: @current_uid, following_uid: params[:following_uid]).first
     if following
       group_ids = []
       old_group_ids = []
       old_is_auto_push = false
 
-      is_auto_push_count = Following.stn(@current_uid).where(uid: @current_uid, is_auto_push: true).count
+      is_auto_push_count = Following.shard(@current_uid).where(uid: @current_uid, is_auto_push: true).count
       if is_auto_push_count >= Settings.auto_push_group_limit and !following.is_auto_push and params[:is_auto_push] == 'true'
         res[:error] = "必听组好友不能超过#{Settings.auto_push_group_limit}个"
       else
@@ -142,18 +142,18 @@ class FollowController < ApplicationController
       end
       
       # 先全部删除
-      Followingx2Group.stn(@current_uid).where(uid: @current_uid, following_id: following.id).each do |f|
+      Followingx2Group.shard(@current_uid).where(uid: @current_uid, following_id: following.id).each do |f|
         f.destroy
         old_group_ids << f.following_group_id
       end
 
       if params[:following_group_ids]
         params[:following_group_ids].uniq.each do |fg_id|
-          fx2_count = Followingx2Group.stn(@current_uid).where(uid: @current_uid, following_group_id: fg_id).count
+          fx2_count = Followingx2Group.shard(@current_uid).where(uid: @current_uid, following_group_id: fg_id).count
           if fx2_count >= Settings.following_group_limit
             res[:error] = "分组好友不能超过#{Settings.following_group_limit}个"
           else
-            fg = FollowingGroup.stn(@current_uid).where(id: fg_id).first
+            fg = FollowingGroup.shard(@current_uid).where(id: fg_id).first
             if fg
               Followingx2Group.create(uid: @current_uid, following_id: following.id, following_group_id: fg.id, following_uid: following.following_uid)
               groups << fg.title
@@ -188,7 +188,7 @@ class FollowController < ApplicationController
     halt_400 unless @current_uid
 
     fgs = []
-    all_groups = FollowingGroup.stn(@current_uid).where(uid: @current_uid)
+    all_groups = FollowingGroup.shard(@current_uid).where(uid: @current_uid)
     all_groups.each do |fg| 
       fgs << {id: fg.id, title: fg.title}
     end
@@ -202,11 +202,11 @@ class FollowController < ApplicationController
 
     halt render_json({res: false, errno: "following_groups.2", msg: print_message(:params_missing, "title")}) if params[:title].blank?
     
-    halt render_json({res: false, errno: "following_groups.3", msg: "分组最多创建16个"}) if !@current_user.isVerified and FollowingGroup.stn(@current_uid).where(uid: @current_uid).count >= 16
+    halt render_json({res: false, errno: "following_groups.3", msg: "分组最多创建16个"}) if !@current_user.isVerified and FollowingGroup.shard(@current_uid).where(uid: @current_uid).count >= 16
 
     title = CGI.escapeHTML(params[:title].strip)
 
-    fg = FollowingGroup.stn(@current_uid).where(uid: @current_uid, title: title).first
+    fg = FollowingGroup.shard(@current_uid).where(uid: @current_uid, title: title).first
     halt render_json({res: false, errno: "following_groups.4", msg: "#{params[:title].strip} 已存在"})
     
     fg = FollowingGroup.create(uid: @current_uid, title: title)
@@ -222,10 +222,10 @@ class FollowController < ApplicationController
 
     id,title = params[:id].to_i,CGI.escapeHTML(params[:title].strip)
 
-    already_exist = FollowingGroup.stn(@current_uid).where('id <> ? and title = ? and uid = ?', id, title, @current_uid).any?
+    already_exist = FollowingGroup.shard(@current_uid).where('id <> ? and title = ? and uid = ?', id, title, @current_uid).any?
     halt render_json({res: false, errno: "following_groups.4", msg: "#{title}分组已经存在"}) if already_exist
 
-    fg = FollowingGroup.stn(@current_uid).where(id: id).first
+    fg = FollowingGroup.shard(@current_uid).where(id: id).first
     if fg and fg.title != title
       fg.title = title
       fg.save
@@ -241,14 +241,14 @@ class FollowController < ApplicationController
 
     following_ids = []
 
-    fg = FollowingGroup.stn(@current_uid).where(id: params[:id]).first
+    fg = FollowingGroup.shard(@current_uid).where(id: params[:id]).first
     fg.destroy
-    Followingx2Group.stn(@current_uid).where(uid: @current_uid, following_group_id: fg.id).each do |f|
+    Followingx2Group.shard(@current_uid).where(uid: @current_uid, following_group_id: fg.id).each do |f|
       f.destroy
       following_ids << f.following_id
     end
 
-    following_uids = Following.stn(@current_uid).where(uid: @current_uid, id: following_ids).select('following_uid').collect{|f| f.following_uid}
+    following_uids = Following.shard(@current_uid).where(uid: @current_uid, id: following_ids).select('following_uid').collect{|f| f.following_uid}
 
     $rabbitmq_channel.fanout(Settings.topic.followgroup.destroyed, durable: true).publish(oj_dump({
       uid: @current_uid,

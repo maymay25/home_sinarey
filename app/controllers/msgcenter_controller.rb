@@ -20,11 +20,11 @@ class MsgcenterController < ApplicationController
     xima = get_profile_user_basic_info(1)
 
     # 上次收到的最后一条公告 喜马发的
-    sysmsg_count = Inbox.stn(@current_uid).where(to_uid: @current_uid, message_type: 5, uid: xima.uid).count
+    sysmsg_count = Inbox.shard(@current_uid).where(to_uid: @current_uid, message_type: 5, uid: xima.uid).count
 
     if sysmsg_count > 0
       # 收过公告 喜马发的
-      last = Inbox.stn(@current_uid).where(to_uid: @current_uid, message_type: 5, uid: xima.uid).last
+      last = Inbox.shard(@current_uid).where(to_uid: @current_uid, message_type: 5, uid: xima.uid).last
       if last and last.anno_id
         # 收新的公告 喜马发的
         Announcement.where('id > ? and created_at > ? and uid = ?', last.anno_id, Time.at(@current_user.createdTime/1000), xima.uid).each do |a|
@@ -60,7 +60,7 @@ class MsgcenterController < ApplicationController
     @page = (tmp = params[:page].to_i )>0 ? tmp : 1
     @per_page = 10
 
-    all_messages = Inbox.stn(@current_uid).where(to_uid: @current_uid, message_type: [5, 6], has_read: false)
+    all_messages = Inbox.shard(@current_uid).where(to_uid: @current_uid, message_type: [5, 6], has_read: false)
     @messages_count = all_messages.count
     @messages = all_messages.order('id desc').offset((@page-1)*@per_page).limit(@per_page)
 
@@ -78,7 +78,7 @@ class MsgcenterController < ApplicationController
     
     halt render_json({result: "unlogin"}) unless @current_uid
 
-    message = Inbox.stn(@current_uid).where(id: params[:id]).first
+    message = Inbox.shard(@current_uid).where(id: params[:id]).first
     message.update_attribute("has_read", true) if message
 
     render_json({result: "success"})
@@ -93,7 +93,7 @@ class MsgcenterController < ApplicationController
     
     redirect_to_login('/#/msgcenter/referme') unless @current_uid
 
-    all_refermes = Inbox.stn(@current_uid).where(to_uid: @current_uid).order('id desc')
+    all_refermes = Inbox.shard(@current_uid).where(to_uid: @current_uid).order('id desc')
 
     @refermes_comment_count = all_refermes.where(message_type: 4).count
     @refermes_relay_count = all_refermes.where(message_type: 8).count
@@ -129,10 +129,10 @@ class MsgcenterController < ApplicationController
     
     redirect_to_login('/#/msgcenter/comment') unless @current_uid
 
-    inbox_comments = Inbox.stn(@current_uid).where(to_uid: @current_uid, message_type: [2, 3])
+    inbox_comments = Inbox.shard(@current_uid).where(to_uid: @current_uid, message_type: [2, 3])
     @inbox_count = inbox_comments.count
 
-    outbox_comments = Outbox.stn(@current_uid).where(uid: @current_uid, message_type: [2, 3])
+    outbox_comments = Outbox.shard(@current_uid).where(uid: @current_uid, message_type: [2, 3])
     @outbox_count = outbox_comments.count
 
     @all_count = @inbox_count + @outbox_count
@@ -187,7 +187,7 @@ class MsgcenterController < ApplicationController
 
     if params[:parent_id] and !params[:parent_id].empty?
       # 回复评论
-      pcomment = Comment.stn(params[:track_id]).where(id: params[:parent_id]).first
+      pcomment = Comment.shard(params[:track_id]).where(id: params[:parent_id]).first
       halt render_json({res: false, message: "", msg: '该评论不存在'}) unless pcomment
       master_comment_id = pcomment.parent_id || pcomment.id
     end
@@ -201,11 +201,11 @@ class MsgcenterController < ApplicationController
       res = {res: false, message: "", msg: '由于对方的隐私设置，发送失败'}
       case track_ps.allow_comment
       when 2
-        if !@current_user.isVerified and !Following.stn(track.uid).where(uid: track.uid, following_uid: @current_uid).any? and !Follower.stn(track.uid).where(uid: @current_uid, following_uid: track.uid).any?
+        if !@current_user.isVerified and !Following.shard(track.uid).where(uid: track.uid, following_uid: @current_uid).any? and !Follower.shard(track.uid).where(uid: @current_uid, following_uid: track.uid).any?
           halt render_json(res)
         end
       when 3
-        unless Following.stn(track.uid).where(uid: track.uid, following_uid: @current_uid).any?
+        unless Following.shard(track.uid).where(uid: track.uid, following_uid: @current_uid).any?
           render_json(res)
         end
       when 4
@@ -327,7 +327,7 @@ class MsgcenterController < ApplicationController
 
     halt_400 unless @current_uid
     
-    comment = Comment.stn(params[:track_id]).where(id: params[:comment_id], is_deleted: false).first
+    comment = Comment.shard(params[:track_id]).where(id: params[:comment_id], is_deleted: false).first
     if comment.uid == @current_uid or comment.track_uid == @current_uid
       comment.is_deleted = true
       comment.save
@@ -359,7 +359,7 @@ class MsgcenterController < ApplicationController
     receive_notice
 
     conditions = ["linkman_nickname like ? or last_chat_content like ?", "%#{params[:q]}%", "%#{params[:q]}%"] if params[:q] and !params[:q].empty?  #搜索条件
-    linkmens = Linkman.stn(@current_uid).where(uid: @current_uid).where(conditions).order('last_chat_at desc')
+    linkmens = Linkman.shard(@current_uid).where(uid: @current_uid).where(conditions).order('last_chat_at desc')
     @linkmen_count = linkmens.count
 
     @page = (tmp = params[:page].to_i )>0 ? tmp : 1
@@ -368,7 +368,7 @@ class MsgcenterController < ApplicationController
 
     @last_chats = {}
     @linkmen.each do |l|
-        last = Chat.stn(@current_uid).where(uid: @current_uid, with_uid: l.linkman_uid).order('created_at desc').first
+        last = Chat.shard(@current_uid).where(uid: @current_uid, with_uid: l.linkman_uid).order('created_at desc').first
       # 延迟删除没有聊天记录的联系人
       unless last
         l.destroy
@@ -403,10 +403,10 @@ class MsgcenterController < ApplicationController
 
     receive_notice if params[:uid].to_i == 2
 
-    @chats = Chat.stn(@current_uid).where(uid: @current_uid, with_uid: @with_user.uid).order('created_at desc').limit(200)
+    @chats = Chat.shard(@current_uid).where(uid: @current_uid, with_uid: @with_user.uid).order('created_at desc').limit(200)
     $counter_client.set(Settings.counter.user.new_message, @current_uid, 0)
 
-    linkman = Linkman.stn(@current_uid).where(uid: @current_uid, linkman_uid: @with_user.uid).first
+    linkman = Linkman.shard(@current_uid).where(uid: @current_uid, linkman_uid: @with_user.uid).first
     linkman.update_attributes(no_read_count: 0) if linkman
 
     erb_js(:letter_show_js)
@@ -439,11 +439,11 @@ class MsgcenterController < ApplicationController
       res = {res: false, msg: "由于对方的隐私设置，发送失败"}
       case to_ps.allow_message
       when 2
-        if !@current_user.isVerified and !Following.stn(to_profile.uid).where(uid: to_profile.uid, following_uid: @current_uid).any? and !Follower.stn(to_profile.uid).where(uid: @current_uid, following_uid: to_profile.uid).any?
+        if !@current_user.isVerified and !Following.shard(to_profile.uid).where(uid: to_profile.uid, following_uid: @current_uid).any? and !Follower.shard(to_profile.uid).where(uid: @current_uid, following_uid: to_profile.uid).any?
           halt render_json(res)
         end
       when 3
-        unless Following.stn(to_profile.uid).where(uid: to_profile.uid, following_uid: @current_uid).any?
+        unless Following.shard(to_profile.uid).where(uid: to_profile.uid, following_uid: @current_uid).any?
           halt render_json(res)
         end
       when 4
@@ -461,7 +461,7 @@ class MsgcenterController < ApplicationController
     
     ActiveRecord::Base.transaction do 
       # 我的联系人他
-      linkman = Linkman.stn(@current_uid).where(uid: @current_uid, linkman_uid: to_profile.uid).first
+      linkman = Linkman.shard(@current_uid).where(uid: @current_uid, linkman_uid: to_profile.uid).first
       now = Time.new
       if linkman
         linkman.last_chat_at = now
@@ -481,7 +481,7 @@ class MsgcenterController < ApplicationController
       end
 
       # 他的联系人我
-      to_linkman = Linkman.stn(to_profile.uid).where(uid: to_profile.uid, linkman_uid: @current_uid).first
+      to_linkman = Linkman.shard(to_profile.uid).where(uid: to_profile.uid, linkman_uid: @current_uid).first
       if to_linkman
         to_linkman.no_read_count = to_linkman.no_read_count + 1
         to_linkman.last_chat_at = now
@@ -539,7 +539,7 @@ class MsgcenterController < ApplicationController
     
     halt_400 unless @current_uid
 
-    chat = Chat.stn(@current_uid).where(id: params[:id]).first
+    chat = Chat.shard(@current_uid).where(id: params[:id]).first
     chat.destroy
 
     render_json({res: true, msg: print_message(:success)})
@@ -553,7 +553,7 @@ class MsgcenterController < ApplicationController
     halt_400 unless @current_uid
 
     params[:ids].each do |id|
-      chat = Chat.stn(@current_uid).where(id: id).first
+      chat = Chat.shard(@current_uid).where(id: id).first
       chat.destroy
     end
 
@@ -567,7 +567,7 @@ class MsgcenterController < ApplicationController
     
     halt_400 unless @current_uid
 
-    Chat.stn(@current_uid).where(uid: @current_uid, with_uid: params[:uid]).each do |c|
+    Chat.shard(@current_uid).where(uid: @current_uid, with_uid: params[:uid]).each do |c|
       c.destroy
     end
    
@@ -583,7 +583,7 @@ class MsgcenterController < ApplicationController
     
     redirect_to_login('/#/msgcenter/like') unless @current_uid
 
-    all_likes = Inbox.stn(@current_uid).where(to_uid: @current_uid, message_type: 7)
+    all_likes = Inbox.shard(@current_uid).where(to_uid: @current_uid, message_type: 7)
     
     @page = (tmp = params[:page].to_i )>0 ? tmp : 1
     @per_page = 10
@@ -605,7 +605,7 @@ class MsgcenterController < ApplicationController
     
     halt render_json({res: false, message: "need id", msg: '评论不能为空喔。'}) unless params[:id]
 
-    like = Inbox.stn(@current_uid).where(id: params[:id]).first
+    like = Inbox.shard(@current_uid).where(id: params[:id]).first
     like.destroy
 
     render_json({result: "success"})
@@ -670,7 +670,7 @@ class MsgcenterController < ApplicationController
 
   def check_my_laya(new_annos_count = 0)
     laya = get_profile_user_basic_info(2)
-    linkman = Linkman.stn(@current_uid).where(uid: @current_uid, linkman_uid: 2).first
+    linkman = Linkman.shard(@current_uid).where(uid: @current_uid, linkman_uid: 2).first
     now = Time.new
     if linkman 
       linkman.last_chat_at = now

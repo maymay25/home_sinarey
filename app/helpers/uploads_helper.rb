@@ -94,7 +94,7 @@ module UploadsHelper
     cleaned_rich_intro = clean_html(rich_intro) if rich_intro.present?
     cleaned_lyric = CGI.escapeHTML(Sanitize.clean(lyric, { elements: %w(br) }))[0, 5000] if lyric.present?
 
-    track_rich = TrackRich.stn(track.id).where(track_id: track.id).first
+    track_rich = TrackRich.shard(track.id).where(track_id: track.id).first
     if track_rich
       track_rich.update_attributes(rich_intro: cleaned_rich_intro, lyric: cleaned_lyric)
     else
@@ -335,7 +335,7 @@ module UploadsHelper
 
   #上传多条声音·添加到指定专辑
   def upload_tracks_into_album(album,zipfiles,is_records_desc,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height,datetime)
-    album_rich = TrackSetRich.stn(album.id).where(track_set_id: album.id).first
+    album_rich = TrackSetRich.shard(album.id).where(track_set_id: album.id).first
     cleaned_rich_intro = (album_rich && album.rich_intro.to_s) || ''
     if datetime
       delayedzipfiles = []
@@ -378,7 +378,7 @@ module UploadsHelper
     # 专辑富文本
     cleaned_rich_intro = clean_html(rich_intro) if rich_intro.present?
 
-    setrich = TrackSetRich.stn(album.id).where(track_set_id: album.id).first
+    setrich = TrackSetRich.shard(album.id).where(track_set_id: album.id).first
     if setrich
       setrich.update_attributes(rich_intro: cleaned_rich_intro)
     else
@@ -535,7 +535,7 @@ module UploadsHelper
     #更新声音图片信息
     destroy_images.each do |picture_id|
       picture_id = picture_id.to_i
-      track_picture = TrackPicture.stn(track.id).where(id:picture_id,track_id:track.id).first
+      track_picture = TrackPicture.shard(track.id).where(id:picture_id,track_id:track.id).first
       track_picture.destroy if track_picture
     end if destroy_images.present?
 
@@ -544,7 +544,7 @@ module UploadsHelper
       images.each do |image|
         next if image.to_s=="0"
         if (picture_id=image.to_i)>0
-          track_picture = TrackPicture.stn(track.id).where(id:picture_id,track_id:track.id).first
+          track_picture = TrackPicture.shard(track.id).where(id:picture_id,track_id:track.id).first
           if track_picture
             track_picture.update_attribute('order_num',image_index+1)
             if image_index.zero?
@@ -595,7 +595,7 @@ module UploadsHelper
       UPLOAD_SERVICE.updateTrackUsed(track.id, track.transcode_state, image_ids, nil, nil)
     end
 
-    track_rich = TrackRich.stn(track.id).where(track_id: track.id).first
+    track_rich = TrackRich.shard(track.id).where(track_id: track.id).first
     if track_rich
       track_rich.update_attributes(rich_intro: cleaned_rich_intro, lyric: cleaned_lyric)
     else
@@ -617,7 +617,7 @@ module UploadsHelper
 
       CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,false,request.user_agent,get_client_ip,nil,nil,[[record.id, cache_album_id]],nil,nil,nil,nil)
     elsif cache_album_id
-      past_album = Album.stn(@current_uid).where(id: cache_album_id, uid: @current_uid).first
+      past_album = TrackSet.shard(cache_album_id).where(id: cache_album_id, uid: @current_uid).first
       if past_album
         past_album.records_order &&= past_album.records_order.split(',').delete_if{ |id| id == record.id }.join(",")
         past_album.save
@@ -789,7 +789,7 @@ module UploadsHelper
     album.update_attributes(tmp_attrs)
 
     # 专辑富文本
-    setrich = TrackSetRich.stn(album.id).where(track_set_id: album.id).first
+    setrich = TrackSetRich.shard(album.id).where(track_set_id: album.id).first
 
     if setrich
       setrich.update_attributes(rich_intro: cleaned_rich_intro)
@@ -988,10 +988,10 @@ module UploadsHelper
   def destroy_album_tracks(album,record_ids)
     destroy_track_ids = []
     record_ids.each do |record_id|
-      record = TrackRecord.stn(album.uid).where(uid: album.uid, id: record_id, is_deleted: false, status: 1).first
+      record = TrackRecord.shard(album.uid).where(uid: album.uid, id: record_id, is_deleted: false, status: 1).first
       if record
         if record.op_type == 1 # 软删声音
-          track = Track.stn(record.track_id).where(id: record.track_id).first
+          track = Track.shard(record.track_id).where(id: record.track_id).first
           if track
             track.update_attribute(:is_deleted, true)
             destroy_track_ids << track.id
@@ -1005,12 +1005,12 @@ module UploadsHelper
   end
 
   def update_album_track(album,record_id,title)
-    record = TrackRecord.stn(album.uid).where(uid: album.uid, id: record_id, is_deleted: false, status: 1).first
+    record = TrackRecord.shard(album.uid).where(uid: album.uid, id: record_id, is_deleted: false, status: 1).first
     return false unless record
 
     response = {}
     if record.uid == record.track_uid
-      track = Track.stn(record.track_id).where(uid: record.track_uid, id: record.track_id).first
+      track = Track.shard(record.track_id).where(uid: record.track_uid, id: record.track_id).first
       return false unless track
 
       record.title = title if title.present?
@@ -1034,10 +1034,10 @@ module UploadsHelper
 
   def move_album_track(album,record_id,title)
 
-    record = TrackRecord.stn(album.uid).where(uid: album.uid, id: record_id, is_deleted: false, status: 1).first
+    record = TrackRecord.shard(album.uid).where(uid: album.uid, id: record_id, is_deleted: false, status: 1).first
     return false unless record
 
-    track = Track.stn(record.track_id).where(uid: album.uid, id: record.track_id, is_deleted: false, status: 1).first
+    track = Track.shard(record.track_id).where(uid: album.uid, id: record.track_id, is_deleted: false, status: 1).first
     return false unless track
 
     response = {}

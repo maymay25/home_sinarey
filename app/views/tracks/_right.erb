@@ -4,7 +4,7 @@
   album_ids << track.album_id if track.album_id
 
   # 有专辑的声音转采记录
-  reposts_with_album = TrackRepost.stn(track.id).where(is_deleted:0,track_id:track.id).where('album_id != NULL').limit(6)
+  reposts_with_album = TrackRepost.shard(track.id).where(is_deleted:0,track_id:track.id).where('album_id != NULL').limit(6)
   album_ids += reposts_with_album.map(&:album_id)
   
   albums = TrackSet.mfetch(album_ids,true)
@@ -12,7 +12,7 @@
 
   favorites_count = $counter_client.get(Settings.counter.track.favorites, track.id)
 
-  lovers = Lover.stn(track.id).where(track_id: track.id).order("id desc").limit(10)
+  lovers = Lover.shard(track.id).where(track_id: track.id).order("id desc").limit(10)
   if lovers.count > 0
     uids = lovers.map{|l| l.uid}
     lover_users = $profile_client.getMultiUserBasicInfos(uids)
@@ -20,7 +20,7 @@
     lover_followers_counts = $counter_client.getByIds(Settings.counter.user.followers, uids)
   end
 
-  trackrich = TrackRich.stn(params[:id]).where(track_id: params[:id]).select('lyric').first
+  trackrich = TrackRich.shard(params[:id]).where(track_id: params[:id]).select('lyric').first
   if trackrich && trackrich.lyric
     track_user = get_profile_user_basic_info(track.uid)
     if track_user && track_user.isVerified
@@ -28,8 +28,8 @@
     end
   end
 
-  other_records = TrackRecord.stn(track.uid).where(uid:track.uid,is_public:true,is_deleted:false,status:1).where(['id > ?',track.id]).order('id asc').limit(3).to_a.reverse
-  other_records += TrackRecord.stn(track.uid).where(uid:track.uid,is_public:true,is_deleted:false,status:1).where(['id < ?',track.id]).order('id desc').limit(3).to_a
+  other_records = TrackRecord.shard(track.uid).where(uid:track.uid,is_public:true,is_deleted:false,status:1).where(['id > ?',track.id]).order('id asc').limit(3).to_a.reverse
+  other_records += TrackRecord.shard(track.uid).where(uid:track.uid,is_public:true,is_deleted:false,status:1).where(['id < ?',track.id]).order('id desc').limit(3).to_a
   track_ids = other_records.map(&:track_id)
   other_tracks = Track.mfetch(track_ids)
   track_ids = other_tracks.map(&:id)

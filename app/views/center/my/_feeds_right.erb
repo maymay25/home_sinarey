@@ -235,7 +235,7 @@
 
         <div class="tab_content myTags">
           <div class="tagsBox">
-            <% following_tags = FollowingTag.stn(@current_uid).where('tname <> ? and uid = ?', '', @current_uid).limit(20) %>
+            <% following_tags = FollowingTag.shard(@current_uid).where('tname <> ? and uid = ?', '', @current_uid).limit(20) %>
             <% if following_tags.size > 0 %>
                 <% following_tags.each_with_index do |f,index| %>
                   <a class="tagBtn" href="<%= link_path "/tag/#{f.tname}/" %>">

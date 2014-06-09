@@ -107,7 +107,7 @@
                     
                                 <div class="sound_bottom">
                                     <span class="createtime"><%= parse_time_until_now(data.createdAt.to_datetime) %></span>
-                                    <% is_favorited = @current_uid ? Favorite.stn(@current_uid).where(uid: @current_uid, track_id: feed.toTid).any? : false %>
+                                    <% is_favorited = @current_uid ? Favorite.shard(@current_uid).where(uid: @current_uid, track_id: feed.toTid).any? : false %>
                                     <div class="fr">
                                         <a class="downloadToMobile link1">下载到手机</a>
                                         <a class="likeBtn link1 <%= 'is-sound-liked' if is_favorited %>" href="javascript:;">赞(<span class="count"><%= favorites_count %></span>)</a>
@@ -168,7 +168,7 @@
                                 <% data.timelines.each_with_index do |feed,index| %>
                                 <%
                                 if @current_uid
-                                  following = Following.stn(@current_uid).where(uid: @current_uid, following_uid: feed.toUid).select('following_uid, is_mutual').first
+                                  following = Following.shard(@current_uid).where(uid: @current_uid, following_uid: feed.toUid).select('following_uid, is_mutual').first
                                   is_follow = following.present?
                                   be_followed = following.present? && following.is_mutual
                                 else
@@ -397,7 +397,7 @@
                     
                                 <div class="sound_bottom">
                                     <span class="createtime"><%= parse_time_until_now(data.createdAt.to_datetime) %></span>
-                                    <% is_favorited = @current_uid ? Favorite.stn(@current_uid).where(uid: @current_uid, track_id: feed.toTid).any? : false %>
+                                    <% is_favorited = @current_uid ? Favorite.shard(@current_uid).where(uid: @current_uid, track_id: feed.toTid).any? : false %>
                                     <div class="fr">
                                         <a class="downloadToMobile link1">下载到手机</a>
                                         <a class="likeBtn link1 <%= 'is-sound-liked' if is_favorited %>" href="javascript:;">赞(<span class="count"><%= favorites_count %></span>)</a>

@@ -1,7 +1,7 @@
 <% if @track && @track_user.isVerified %>
 
   <%
-    trackrich = TrackRich.stn(@track.id).where(track_id: @track.id).first
+    trackrich = TrackRich.shard(@track.id).where(track_id: @track.id).first
     rich_intro = trackrich ? clean_html(trackrich.rich_intro) : clean_html(@track.intro)
   %>
   <article><%== simple_format(rich_intro) %></article>

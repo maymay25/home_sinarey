@@ -20,7 +20,7 @@ class TagsController < ApplicationController
       
     halt_404 if %w[ 卢台长 卢军宏 玄艺综述 玄艺问答 直话直说 白话佛法 ].include?(@tag_name)
 
-    tag_followers = FollowerTag.stn(@tag_name).where(tname: @tag_name).order("created_at desc")
+    tag_followers = FollowerTag.shard(@tag_name).where(tname: @tag_name).order("created_at desc")
     @is_follow = tag_followers.where(uid: @current_uid).any?
     @tags_followers_count = tag_followers.count
 
@@ -86,7 +86,7 @@ class TagsController < ApplicationController
 
     halt_404 if !TAG_SERVICE.exist(@tag_name)
 
-    tag_followers = FollowerTag.stn(@tag_name).where(tname: @tag_name).order("created_at desc")
+    tag_followers = FollowerTag.shard(@tag_name).where(tname: @tag_name).order("created_at desc")
     @is_follow = tag_followers.where(uid: @current_uid).any?
     @tags_followers_count = tag_followers.count
     @categories = {}.tap{ |h| Category.order("order_num asc").each{ |c| h[c.id] = c.title } }
@@ -110,7 +110,7 @@ class TagsController < ApplicationController
       @user_followers_counts = $counter_client.getByIds(Settings.counter.user.followers, follower_uids)
       @user_followings_counts = $counter_client.getByIds(Settings.counter.user.followings, follower_uids)
       if @current_uid
-        followings = Following.stn(@current_uid).where(uid: @current_uid, following_uid: follower_uids).select('following_uid, is_mutual')
+        followings = Following.shard(@current_uid).where(uid: @current_uid, following_uid: follower_uids).select('following_uid, is_mutual')
         followings.each do |follow|
           @follow_status[follow.following_uid] = [true,follow.is_mutual]
         end
@@ -136,7 +136,7 @@ class TagsController < ApplicationController
     @tag_name = params[:tname].to_s.strip
     halt render_json({response:'nothing'}) if @tag_name.blank?
 
-    ftag = FollowingTag.stn(@current_uid).where(uid: @current_uid, tname: @tag_name).first
+    ftag = FollowingTag.shard(@current_uid).where(uid: @current_uid, tname: @tag_name).first
     if ftag
 
       ftag.destroy
