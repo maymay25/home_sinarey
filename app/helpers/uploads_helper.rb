@@ -462,8 +462,8 @@ module UploadsHelper
       #track.human_category_id = album.human_category_id
       track.approved_at = Time.now
       track.album_id = album.id # 源专辑id
-      track.album_title = album.title # 源专辑标题
-      track.album_cover_path = album.cover_path
+      #track.album_title = album.title # 源专辑标题
+      #track.album_cover_path = album.cover_path
       track.title = title
       track.category_id = album.category_id
       track.music_category = album.music_category
@@ -642,8 +642,9 @@ module UploadsHelper
       if track.is_public && track.status == 1 && !@current_user.isVerified
         ApprovingTrack.where(track_id: track.id, is_update: true).destroy_all
         uag = UidApproveGroup.where(uid: track.uid).first
-        ApprovingTrack.create(album_cover_path: album && album.cover_path,
-          album_title: album && album.title,
+        ApprovingTrack.create(track_id: track.id,
+          #album_cover_path: album && album.cover_path,
+          #album_title: album && album.title,
           album_id: track.album_id,
           approve_group_id: uag && uag.approve_group_id,
           category_id: track.category_id,
@@ -658,7 +659,6 @@ module UploadsHelper
           status: track.status,
           title: track.title,
           track_created_at: track.created_at,
-          track_id: track.id,
           transcode_state: track.transcode_state,
           uid: track.uid,
           user_source: track.user_source,
@@ -1014,14 +1014,14 @@ module UploadsHelper
       return false unless track
 
       record.title = title if title.present?
-      record.album_title = album.title
-      record.album_cover_path = album.cover_path
+      #record.album_title = album.title
+      #record.album_cover_path = album.cover_path
       record.is_public = album.is_public
       record.save if record.changed?
 
       track.title = title
-      track.album_title = album.title
-      track.album_cover_path = album.cover_path
+      #track.album_title = album.title
+      #track.album_cover_path = album.cover_path
       track.is_public = album.is_public
       if track.changed?
         track.save
@@ -1046,14 +1046,14 @@ module UploadsHelper
 
     track.title = title
     track.album_id = album.id
-    track.album_title = album.title
-    track.album_cover_path = album.cover_path
+    #track.album_title = album.title
+    #track.album_cover_path = album.cover_path
     track.is_public = album.is_public
 
     record.title = title
     record.album_id = album.id
-    record.album_title = album.title
-    record.album_cover_path = album.cover_path
+    #record.album_title = album.title
+    #record.album_cover_path = album.cover_path
     record.is_public = album.is_public     
 
     track.save
@@ -1092,8 +1092,8 @@ module UploadsHelper
     #track.human_category_id = @current_user.vCategoryId
     track.approved_at = Time.now
     track.album_id = album.id # 源专辑id
-    track.album_title = album.title # 源专辑标题
-    track.album_cover_path = album.cover_path
+    #track.album_title = album.title # 源专辑标题
+    #track.album_cover_path = album.cover_path
     track.title = title
     track.category_id = album.category_id
     track.music_category = album.music_category
