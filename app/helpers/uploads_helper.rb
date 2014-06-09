@@ -803,14 +803,14 @@ module UploadsHelper
 
     return if uploadzipfiles.blank?
 
-    create_record_ids = []
+    new_records = []
 
     new_fileid_idx = 0
     uploadzipfiles.each do |fid, title|
       transcode_data = p_transcode_res['data'][new_fileid_idx]
       new_fileid_idx += 1
       if result = create_album_track(album,fid,title,transcode_data,default_cover_path,default_cover_exlore_height,cleaned_rich_intro)
-        create_record_ids << result[:record]
+        new_records << result[:record]
       end
     end
 
@@ -823,12 +823,12 @@ module UploadsHelper
       album.save
     end
 
-    if album.status == 1 and (new_tracks_size=create_record_ids.size)>0
-      $counter_client.incr(Settings.counter.user.tracks, album.uid, new_tracks_size)
-      $counter_client.incr(Settings.counter.album.tracks, album.id, new_tracks_size)
+    if album.status == 1 and (new_records_size=new_records.size)>0
+      $counter_client.incr(Settings.counter.user.tracks, album.uid, new_records_size)
+      $counter_client.incr(Settings.counter.album.tracks, album.id, new_records_size)
     end
 
-    CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,false,request.user_agent,get_client_ip,create_record_ids,nil,nil,nil,nil,[sharing_to, share_content],nil)
+    CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,false,request.user_agent,get_client_ip,new_records.map(&:id),nil,nil,nil,nil,[sharing_to, share_content],nil)
   end
 
   def delayed_create_album_tracks(datetime,album,delayedzipfiles,is_records_desc,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height,cleaned_rich_intro)
