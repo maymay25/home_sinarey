@@ -978,7 +978,7 @@ module UploadsHelper
       latest_track_id = all_records.sort{|x, y| y.created_at <=> x.created_at }.first.track_id
       latest_track = all_tracks[latest_track_id]
       album.last_uptrack_at = latest_track.created_at
-      album.last_uptrack_id = latest_track.track_id
+      album.last_uptrack_id = latest_track.id
       album.last_uptrack_title = latest_track.title
       album.last_uptrack_cover_path = latest_track.cover_path
     else
