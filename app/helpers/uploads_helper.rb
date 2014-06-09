@@ -122,11 +122,11 @@ module UploadsHelper
 
     # 如果添加到专辑，更新专辑排序
     if album
-      if album.tracks_order
+      if album.records_order
         if album.is_records_desc
-          album.tracks_order = ( [track_record.id] + album.tracks_order.split(",") ).join(",")
+          album.records_order = ( [track_record.id] + album.records_order.split(",") ).join(",")
         else
-          album.tracks_order = album.tracks_order.split(",").push(track_record.id).join(",")
+          album.records_order = album.records_order.split(",").push(track_record.id).join(",")
         end
       end
       album.save
@@ -352,7 +352,7 @@ module UploadsHelper
 
   #上传单张专辑·多条声音
   def create_album_and_tracks(zipfiles,category_id,title,tags,user_source,intro,rich_intro,is_records_desc,music_category,is_finished,sharing_to,share_content,p_transcode_res,default_cover_path,default_cover_exlore_height)
-    album = Album.new
+    album = TrackSet.new
     album.uid = @current_uid
     #album.nickname = @current_user.nickname
     #album.avatar_path = @current_user.logoPic
@@ -603,11 +603,11 @@ module UploadsHelper
     end
     
     if album
-      if album.tracks_order
+      if album.records_order
         if album.is_records_desc
-          album.tracks_order = ( [record.id] + album.tracks_order.split(",") ).join(",")
+          album.records_order = ( [record.id] + album.records_order.split(",") ).join(",")
         else
-          album.tracks_order = album.tracks_order.split(",").push(record.id).join(",")
+          album.records_order = album.records_order.split(",").push(record.id).join(",")
         end
         album.save
       end
@@ -619,7 +619,7 @@ module UploadsHelper
     elsif cache_album_id
       past_album = Album.stn(@current_uid).where(id: cache_album_id, uid: @current_uid).first
       if past_album
-        past_album.tracks_order &&= past_album.tracks_order.split(',').delete_if{ |id| id == record.id }.join(",")
+        past_album.records_order &&= past_album.records_order.split(',').delete_if{ |id| id == record.id }.join(",")
         past_album.save
 
         if track and track.is_public
@@ -814,11 +814,11 @@ module UploadsHelper
       end
     end
 
-    if new_records.size > 0 and album.tracks_order
+    if new_records.size > 0 and album.records_order
       if is_records_desc || album.is_records_desc
-        album.tracks_order = ( new_records.map{|r| r.id} + album.tracks_order.split(",") ).join(",")
+        album.records_order = ( new_records.map{|r| r.id} + album.records_order.split(",") ).join(",")
       else
-        album.tracks_order = ( album.tracks_order.split(",") + new_records.map{|r| r.id} ).join(",")
+        album.records_order = ( album.records_order.split(",") + new_records.map{|r| r.id} ).join(",")
       end
       album.save
     end
@@ -967,14 +967,14 @@ module UploadsHelper
 
     # 更新专辑声音排序和最新更新声音
     if all_records.size > 0
-      album.tracks_order = all_records.map{|r| r.id}.join(',')
+      album.records_order = all_records.map{|r| r.id}.join(',')
       latest_record = all_records.sort{|x, y| y.created_at <=> x.created_at }.first
       album.last_uptrack_at = latest_record.created_at
       album.last_uptrack_id = latest_record.track_id
       album.last_uptrack_title = latest_record.title
       album.last_uptrack_cover_path = latest_record.cover_path
     else
-      album.tracks_order = nil
+      album.records_order = nil
       album.last_uptrack_at = nil
       album.last_uptrack_id = nil
       album.last_uptrack_title = nil

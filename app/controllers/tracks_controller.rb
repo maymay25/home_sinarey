@@ -432,13 +432,13 @@ class TracksController < ApplicationController
 
         # 将该声音添加到新专辑的声音序列
         update_attrs = {}
-        if album.tracks_order
+        if album.records_order
           if album.is_records_desc
-            _tracks_order = ( [params[:record_id]] + album.tracks_order.split(",") ).join(",")
+            this_records_order = ( [params[:record_id]] + album.records_order.split(",") ).join(",")
           else
-            _tracks_order = album.tracks_order.split(",").push(params[:record_id]).join(",")
+            this_records_order = album.records_order.split(",").push(params[:record_id]).join(",")
           end
-          update_attrs[:tracks_order] = _tracks_order
+          update_attrs[:records_order] = this_records_order
         end
         album.update_attributes(update_attrs) unless update_attrs == {}
 
@@ -481,7 +481,7 @@ class TracksController < ApplicationController
       album.is_publish = true
       album.is_public = true
       album.status = calculate_default_status(@current_user)
-      album.tracks_order = params[:record_id]
+      album.records_order = params[:record_id]
       album.save
 
       track.update_attributes(album_id: album.id, album_title: album.title, album_cover_path: album.cover_path) if record.op_type == 1
@@ -515,9 +515,9 @@ class TracksController < ApplicationController
       album = Album.stn(@current_uid).where(uid: @current_uid, id: record.album_id, is_deleted: false).first
       #更新专辑的声音排序   #维护专辑的'最后更新声音'(在异步脚本中实现)
       if album
-        if album.tracks_order
-          this_tracks_order = album.tracks_order.split(",").delete_if{ |record_id| "#{record_id}" == "#{params[:record_id]}" }.join(",")
-          album.tracks_order = this_tracks_order
+        if album.records_order
+          this_records_order = album.records_order.split(",").delete_if{ |record_id| "#{record_id}" == "#{params[:record_id]}" }.join(",")
+          album.records_order = this_records_order
         end
         album.save
       end

@@ -258,11 +258,11 @@ class AlbumsController < ApplicationController
     halt_error("专辑已删除或者不存在") if @album.nil?
 
     @album_rich = TrackSetRich.stn(@album.id).where(track_set_id: @album.id).first
-    if @album.is_crawler || @album.tracks_order.nil? || @album.tracks_order.empty? 
+    if @album.is_crawler || @album.records_order.nil? || @album.records_order.empty? 
       direction = @album.is_records_desc ? 'desc' : 'asc'
       @tracks = TrackRecord.stn(@current_uid).where(uid: @current_uid, album_id: @album.id, is_public: true, is_deleted: false, status: [0, 1]).order("order_num #{direction}, created_at #{direction}")
     else
-      @tracks = TrackRecord.stn(@current_uid).where(uid: @current_uid, album_id: @album.id, is_public: true, is_deleted: false, status: [0, 1]).order("field(id,#{@album.tracks_order})")
+      @tracks = TrackRecord.stn(@current_uid).where(uid: @current_uid, album_id: @album.id, is_public: true, is_deleted: false, status: [0, 1]).order("field(id,#{@album.records_order})")
     end
 
     @category = CATEGORIES[@album.category_id]
