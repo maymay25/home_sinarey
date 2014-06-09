@@ -75,7 +75,7 @@ module UploadsHelper
       #track.album_cover_path = album.cover_path
     end
 
-    track.inet_aton_ip = inet_aton(get_client_ip)
+    #track.inet_aton_ip = inet_aton(get_client_ip)
     track.status = default_status
     track.save
 
@@ -134,7 +134,7 @@ module UploadsHelper
       CoreAsync::AlbumUpdatedWorker.perform_async(:album_updated,album.id,false,request.user_agent,get_client_ip,[track_record.id],nil,nil,nil,nil,[sharing_to, share_content],'sound')
     else
       if track.is_public && track.status == 1
-        CoreAsync::TrackOnWorker.perform_async(:track_on, track.id, true, [sharing_to, share_content], nil)
+        CoreAsync::TrackOnWorker.perform_async(:track_on, track.id, true, share_opts:[sharing_to, share_content],ip:get_client_ip)
         $rabbitmq_channel.fanout(Settings.topic.track.created, durable: true).publish(oj_dump(track.to_topic_hash.merge(user_agent: request.user_agent, is_feed: true, ip: get_client_ip)), content_type: 'text/plain', persistent: true)
         bunny_logger = ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
         bunny_logger.info "track.created.topic #{track.id} #{track.title} #{track.nickname} #{track.updated_at.strftime('%R')}"
@@ -193,7 +193,7 @@ module UploadsHelper
     track_origin.mp3size_64 = transcode_data['paths']['mp364_size']
     track_origin.duration = transcode_data['duration']
     track_origin.waveform = transcode_data['waveform']
-    track_origin.inet_aton_ip = inet_aton(get_client_ip)
+    #track_origin.inet_aton_ip = inet_aton(get_client_ip)
     track_origin.status = 2
 
     if album
@@ -1086,11 +1086,11 @@ module UploadsHelper
     track.is_crawler = false
     track.upload_source = 2 # 网站上传
     track.uid = @current_uid # 源发布者id
-    track.nickname = @current_user.nickname # 源发布者昵称
-    track.avatar_path = @current_user.logoPic #源发布者头像
-    track.is_v = @current_user.isVerified
-    track.dig_status = calculate_dig_status(@current_user) # 发现页可见
-    track.human_category_id = @current_user.vCategoryId
+    #track.nickname = @current_user.nickname # 源发布者昵称
+    #track.avatar_path = @current_user.logoPic #源发布者头像
+    #track.is_v = @current_user.isVerified
+    #track.dig_status = calculate_dig_status(@current_user) # 发现页可见
+    #track.human_category_id = @current_user.vCategoryId
     track.approved_at = Time.now
     track.album_id = album.id # 源专辑id
     track.album_title = album.title # 源专辑标题
@@ -1108,7 +1108,7 @@ module UploadsHelper
     track.is_public = album.is_public
     #track.is_publish = true
 
-    track.inet_aton_ip = inet_aton(get_client_ip)
+    #track.inet_aton_ip = inet_aton(get_client_ip)
     track.status = album.status
     track.save
 
@@ -1122,57 +1122,12 @@ module UploadsHelper
     
     # 创建record记录
     record = TrackRecord.create(op_type: 1,
+      uid: @current_uid,  
       track_id: track.id,
-      track_uid: track.uid,
-      track_upload_source: track.upload_source,
-      is_crawler: track.is_crawler,
-      uid: track.uid, 
-      nickname: track.nickname,
-      avatar_path: track.avatar_path, 
-      is_v: track.is_v,
-      dig_status: track.dig_status,
-      human_category_id: track.human_category_id,
-      approved_at: track.approved_at,
-      upload_source: track.upload_source,
-      user_source: track.user_source, 
-      category_id: track.category_id,
-      music_category: track.music_category,
-      download_path: track.download_path,
-      duration: track.duration,
-      play_path: track.play_path,
-      play_path_32: track.play_path_32,
-      play_path_64: track.play_path_64,
-      play_path_128: track.play_path_128,
-      transcode_state: track.transcode_state, 
-      mp3size: track.mp3size,
-      mp3size_32: track.mp3size_32,
-      mp3size_64: track.mp3size_64,
-      tags: track.tags, 
-      title: track.title, 
-      intro: track.intro,
-      short_intro: track.short_intro,
-      rich_intro: track.rich_intro,
-      is_public: track.is_public,
-      #is_publish: track.is_publish,
-      singer: track.singer,
-      singer_category: track.singer_category,
-      author: track.author,
-      arrangement: track.arrangement,
-      post_production: track.post_production,
-      resinger: track.resinger,
-      announcer: track.announcer,
-      composer: track.composer,
-      allow_download: track.allow_download,
-      allow_comment: track.allow_comment,
-      cover_path: track.cover_path, 
-      album_id: track.album_id, 
-      album_title: track.album_title, 
-      album_cover_path: track.album_cover_path,
-      waveform: track.waveform,
-      upload_id: track.upload_id,
-      inet_aton_ip: track.inet_aton_ip,
       status: track.status,
-      explore_height: track.explore_height
+      is_public: track.is_public,
+      album_id: track.album_id,
+      upload_source: track.upload_source
     )
 
     response[:create] = record.id
