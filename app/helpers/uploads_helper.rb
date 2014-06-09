@@ -136,7 +136,7 @@ module UploadsHelper
         CoreAsync::TrackOnWorker.perform_async(:track_on, track.id, true, share_opts:[sharing_to, share_content],ip:get_client_ip)
         $rabbitmq_channel.fanout(Settings.topic.track.created, durable: true).publish(oj_dump(track.to_topic_hash.merge(user_agent: request.user_agent, is_feed: true, ip: get_client_ip)), content_type: 'text/plain', persistent: true)
         bunny_logger = ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
-        bunny_logger.info "track.created.topic #{track.id} #{track.title} #{track.nickname} #{track.updated_at.strftime('%R')}"
+        bunny_logger.info "track.created.topic #{track.id} #{track.title} #{@current_user.nickname} #{track.updated_at.strftime('%R')}"
       end
     end
   end
@@ -637,7 +637,7 @@ module UploadsHelper
     if cache_is_public
       $rabbitmq_channel.fanout(Settings.topic.track.updated, durable: true).publish(oj_dump(track.to_topic_hash.merge(ip: get_client_ip)), content_type: 'text/plain', persistent: true)
       bunny_logger = ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
-      bunny_logger.info "track.updated.topic #{track.id} #{track.title} #{track.nickname} #{track.updated_at.strftime('%R')}"
+      bunny_logger.info "track.updated.topic #{track.id} #{track.title} #{@current_user.nickname} #{track.updated_at.strftime('%R')}"
 
       if track.is_public && track.status == 1 && !@current_user.isVerified
         ApprovingTrack.where(track_id: track.id, is_update: true).destroy_all
@@ -670,7 +670,7 @@ module UploadsHelper
       CoreAsync::TrackOnWorker.perform_async(:track_on, track.id, false, nil, nil)
       $rabbitmq_channel.fanout(Settings.topic.track.created, durable: true).publish(oj_dump(track.to_topic_hash.merge(user_agent: request.user_agent, is_feed: true, ip: get_client_ip)), content_type: 'text/plain', persistent: true)
       bunny_logger = ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
-      bunny_logger.info "track.created.topic #{track.id} #{track.title} #{track.nickname} #{track.updated_at.strftime('%R')}"
+      bunny_logger.info "track.created.topic #{track.id} #{track.title} #{@current_user.nickname} #{track.updated_at.strftime('%R')}"
     end   
   end
 
