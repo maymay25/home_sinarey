@@ -110,8 +110,7 @@ module UploadsHelper
       op_type: 1,
       status: track.status,
       is_public: track.is_public,
-      album_id: track.album_id,
-      upload_source: track.upload_source
+      album_id: track.album_id
     )
 
     if track.is_public && track.status == 1
@@ -1126,8 +1125,7 @@ module UploadsHelper
       track_id: track.id,
       status: track.status,
       is_public: track.is_public,
-      album_id: track.album_id,
-      upload_source: track.upload_source
+      album_id: track.album_id
     )
 
     response[:create] = record.id
