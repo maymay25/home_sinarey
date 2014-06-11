@@ -23,28 +23,34 @@
             <div class="albumList">
 
               <ul class="progressBarContainer">
-                <% @tracks.each_with_index do |track,index| %>
-                <li id="tracklist<%= track["id"] %>" preplay_id="<%= track["track_id"] %>">
-                  <input type="hidden" name="fileids[]" class="fileid" value="r<%= track["id"] %>"/>
+                <% number = 0 %>
+                <% @records.each do |record| %>
+                <%
+                  track = @tracks[record.track_id]
+                  next if track.nil? or track.is_deleted
+                  number += 1
+                %>
+                <li id="tracklist<%= record.id %>" preplay_id="<%= track.id %>">
+                  <input type="hidden" name="fileids[]" class="fileid" value="r<%= record.id %>"/>
 
                   <div class="albumList_r1">
-                    <div class="number"><%= index+1 %></div>
+                    <div class="number"><%= number %></div>
                     <div class="albumList_sound">
                       <div class="soundInfo">
                         <div class="unedit">
-                          <span class="tit" title="<%= track["title"] %>"><%= track["title"].truncate(30) %></span>
-                          <% if track.op_type == TrackRecordTemp::OP_TYPE[:UPLOAD] %>
+                          <span class="tit" title="<%= track.title %>"><%= track.title.to_s.truncate(30) %></span>
+                          <% if record.op_type == TrackRecordTemp::OP_TYPE[:UPLOAD] %>
                           <a class="editBtn forbid-drag"></a>
                           <% end %>
                         </div>
-                        <% if track.op_type == TrackRecordTemp::OP_TYPE[:UPLOAD] %>
+                        <% if record.op_type == TrackRecordTemp::OP_TYPE[:UPLOAD] %>
                         <div class="edit forbid-drag">
-                          <input type="text" value="<%= track["title"] %>" name="files[]"/>   
+                          <input type="text" value="<%= track.title %>" name="files[]"/>   
                           <a class="editConfirm" href="javascript:;">确认</a>
                           <a class="cancel" href="javascript:;">取消</a>
                         </div>
                         <% else %>
-                          <input type="hidden" value="<%= track["title"] %>" name="files[]"/>
+                          <input type="hidden" value="<%= track.title %>" name="files[]"/>
                         <% end %>
                       </div>
                       <span class="c01"></span>
@@ -57,11 +63,11 @@
                     </div>
                   </div>
                 </li>
-                <% end if @tracks and @tracks.count > 0 %>
+                <% end %>
               </ul>
 
-              <% if @tracks.nil? or @tracks.count == 0 %>
-                <div class="editAlbum_none">为新的专辑添加声音</div>
+              <% if @records.blank? %>
+                <div class="editAlbum_none">为专辑添加声音</div>
               <% end %>
 
               <div class="editAlbum">

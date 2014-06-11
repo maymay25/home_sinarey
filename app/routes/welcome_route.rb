@@ -11,6 +11,13 @@ class WelcomeRoute < WelcomeController
   route :get, :post, '/download_pc'                 do dispatch(:download_pc_page) end
   route :get, :post, '/dload'                       do dispatch(:dload_page) end
 
+  route :get, :post, '/copyright/new'               do dispatch(:new_copyright) end
+  route :get, :post, '/copyright/save_draft'        do dispatch(:save_copyright_draft) end
+  route :get, :post, '/copyright/create'            do dispatch(:create_copyright) end
+  route :get, :post, '/copyright/cancel'            do dispatch(:cancel_copyright) end
+  route :get, :post, '/copyright/show'              do dispatch(:show_copyright) end
+  route :get, :post, '/copyright/edit'              do dispatch(:edit_copyright) end
+
   route :get, :post, '/sitemap/silian_sound.txt'    do dispatch(:silian_sound) end
   route :get, :post, '/sitemap/silian_album.txt'    do dispatch(:silian_album) end
   route :get, :post, '/sitemap/silian_u.txt'        do dispatch(:silian_user) end

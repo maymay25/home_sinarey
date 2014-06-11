@@ -1,0 +1,604 @@
+<style type="text/css">
+
+.w100{
+  width:100px;
+}
+.w150{
+  width:150px;
+}
+.w200{
+  width:200px;
+}
+.w250{
+  width:250px;
+}
+.w350{
+  width:350px;
+}
+.w400{
+  width:400px;
+}
+.w90p{
+  width:90%;
+}
+
+.h60{
+  height:60px;
+}
+
+.bd{
+  border-bottom: 1px dashed #ccc;
+}
+
+span.red{
+  color:red;
+}
+
+.infoTit {
+border-bottom: 1px solid #CCCCCC;
+text-align:left;
+}
+
+.infoTit .tit {
+height: 28px;
+line-height: 28px;
+font-size: 18px;
+color: #999999;
+display: inline-block;
+font-weight: bold;
+}
+
+.-a- .a{
+margin: 40px 0;
+padding: 40px 0;
+background-color: #fff;
+}
+.-a- .aa{
+width: 710px;
+margin: 0 auto;
+}
+.-a- .aaa{
+position: relative;
+height: 35px;
+margin-top: 20px;
+font-size: 14px;
+color: #999;
+}
+
+.-a- .aaa span {
+display: inline-block;
+width: 250px;
+height: 35px;
+text-align: center;
+line-height: 35px;
+background: url("http://s1.xmcdn.com/1385092349/css/img/sprite/vip_progress_bar.png") no-repeat;
+position: absolute;
+top: 0;
+font-size: 14px;
+color: #999;
+}
+
+.-a- .aaa span.already {
+color: #fff;
+}
+
+.-a- .aaa .bar1 {
+background-position: 0 2px;
+left: 0;
+}
+
+.-a- .aaa .bar1.already {
+background-position: 0 -38px;
+}
+
+.-a- .aaa .bar2 {
+background-position: 0 -78px;
+left: 240px;
+}
+
+.-a- .aaa .bar2.already {
+background-position: 0 -118px;
+}
+
+.-a- .aaa .bar3 {
+background-position: 0 -158px;
+left: 480px;
+}
+
+.-a- .aaa .bar3.already {
+background-position: 0 -198px;
+}
+
+.submit_wrap{
+  text-align:right;
+}
+
+table{
+  border:1px solid #ccc;
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 0 2px;
+}
+
+table.temp{
+  margin:0;
+}
+
+tr{
+line-height:30px;
+}
+
+.hidden{
+  display:none;
+}
+
+.fl{
+  float:left;
+}
+
+.fr{
+  float:right;
+}
+
+.nav_wrap{
+  text-align:right;
+}
+
+button {
+cursor: pointer;
+display: inline-block;
+vertical-align: middle;
+min-height: 1em;
+outline: 0;
+border: 0;
+background-color: #FAFAFA;
+color: gray;
+margin: 0;
+padding: .8em 1.5em;
+font-size: 1rem;
+text-transform: uppercase;
+line-height: 1;
+font-weight: 700;
+font-style: normal;
+text-align: center;
+text-decoration: none;
+background-image: -webkit-gradient(linear,left top,left bottom,from(rgba(0,0,0,0)),to(rgba(0,0,0,.05)));
+background-image: -webkit-linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.05));
+background-image: linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.05));
+border-radius: .25em;
+-webkit-box-shadow: 0 0 0 1px rgba(0,0,0,.08) inset;
+box-shadow: 0 0 0 1px rgba(0,0,0,.08) inset;
+-webkit-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+-webkit-box-sizing: border-box;
+-moz-box-sizing: border-box;
+-ms-box-sizing: border-box;
+box-sizing: border-box;
+-webkit-tap-highlight-color: rgba(0,0,0,0);
+-webkit-transition: opacity .25s ease,background-color .25s ease,color .25s ease,background .25s ease,-webkit-box-shadow .25s ease;
+transition: opacity .25s ease,background-color .25s ease,color .25s ease,background .25s ease,box-shadow .25s ease;
+}
+
+button:hover {
+background-image: -webkit-gradient(linear,left top,left bottom,from(rgba(0,0,0,0)),to(rgba(0,0,0,.08)));
+background-image: -webkit-linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.08));
+background-image: linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.08));
+color: rgba(0,0,0,.6);
+}
+
+button.active {
+background-color: #EAEAEA;
+background-image: none;
+-webkit-box-shadow: 0 0 0 1px rgba(0,0,0,.05) inset!important;
+box-shadow: 0 0 0 1px rgba(0,0,0,.05) inset!important;
+color: rgba(0,0,0,.7);
+}
+
+button.green {
+  background-color: #5BBD72;
+  color: #FFFFFF;
+}
+
+button.green:hover {
+  background-color: #58cb73;
+  color: #FFFFFF;
+}
+
+button.green:active {
+  background-color: #4CB164;
+  color: #FFFFFF;
+}
+
+button {
+  font-size: 1rem;
+}
+button.big {
+  font-size: 1.25rem;
+}
+
+</style>
+
+<div id="home_wrapper">
+  <div class="-a- mainbox">
+    <div class="a">
+      <div class="aa">
+        <div class="aaa">
+          <span class="bar1 already">作品版权申请</span>
+          <span class="bar2 already">等待审核结果</span>
+          <span class="bar3 <%= 'already' if @bean.status==4 %>">版权登记成功</span>
+        </div>
+
+        <% status_trans = {1=>'待处理',2=>'处理中',3=>'待补充材料',4=>'登记成功',5=>'登记失败',8=>'作品信息错误，请修正，然后联系客服处理',9=>'附件信息错误，请联系客服处理'} %>
+        <div style="text-align:center;font-size:36px;margin:50px 0;line-height:36px;">
+          <p><%= status_trans[@bean.status] %></p>
+          <% if @bean.status==4 && @bean.works_id %>
+          <p style="font-size:16px;">登记号：<span style="color:red;"><%= @bean.works_id %></span></p>
+          <% end %>
+          <% if @bean.status==8 && @bean.work_error_content.present? %>
+          <p style="font-size:16px;">错误提示：<span style="color:red;"><%= @bean.work_error_content %></span></p>
+          <% end %>
+        </div>
+
+        <table border="0" cellspacing="0" cellpadding="0">
+          <thead>
+            <td colspan="2">
+              <div class="infoTit">
+                <h3 class="tit">作品信息</h3>
+              </div>
+            </td>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="w100"><span class="red">*</span>作品名称</td>
+              <td>
+                <span><%= @bean.work_name %></span>
+              </td>
+            </tr>
+            <tr>
+              <td class="w100">作品类别</td>
+              <td>
+                录音制品
+              </td>
+            </tr>
+
+            <tr>
+              <td class="w100">选择声音</td>
+              <td>
+                <a href="<%= link_path "/#{@bean.uid}/sound/#{@bean.track_id}" %>" target="_blank">
+                  <%= @track && @track.title %>
+                </a>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+
+        <table>
+          <thead>
+            <td colspan="4">
+              <div class="infoTit">
+                <h3 class="tit">著作权人信息</h3>
+              </div>
+            </td>
+          </thead>
+          <tbody>
+            <tr>
+              <td id="rightOwnerInit">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="temp">
+                  <tbody>
+                    <tr>
+                      <td class="w100"><span class="red">*</span>姓名/单位名称</td>
+                      <td>
+                        <%= @account.name %>
+                      </td>
+                      <td class="w100">类别</td>
+                      <td>
+                        <%= @account.legal_type %>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="w100">证件类型</td>
+                      <td>
+                        <%= @account.certificate_type %>
+                      </td>
+                      <td class="w100"><span class="red">*</span>证件号码</td>
+                      <td>
+                        <%= @account.credential_number %>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="w100">国籍</td>
+                      <td>
+                        <%= @account.nationality %>
+                      </td>
+                      <td class="w100">省份</td>
+                      <td>
+                        <%= @account.province %>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="w100"><span class="red">*</span>城市</td>
+                      <td>
+                        <%= @account.city %>
+                      </td>
+                      <td class="w100">区县</td>
+                      <td>
+                        <%= @account.county %>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="w100">署名情况</td>
+                      <td>
+                        <%= @account.alia_type %>
+                      </td>
+                      <% if @account.alia_type=="别名" %>
+                      <td class="w100">别名</td>
+                      <td>
+                        <%= @account.alia %>
+                      </td>
+                      <% end %>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table>
+          <thead>
+            <td colspan="4">
+              <div class="infoTit">
+                <h3 class="tit">作者姓名或名称以及作品署名</h3>
+              </div>
+            </td>
+          </thead>
+          <tbody id="authorInit">
+            <tr>
+              <td class="w100"><span class="red">*</span>作者姓名或名称</td>
+              <td>
+                <%= @account.name %>
+              </td>
+              <td class="w100">署名情况</td>
+              <td class="w350">
+                <div class="fl">
+                  <%= @account.alia_type %>
+                </div>
+                <% if @account.alia_type=='别名' %>
+                <div class="fl">
+                  &nbsp;&nbsp;(<%= @account.alia %>)
+                </div>
+                <% end %>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table>
+          <thead>
+            <td colspan="2">
+              <div class="infoTit">
+                <h3 class="tit">作品基本信息</h3>
+              </div>
+            </td>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="w100">作品创作性质</td>
+              <td>
+                原创
+              </td>
+            </tr>
+            <tr>
+              <td class="w100"><span class="red">*</span>创作完成日期</td>
+              <td>
+                <%= @bean.completion_date %>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="w100">创作完成地点</td>
+              <td>
+                国家：中国&nbsp;&nbsp;&nbsp;
+                <span class="red">*</span>城市：
+                <%= @bean.completion_city %>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="w100">
+                <span class="red">*</span>发表状态
+              </td>
+              <td>
+                已发表
+              </td>
+            </tr>
+
+            <tr>
+              <td class="w100">
+                <span class="red">*</span>首次发表时间
+              </td>
+              <td>
+                <%= @bean.published_date %>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="w100">
+                <span class="red">*</span>首次发表地点
+              </td>
+              <td>
+                国家：中国&nbsp;&nbsp;&nbsp;
+                <span class="red">*</span>城市：
+                <%= @bean.published_city %>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table>
+          <thead>
+            <td>
+              <div class="infoTit">
+                <h3 class="tit">作品说明</h3>
+              </div>
+            </td>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="w100"><span class="red">*</span>设计理念</td>
+            </tr>
+            <tr>
+              <td>
+                <%= @bean.design_concept %>
+              </td>
+            </tr>
+            <tr>
+              <td class="w100"><span class="red">*</span>主要特征描述（需要提到音频时长）</td>
+            </tr>
+            <tr>
+              <td>
+                <%= @bean.feature_desc %>
+              </td>
+            </tr>
+            <tr>
+              <td class="w100"><span class="red">*</span>创作过程描述</td>
+            </tr>
+            <tr>
+              <td>
+                <%= @bean.process_desc %>
+              </td>
+            </tr>
+            <tr>
+              <td class="w100"><span class="red">*</span>作品用途</td>
+            </tr>
+            <tr>
+              <td>
+                <%= @bean.purpose %>
+              </td>
+            </tr>
+            <tr style="line-height: 5px;height:5px;">
+              <td>&nbsp;</td>
+            </tr>
+
+          </tbody>
+        </table>
+
+        <table>
+          <thead>
+            <td colspan="2">
+              <div class="infoTit">
+                <h3 class="tit">权利状况说明</h3>
+              </div>
+            </td>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="w150">权利取得方式</td>
+              <td>
+                原始
+              </td>
+            </tr>
+            <tr>
+              <td class="w150">权利归属方式及其说明</td>
+              <td>
+                <div>
+                  <%= @bean.power_belong_way %>
+                </div>
+                <div>
+                  说明：<%= @bean.power_belong_desc %>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td class="w150">权利携有状况</td>
+              <td>
+                全部
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table>
+          <thead>
+            <td colspan="2">
+              <div class="infoTit">
+                <h3 class="tit">留存作品样本(可选择其中一项进行填写)</h3>
+              </div>
+            </td>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="w100">电子介质</td>
+              <td>
+                DVD-ROM 1份
+              </td>
+            </tr>
+            <tr>
+              <td class="w100">纸 介 质</td>
+              <td>
+                无
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table>
+          <thead>
+            <td colspan="2">
+              <div class="infoTit">
+                <h3 class="tit">申请办理信息</h3>
+              </div>
+            </td>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="w100">申请方式</td>
+              <td>
+                由著作权人申请
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table>
+          <thead>
+            <td colspan="2">
+              <div class="infoTit">
+                <h3 class="tit">报审单位</h3>
+              </div>
+            </td>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="w100"><span class="red">*</span>工作站名称</td>
+              <td>
+                上海版权服务中心
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="nav_wrap">
+          <button class="green" type="button" onclick="window.location.href='/copyright/show'">返回列表</button>
+          <% if [1,8].include?(@bean.status) %>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <button class="green" type="button" onclick="window.location.href='/copyright/edit?id=<%= @bean.id %>'">编辑</button>
+          <% end %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<% content_for :script_own do -%>
+<script type="text/javascript">
+  requirejs(["page/404"], function (page) {
+    page.init();
+  });
+</script>
+<% end %>

@@ -164,17 +164,17 @@ class XposterController < ApplicationController
       track_ids2 = [2651996]
     end
 
-    @tirs = TrackInRecord.mfetch(track_ids)
-    hit_ids = @tirs.map{|track| track.track_id }
-    hit_uids = @tirs.map{|track| track.uid }
+    @tracks = Track.mfetch(track_ids,true)
+    hit_ids = @tracks.map{|track| track.id }
+    hit_uids = @tracks.map{|track| track.uid }
     if hit_ids.length > 0
       @favorites_counts = $counter_client.getByIds(Settings.counter.track.favorites, hit_ids)
       @plays_counts = $counter_client.getByIds(Settings.counter.track.plays, hit_ids)
     end
 
-    @tirs2 = TrackInRecord.mfetch(track_ids2)
-    hit_ids2 = @tirs2.map{|track| track.track_id }
-    hit_uids2 = @tirs2.map{|track| track.uid }
+    @tracks2 = Track.mfetch(track_ids2,true)
+    hit_ids2 = @tracks2.map{|track| track.id }
+    hit_uids2 = @tracks2.map{|track| track.uid }
     if hit_ids2.length > 0
       @favorites_counts2 = $counter_client.getByIds(Settings.counter.track.favorites, hit_ids2)
       @plays_counts2 = $counter_client.getByIds(Settings.counter.track.plays, hit_ids2)

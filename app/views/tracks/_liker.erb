@@ -28,22 +28,22 @@
       </div>
       <div class="personal_body">
         <div class="detailContent">
-          <a href="javascript:;" class="reportBtn2" title="举报" data-options="<%= {track_id:@tir.track_id,uid:@current_uid,to_uid:@tir.uid,content_title:@tir.title,content_type:ReportInformation::TYPE["track"]}.to_json %>"></a>
+          <a href="javascript:;" class="reportBtn2" title="举报" data-options="<%= {track_id:@track.id,uid:@current_uid,to_uid:@track.uid,content_title:@track.title,content_type:ReportInformation::TYPE["track"]}.to_json %>"></a>
           <div class="left">
-            <a class="soundface180" href="<%= link_path "/#{@tir.uid}/sound/#{@tir.track_id}" %>">
-              <img alt="<%= @tir.title %>" src="<%= picture_url('track', @tir.cover_path, '180') %>" data-options="defaultImg:track_180">
+            <a class="soundface180" href="<%= link_path "/#{@track.uid}/sound/#{@track.id}" %>">
+              <img alt="<%= @track.title %>" src="<%= picture_url('track', @track.cover_path, '180') %>" data-options="defaultImg:track_180">
             </a>              
           </div>
           <div class="right">
-            <div class="detailContent_title"><%= @tir.title %></div>
+            <div class="detailContent_title"><%= @track.title %></div>
             <%
-              if @tir.category_id
-                category = Category.where(id: @tir.category_id).first
+              if @track.category_id
+                category = Category.where(id: @track.category_id).first
                 category_title = category.title if category
               end
             %>
-            <div class="detailContent_category">类别:&nbsp;<%= category_title %>&nbsp;来源：<%= @tir.user_source == 1 ? "原创" : @tir.user_source == 2 ? "采集" : "未知" %></div>
-            <% track_tags = @tir.tags.split(",") %>
+            <div class="detailContent_category">类别:&nbsp;<%= category_title %>&nbsp;来源：<%= @track.user_source == 1 ? "原创" : @track.user_source == 2 ? "采集" : "未知" %></div>
+            <% track_tags = @track.tags.split(",") %>
             <% if track_tags.size > 0 %>
             <div class="tagBtnList">
               <% track_tags.each do |tag| %>
@@ -110,7 +110,7 @@
           <% end %>
 
           <div class="pagingBar mgTB20">
-              <%== paginate CustomPagination.new(@lovers_count,@page,@per_page), {outer_window: 1, url:"/#{@tir.uid}/sound/#{@tir.track_id}/liker", link_path: @current_uid.present?} %>
+              <%== paginate CustomPagination.new(@lovers_count,@page,@per_page), {outer_window: 1, url:"/#{@track.uid}/sound/#{@track.id}/liker", link_path: @current_uid.present?} %>
           </div>
 
         </div>

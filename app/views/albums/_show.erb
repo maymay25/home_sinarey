@@ -29,8 +29,8 @@
         </div>
       </div>
 
-      <div class="personal_body" sound_ids="<%= @tracks.collect{|t|t.track_id}.join(",") if @tracks %>">
-        <div class="detailContent follower" sound_id="<%= @tracks[0].track_id if @tracks and @tracks[0] %>">
+      <div class="personal_body" sound_ids="<%= @track_ids.join(",") %>">
+        <div class="detailContent follower" sound_id="<%= @first_track.id if @first_track %>">
           <% if @current_uid and @album.uid == @current_uid %>
             <a href="/edit_album/<%= @album.id %>" class="editBtn2" title="编辑">编辑</a>
           <% end %>
@@ -74,7 +74,7 @@
                 </div>
               </div>
             <% else %>
-              <% if @all_tracks_count>0 %>
+              <% if @all_records_count>0 %>
               <div class="detailContent_playcount">
                 <a class="playBtn"></a>
                 <div class="detailContent_playcountDetail">
@@ -113,14 +113,14 @@
           <% end %>
         </div>
 
-        <% if @tracks && @tracks.size > 0 %>
-        <div class="detail_soundBox follower j-sound_detail" sound_id="<%= @tracks[0].track_id %>">
+        <% if @first_track %>
+        <div class="detail_soundBox follower j-sound_detail" sound_id="<%= @first_track.id %>">
           <div class="sound">
             <div class="sound_titlebar">
-              <a class="sound_title j-sound_title" title="<%= @tracks[0].title %>" href="<%= link_path("/#{@tracks[0].track_uid}/sound/#{@tracks[0].track_id}") %>"><%= @tracks[0].title %></a>
-              <span class="sound_playcount j-sound_playCount" title="<%= @init_track_play_count %>次播放"><%= @init_track_play_count %></span>
+              <a class="sound_title j-sound_title" title="<%= @first_track.title %>" href="<%= link_path("/#{@first_track.uid}/sound/#{@first_track.id}") %>"><%= @first_track.title %></a>
+              <span class="sound_playcount j-sound_playCount" title="<%= @first_track_play_count %>次播放"><%= @first_track_play_count %></span>
               <div class="fr">
-                <span class="sound_position">00:00</span>/<span class="sound_duration j-sound_durationStr"><%= parse_duration @tracks[0].duration %></span>
+                <span class="sound_position">00:00</span>/<span class="sound_duration j-sound_durationStr"><%= parse_duration @first_track.duration %></span>
               </div>
             </div>
             <div class="detail_middlePlayerBox">
@@ -134,7 +134,7 @@
                     <div class="player_progressbarBg"></div>
                     <div class="player_seekbar"></div>
                     <div class="player_playbar"></div>
-                    <div class="player_wavebox" sound_uploadid="<%= @tracks[0].upload_id %>" sound_wave="<%= file_url @tracks[0].waveform %>"></div>
+                    <div class="player_wavebox" sound_uploadid="<%= @first_track.upload_id %>" sound_wave="<%= file_url @first_track.waveform %>"></div>
                     <div class="player_progressbarCoverBg"></div>
                     <div class="player_nonius">
                       <div class="player_nonius_cover"></div>
@@ -149,10 +149,10 @@
                     <a href="javascript:;" class="player_commentbarBtn" title="显示/隐藏评论"></a>
                   </div>
                 </div>
-                <% if @tracks[0].cover_path and @tracks[0].cover_path!="" %>
-                <div class="pin" sound_popsrc="<%= @tracks[0].track_id %>">
-                    <a href="<%= link_path "/#{@tracks[0].track_uid}/sound/#{@tracks[0].track_id}" %>" class="soundface">
-                        <img alt="<%= @tracks[0].title %>" src="<%= picture_url('track', @tracks[0].cover_path, '60') %>" data-options="defaultImg:track_60">
+                <% if @first_track.cover_path and @first_track.cover_path!="" %>
+                <div class="pin" sound_popsrc="<%= @first_track.id %>">
+                    <a href="<%= link_path "/#{@first_track.uid}/sound/#{@first_track.id}" %>" class="soundface">
+                        <img alt="<%= @first_track.title %>" src="<%= picture_url('track', @first_track.cover_path, '60') %>" data-options="defaultImg:track_60">
                         <span></span>
                     </a>
                 </div>
@@ -160,13 +160,13 @@
               </div>
             </div>
             <div class="sound_bottom">
-              <span class="createtime j-sound_timeUntilNow"><%= parse_time_until_now(@tracks[0].created_at) %></span>
-              <% is_favorited = @current_uid ? Favorite.shard(@current_uid).where(uid: @current_uid, track_id: @tracks[0].track_id).any? : false %>
+              <span class="createtime j-sound_timeUntilNow"><%= parse_time_until_now(@first_track.created_at) %></span>
+              <% is_favorited = @current_uid ? Favorite.shard(@current_uid).where(uid: @current_uid, track_id: @first_track.id).any? : false %>
               <div class="fr">
                 <a class="downloadToMobile link1">下载到手机</a>
-                <a class="likeBtn link1 <%= 'is-sound-liked' if is_favorited %>" href="javascript:;">赞(<span class="count j-sound_favoritesCount"><%= @init_track_favorite_count %></span>)</a>
-                <a class="commentBtn link1" href="javascript:;">评论(<span class="count j-sound_commentCount"><%= @init_track_comment_count %></span>)</a>
-                <a class="forwardBtn link1" href="javascript:;">转采(<span class="count j-sound_shareCount"><%= @init_track_share_count %></span>)</a>
+                <a class="likeBtn link1 <%= 'is-sound-liked' if is_favorited %>" href="javascript:;">赞(<span class="count j-sound_favoritesCount"><%= @first_track_favorite_count %></span>)</a>
+                <a class="commentBtn link1" href="javascript:;">评论(<span class="count j-sound_commentCount"><%= @first_track_comment_count %></span>)</a>
+                <a class="forwardBtn link1" href="javascript:;">转采(<span class="count j-sound_shareCount"><%= @first_track_share_count %></span>)</a>
               </div>
             </div>
           </div>
@@ -176,7 +176,7 @@
           <div class="left">
             <span class="title">
               专辑里的声音
-              <span class="albumSoundcount">(<%= @all_tracks_count %>)</span>
+              <span class="albumSoundcount">(<%= @all_records_count %>)</span>
             </span>
           </div>
           <div class="right">
@@ -190,34 +190,35 @@
             </ul>
           </div>
         </div>
-
         <div class="album_soundlist <%= "is_more" if @tracks.count<=10 %>">
           <ul>
-            <% check_current_user = @current_uid == @album['uid'] %>
-            <%  @tracks.each_with_index do |r,index| %>
-            <% fav = @current_uid ? Favorite.shard(@current_uid).where(uid: @current_uid, track_id: r.track_id).any? : false %>
-            <li sound_id="<%= r.track_id %>">
+            <% is_current_user = @current_uid == @album['uid'] %>
+            <% track_index = -1 %>
+            <%  @page_records.each_with_index do |r| %>
+            <% track = @tracks[r.track_id] ; next if track.nil? ; track_index += 1 %>
+            <% fav = @current_uid ? Favorite.shard(@current_uid).where(uid: @current_uid, track_id: track.id).any? : false %>
+            <li sound_id="<%= track.id %>">
               <div class="miniPlayer3">
                 <a class="playBtn"></a>
-                <a class="title" href="<%= link_path("/#{r.track_uid}/sound/#{r.track_id}") %>"><%= r.title %></a>
-                <% if check_current_user %>
+                <a class="title" href="<%= link_path("/#{track.uid}/sound/#{track.id}") %>"><%= track.title %></a>
+                <% if is_current_user %>
                 <div class="album_soundlist_operate">
                   <% if r.op_type==TrackRecordTemp::OP_TYPE[:UPLOAD] %>
-                  <a href="<%= "/edit_track/#{r.id}" %>">编辑</a>
+                  <a href="<%= "/edit_track/#{track.id}" %>">编辑</a>
                   <% end %>
-                  <a class="destroyBtn" href="javascript:;" destroy_id="<%= r.id %>">删除</a>
+                  <a class="destroyBtn" href="javascript:;" destroy_id="<%= track.id %>">删除</a>
                 </div>
                 <% end %>
                 <div class="operate">
-                  <a class="likeBtn <% if fav %>liked<% end %>" href="javascript:;" title="赞" track_uid="<%= r.track_uid %>" track_id="<%= r.track_id %>"></a>
-                  <% if r.status!=0 %>
-                  <a class="shareBtn" href="javascript:;" title="分享" track_uid="<%= r.track_uid %>" track_id="<%= r.track_id %>" ></a>
+                  <a class="likeBtn <% if fav %>liked<% end %>" href="javascript:;" title="赞" track_uid="<%= track.uid %>" track_id="<%= track.id %>"></a>
+                  <% if track.status!=0 %>
+                  <a class="shareBtn" href="javascript:;" title="分享" track_uid="<%= track.uid %>" track_id="<%= track.id %>" ></a>
                   <% end %>
-                  <a class="commentBtn" href="javascript:;" title="评论" track_uid="<%= r.track_uid %>"></a>
-                  <a class="forwardBtn" href="javascript:;" title="转采" track_uid="<%= r.track_uid %>" track_id="<%= r.track_id %>" track_title="<%= r.title %>" track_intro="<%= r.intro %>"></a>
-                  <span><%= r.created_at.strftime("%Y-%m-%d") %></span>
+                  <a class="commentBtn" href="javascript:;" title="评论" track_uid="<%= track.uid %>"></a>
+                  <a class="forwardBtn" href="javascript:;" title="转采" track_uid="<%= track.uid %>" track_id="<%= track.id %>" track_title="<%= track.title %>" track_intro="<%= track.intro %>"></a>
+                  <span><%= track.created_at.strftime("%Y-%m-%d") %></span>
                 </div>
-                <span title="<%= @tracks_play_count[index] %>次播放" class="sound_playcount"><%= @tracks_play_count[index] %></span>
+                <span title="<%= @tracks_play_count[track_index] %>次播放" class="sound_playcount"><%= @tracks_play_count[track_index] %></span>
               </div>
             </li>
             <% end %>
@@ -225,7 +226,7 @@
         </div>
         <% end %>
         <div class="pagingBar">
-          <%== paginate CustomPagination.new(@all_tracks_count,@page,@per_page), {outer_window: 1, url:"/#{@album.uid}/album/#{@album.id}", link_path: @current_uid.present?} %>
+          <%== paginate CustomPagination.new(@all_records_count,@page,@per_page), {outer_window: 1, url:"/#{@album.uid}/album/#{@album.id}", link_path: @current_uid.present?} %>
         </div>
       </div>
     </div>

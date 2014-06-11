@@ -66,11 +66,11 @@ class TracksController < ApplicationController
 
     set_no_cache_header
 
-    tir = TrackInRecord.fetch(params[:id])
+    track = Track.fetch(params[:id])
     
-    halt_404 unless tir
+    halt_404 unless track
 
-    redirect "/#{tir.uid}/sound/#{tir.track_id}", status: 303
+    redirect "/#{track.uid}/sound/#{track.id}", status: 303
   end
 
   #赞声音的用户列表页
@@ -80,23 +80,23 @@ class TracksController < ApplicationController
 
     set_no_cache_header
 
-    @tir = TrackInRecord.fetch(params[:id])
+    @track = Track.fetch(params[:id])
 
-    halt_404 if @tir.nil? or (!@tir.is_public && @tir.uid != @current_uid) or @tir.is_deleted or @tir.status != 1
+    halt_404 if @track.nil? or (!@track.is_public && @track.uid != @current_uid) or @track.is_deleted or @track.status != 1
 
-    @u = get_profile_user_basic_info(@tir.uid)
+    @u = get_profile_user_basic_info(@track.uid)
 
-    @track_record = TrackRecord.shard(@tir.uid).where(uid: @tir.uid, track_id: @tir.track_id, is_deleted: false).first
-    @track_rich = TrackRich.shard(@tir.track_id).where(track_id: @tir.track_id).first
+    @track_record = TrackRecord.shard(@track.uid).where(uid: @track.uid, track_id: @track.id, is_deleted: false).first
+    @track_rich = TrackRich.shard(@track.id).where(track_id: @track.id).first
 
-    @all_track_records = TrackInRecord.shard(@tir.track_id).where("album_id is not null and track_id = ?", @tir.track_id).limit(6)
+    #@all_track_records = TrackInRecord.shard(@track.id).where("album_id is not null and track_id = ?", @track.id).limit(6)
 
-    @is_favorited = @current_uid ? Favorite.shard(@current_uid).where(uid: @current_uid, track_id: @tir.track_id).any? : false
+    @is_favorited = @current_uid ? Favorite.shard(@current_uid).where(uid: @current_uid, track_id: @track.id).any? : false
 
     @page = ( tmp=params[:page].to_i )>0 ? tmp : 1
     @per_page = 10
 
-    all_lover = Lover.shard(@tir.track_id).where(track_id: @tir.track_id)
+    all_lover = Lover.shard(@track.id).where(track_id: @track.id)
 
     @lovers_count = all_lover.count
     lovers = all_lover.select('id, uid').order("created_at desc").offset((@page-1)*@per_page).limit(@per_page)
@@ -122,24 +122,24 @@ class TracksController < ApplicationController
       @lover_followings_counts = []
     end
 
-    @track_play_count = $counter_client.get(Settings.counter.track.plays, @tir.track_id.to_s)
-    @track_share_count = $counter_client.get(Settings.counter.track.shares, @tir.track_id.to_s)
+    @track_play_count = $counter_client.get(Settings.counter.track.plays, @track.id)
+    @track_share_count = $counter_client.get(Settings.counter.track.shares, @track.id)
 
-    @track_favorite_count = Lover.shard(@tir.track_id).where(track_id: @tir.track_id).count
-    lovers_counter = $counter_client.get(Settings.counter.track.favorites, @tir.track_id.to_s)
+    @track_favorite_count = Lover.shard(@track.id).where(track_id: @track.id).count
+    lovers_counter = $counter_client.get(Settings.counter.track.favorites, @track.id)
     if lovers_counter != @track_favorite_count
-      $counter_client.set(Settings.counter.track.favorites, @tir.track_id, @track_favorite_count)
+      $counter_client.set(Settings.counter.track.favorites, @track.id, @track_favorite_count)
     end
 
-    if @tir.uid == @current_uid
+    if @track.uid == @current_uid
       set_my_counts 
     else
-      set_his_counts(@tir.uid)
+      set_his_counts(@track.uid)
     end
 
-    check_follow_status(@tir.uid)
+    check_follow_status(@track.uid)
     
-    @this_title = "喜欢#{@tir.title}的人 喜马拉雅-听我想听"
+    @this_title = "喜欢#{@track.title}的人 喜马拉雅-听我想听"
 
     halt erb_js(:liker_js) if request.xhr?
     erb :liker
@@ -383,7 +383,7 @@ class TracksController < ApplicationController
     CoreAsync::TrackOnWorker.perform_async(:track_on, track.id, false, nil, nil)
     $rabbitmq_channel.fanout(Settings.topic.track.created, durable: true).publish(oj_dump(track.to_topic_hash.merge(user_agent: request.user_agent, is_feed: true, ip: get_client_ip)), content_type: 'text/plain', persistent: true)
     bunny_logger ||= ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
-    bunny_logger.info "track.created.topic #{track.id} #{track.title} #{track.nickname} #{track.updated_at.strftime('%R')}"
+    bunny_logger.info "track.created.topic #{track.id} #{track.title} #{track.uid} #{track.updated_at.strftime('%R')}"
 
     halt render_json({res: true, message: '改动已生效'})
   end
@@ -532,7 +532,7 @@ class TracksController < ApplicationController
         is_off = !old_is_deleted && track.is_public && track.status == 1
         $rabbitmq_channel.fanout(Settings.topic.track.destroyed, durable: true).publish(Oj.dump(track.to_topic_hash.merge(is_feed: true, is_off: is_off, ip: get_client_ip), mode: :compat), content_type: 'text/plain', persistent: true)
         bunny_logger ||= ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
-        bunny_logger.info "track.destroyed.topic #{track.id} #{track.title} #{track.nickname} #{track.updated_at.strftime('%R')}"
+        bunny_logger.info "track.destroyed.topic #{track.id} #{track.title} #{track.uid} #{track.updated_at.strftime('%R')}"
       end
     elsif record.op_type == TrackRecordTemp::OP_TYPE[:RELAY]
       $counter_client.decr(Settings.counter.user.tracks, record.uid, 1)
@@ -672,11 +672,11 @@ class TracksController < ApplicationController
 
     set_no_cache_header
 
-    @tir = TrackInRecord.fetch(params[:id])
-    halt '' if @tir.nil? or @tir.is_deleted or @tir.status != 1
+    @track = Track.fetch(params[:id])
+    halt '' if @track.nil? or @track.is_deleted or @track.status != 1
 
     # 是否已收藏
-    @is_favorited = @current_uid && Favorite.shard(@current_uid).where(uid: @current_uid, track_id: @tir.track_id).any?
+    @is_favorited = @current_uid && Favorite.shard(@current_uid).where(uid: @current_uid, track_id: @track.id).any?
 
     # 声音相关计数
     @comments_count, @favorites_count, @plays_count, @shares_count = $counter_client.getByNames([
@@ -684,7 +684,7 @@ class TracksController < ApplicationController
         Settings.counter.track.favorites,
         Settings.counter.track.plays,
         Settings.counter.track.shares
-      ], @tir.track_id)
+      ], @track.id)
     
     render_to_string(partial: :_expend_box)
   end
@@ -699,8 +699,8 @@ class TracksController < ApplicationController
     
     track_pictures = TrackPicture.shard(track_id).where(track_id:track_id).order("order_num asc")
     if track_pictures.length==0
-      tir = TrackInRecord.fetch(track_id)
-      track_pictures = [{'picture_path'=>tir.cover_path}] if tir
+      track = Track.fetch(track_id)
+      track_pictures = [{'picture_path'=>track.cover_path}] if track
     end
 
     pictures = []
@@ -845,33 +845,34 @@ class TracksController < ApplicationController
     ids = params[:ids].to_s.split('_')
     halt '' if ids.size == 0
 
-    play_counts = $counter_client.getByIds(Settings.counter.track.plays, ids)
-    comments_counts = $counter_client.getByIds(Settings.counter.track.comments, ids)
-    shares_counts = $counter_client.getByIds(Settings.counter.track.shares, ids)
-    favorites_counts = $counter_client.getByIds(Settings.counter.track.favorites, ids)
+    tracks = Track.mfetch(ids,true)
+    track_ids = tracks.map(&:id)
 
-    tirs = TrackInRecord.mfetch(ids)
+    play_counts = $counter_client.getByIds(Settings.counter.track.plays, track_ids)
+    comments_counts = $counter_client.getByIds(Settings.counter.track.comments, track_ids)
+    shares_counts = $counter_client.getByIds(Settings.counter.track.shares, track_ids)
+    favorites_counts = $counter_client.getByIds(Settings.counter.track.favorites, track_ids)
 
     arr = []
-    tirs.each_with_index do |tir, i|
-      if tir.nil? or (!tir.is_public and tir.track_uid != @current_uid) or tir.is_deleted or tir.status != 1
+    tracks.each_with_index do |track, i|
+      if track.nil? or (!track.is_public and track.uid != @current_uid) or track.is_deleted or track.status != 1
         arr << nil
       else
-        arr << TrackInRecord.hashlize(tir).merge({
-          id: tir.track_id,
-          cover_url: file_url(tir.cover_path),
-          cover_url_142: picture_url('track', tir.cover_path, '180'),
-          formatted_created_at: tir.created_at.strftime('%-m月%-d日 %H:%M'),
-          is_favorited: @current_uid ? Favorite.shard(@current_uid).where(uid: @current_uid, track_id: tir.track_id).any? : false,
+        arr << Track.hashlize(track).merge({
+          id: track.id,
+          cover_url: file_url(track.cover_path),
+          cover_url_142: picture_url('track', track.cover_path, '180'),
+          formatted_created_at: track.created_at.strftime('%-m月%-d日 %H:%M'),
+          is_favorited: @current_uid ? Favorite.shard(@current_uid).where(uid: @current_uid, track_id: track.id).any? : false,
           play_count: play_counts[i],
           comments_count: comments_counts[i],
           shares_count: shares_counts[i],
           favorites_count: favorites_counts[i],
-          title: tir.title ? CGI::escapeHTML(tir.title) : '',
-          album_title: tir.album_title ? CGI::escapeHTML(tir.album_title) : '',
-          intro: tir.intro ? CGI::escapeHTML(tir.intro) : '',
-          short_intro: tir.short_intro ? CGI::escapeHTML(tir.short_intro) : '',
-          time_until_now: parse_time_until_now(tir.created_at)
+          title: track.title,
+          album_title: track.album_title,
+          intro: track.intro,
+          short_intro: track.short_intro,
+          time_until_now: parse_time_until_now(track.created_at)
         })
       end
     end
@@ -886,21 +887,25 @@ class TracksController < ApplicationController
 
     return redirect_to_login unless @current_uid
 
-    @record = TrackRecord.shard(@current_uid).where(uid: @current_uid, id: params[:id], is_deleted: false).first
+    track_id = (tmp=params[:id].to_i)>0 ? tmp : nil
+    halt_error('请求参数错误') if track_id.nil? 
 
-    halt_error('声音已删除或者不存在') if @record.nil? or @record.op_type != TrackRecordTemp::OP_TYPE[:UPLOAD]
+    @track = Track.shard(track_id).where(uid: @current_uid, id: track_id, is_deleted: false).first
+    halt_error('声音已删除或者不存在') if @track.nil?
 
     set_no_cache_header
 
-    trackrich = TrackRich.shard(@record.track_id).where(track_id: @record.track_id).first
+    @album = @track.album_id && TrackSet.shard(@track.album_id).where(uid:@current_uid,id:@track.album_id,is_deleted: false).first
+
+    trackrich = TrackRich.shard(@track.id).where(track_id: @track.id).first
     if trackrich
       @lyric = Sanitize.clean(CGI.unescapeHTML(trackrich.lyric), { elements: %w(br) }) if trackrich.lyric.presence
       @rich_intro = CGI.unescapeHTML(trackrich.rich_intro)
     end
 
-    @category = CATEGORIES[@record.category_id]
+    @category = CATEGORIES[@track.category_id]
 
-    @track_pictures = TrackPicture.shard(@record.track_id).where(track_id:@record.track_id).order("order_num asc")
+    @track_pictures = TrackPicture.shard(@track.id).where(track_id:@track.id).order("order_num asc")
 
     @album_list = Album.shard(@current_uid).where(uid: @current_uid, is_deleted: false, status: 1)
 
@@ -993,15 +998,18 @@ class TracksController < ApplicationController
       halt render_json({res: false, errors: [['page', '图片正在上传中，请稍侯']]}) if img.blank?
     end
 
-    record = TrackRecord.shard(@current_uid).where(uid: @current_uid, id: params[:id], is_deleted: false).first
-    halt_error("声音已删除或者不存在") unless record or record.op_type != TrackRecordTemp::OP_TYPE[:UPLOAD]
-
-    track = Track.shard(record.track_id).where(id: record.track_id, is_deleted: false).first
-    halt_error("声音源数据不存在") unless track
-
     if Settings.is_check_mobile
       halt render_json({res: false, errors: [['mobile', '请先绑定手机']]}) unless @current_user.mobile
     end
+
+    track_id = (tmp=params[:id].to_i)>0 ? tmp : nil
+    halt_error('请求参数错误') if track_id.nil?
+
+    track = Track.shard(track_id).where(uid: @current_uid, id: track_id, is_deleted: false).first
+    halt_error("声音源数据不存在") if track.nil?
+
+    record = TrackRecord.shard(@current_uid).where(uid:@current_uid,track_id:track.id).first
+    halt_error("声音记录不存在") if record.nil?    
 
     #参数整理
     title = params[:title].to_s.chomp

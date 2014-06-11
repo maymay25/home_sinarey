@@ -509,6 +509,7 @@ module UploadsHelper
 
   #修改单条声音 [ 可选 添加进专辑,转移到另一个专辑,转出当前专辑 ]
   def update_single_track(track,record,album,title,intro,is_public,rich_intro,lyric,singer,singer_category,author,composer,arrangement,post_production,resinger,announcer,music_category,images,destroy_images)
+    
     cache_is_public  = track.is_public
     cache_album_id = track.album_id
 
@@ -1017,8 +1018,8 @@ module UploadsHelper
     return false unless record
 
     response = {}
-    if record.uid == record.track_uid
-      track = Track.shard(record.track_id).where(uid: record.track_uid, id: record.track_id).first
+    if record.op_type==TrackRecordTemp::OP_TYPE[:UPLOAD]
+      track = Track.shard(record.track_id).where(uid: record.uid, id: record.track_id).first
       return false unless track
 
       #record.title = title if title.present?

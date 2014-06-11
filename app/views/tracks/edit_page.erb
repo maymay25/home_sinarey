@@ -3,7 +3,7 @@
     <div class="conInfo">
         <div class="conWrap">
             <div class="conMain conMain_add_img">
-                <form autocomplete="off" action="/edit_track/<%= @record.id %>/update" method="post">
+                <form autocomplete="off" action="/edit_track/<%= @track.id %>/update" method="post">
 
                     <div id="info_table_warp">
                         <div class="infoTit">
@@ -11,7 +11,7 @@
                         </div>
                         <div class="tbInfo">
                             <div class="dv-phone">
-                                <img src="<%= picture_url('track', @record.cover_path, '100') %>" />
+                                <img src="<%= picture_url('track', @track.cover_path, '100') %>" />
                             </div>
                             <table  cellspacing="20">
                                 <tbody>
@@ -21,7 +21,7 @@
                                             <em>*</em>
                                         </td>
                                         <td colspan="2">
-                                            <input value="<%= @record.title %>" name="title" type="text" class="inputW1" id="title">    
+                                            <input value="<%= @track.title %>" name="title" type="text" class="inputW1" id="title">    
                                             <br/>
                                             <span class="c01 tip">标题不要超过40个字哦</span>
                                         </td>
@@ -31,9 +31,9 @@
                                         <td colspan="2">
                                             <div id="imageWrap">
 
-                                                <div class="imgBox2" style="<%= "display:none;" if @track_pictures.length>0 or (@record.cover_path and @record.cover_path!="") %>">
+                                                <div class="imgBox2" style="<%= "display:none;" if @track_pictures.length>0 or (@track.cover_path and @track.cover_path!="") %>">
                                                     <div class="imgItem">
-                                                        <img alt="<%= @record.title %>" src="<%= static_url 'css/img/common/track_100.jpg' %>">
+                                                        <img alt="<%= @track.title %>" src="<%= static_url 'css/img/common/track_100.jpg' %>">
                                                         <input type="hidden" name="image">
                                                         <div class="imgLoading"></div>
                                                     </div>
@@ -53,11 +53,11 @@
                                                     </div>
                                                     <% end %>
 
-                                                    <% if @track_pictures.length==0 and @record.cover_path and @record.cover_path!="" %>
-                                                        <div class="imgBox is-fenmian" image_id="0" src640="<%= picture_url('track',@record.cover_path,'640') %>" src="<%= picture_url('track',@record.cover_path,'100') %>">
+                                                    <% if @track_pictures.length==0 and @track.cover_path and @track.cover_path!="" %>
+                                                        <div class="imgBox is-fenmian" image_id="0" src640="<%= picture_url('track',@track.cover_path,'640') %>" src="<%= picture_url('track',@track.cover_path,'100') %>">
                                                             <a class="del"></a>
                                                             <div class="imgItem">
-                                                                <img src="<%= picture_url('track',@record.cover_path,'100') %>">
+                                                                <img src="<%= picture_url('track',@track.cover_path,'100') %>">
                                                                 <input type="hidden" name="image[]" value="0">
                                                                 <div class="imgLoading"></div>
                                                             </div>
@@ -78,7 +78,7 @@
                                     <tr>
                                         <td class="vAlign_top">简介</td>
                                         <td colspan="2">
-                                            <input id="description" type="hidden" name="intro" value="<%= @record.intro %>">    
+                                            <input id="description" type="hidden" name="intro" value="<%= @track.intro %>">    
                                             <input type="hidden" name="intro_images" value="">  
                                             <textarea id="" rows="10" cols="30" name="rich_intro"><%= @rich_intro %></textarea>
                                         </td>
@@ -88,7 +88,7 @@
                                             来源
                                         </td>
                                         <td colspan="2">
-                                          <% case @record.user_source when 1 %>
+                                          <% case @track.user_source when 1 %>
                                             原创<input type="hidden" value="1" class="input150" id="origin"></input>
                                           <% when 2 %>
                                             采集<input type="hidden" value="2" class="input150" id="origin"></input>
@@ -118,10 +118,10 @@
                                                 </div>
                                             </div>
                                             <div id="genre_sub" class="selecter selecter-s5">
-                                                <input type="hidden" name="categories_music" value="<%= @record.music_category.blank? ? '未设置' : @record.music_category %>"/>
-                                                <div class="selecter-selected" data-value="<%= @record.music_category.blank? ? '未设置' : @record.music_category %>">
+                                                <input type="hidden" name="categories_music" value="<%= @track.music_category.blank? ? '未设置' : @track.music_category %>"/>
+                                                <div class="selecter-selected" data-value="<%= @track.music_category.blank? ? '未设置' : @track.music_category %>">
                                                     <span class="selecter-text">
-                                                        <%= @record.music_category.blank? ? '未设置' : @record.music_category %>
+                                                        <%= @track.music_category.blank? ? '未设置' : @track.music_category %>
                                                     </span>
                                                     <em class="selecter-arrow">◆</em>
                                                 </div>
@@ -143,38 +143,38 @@
                                       <td>声音标签</td>
                                         <td colspan="2">
                                             <div class="tagBtnList">
-                                                <% @record.tags.split(",").each do |tag| %>
+                                                <% @track.tags.split(",").each do |tag| %>
                                                 <a class="tagBtn2" href="javascript:;">
                                                     <span><%= tag %></span>
                                                 </a>
-                                                <% end if @record.tags %>
+                                                <% end if @track.tags %>
                                             </div>
-                                            <%= "未设置" if @record.tags.nil? || @record.tags=="" %>
+                                            <%= "未设置" if @track.tags.nil? || @track.tags=="" %>
                                         </td>
                                     </tr>
 
                                     <tr class="music cover">
                                         <td>原唱</td>
                                         <td colspan="2">
-                                            <input value="<%= @record.singer %>" name="singer" type="text" class="input150" id="input">    
+                                            <input value="<%= @track.singer %>" name="singer" type="text" class="input150" id="input">    
                                             <span class="ml5 mr5">翻唱</span>
-                                            <input value="<%= @record.resinger %>" name="resinger" type="text" class="input150" id="input2">
+                                            <input value="<%= @track.resinger %>" name="resinger" type="text" class="input150" id="input2">
                                         </td>
                                     </tr>
                                     <tr class="music sideman">
                                         <td>原唱</td>
                                         <td colspan="2">
-                                            <input value="<%= @record.singer %>" name="singer" type="text" class="input150" id="input" />
+                                            <input value="<%= @track.singer %>" name="singer" type="text" class="input150" id="input" />
                                         </td>
                                     </tr>
                                     <tr class="music original">
                                         <td>演唱</td>
                                         <td colspan="2">
-                                            <input value="<%= @record.singer %>" name="singer" type="text" class="input150" id="input">    
+                                            <input value="<%= @track.singer %>" name="singer" type="text" class="input150" id="input">    
                                             <div id="origin" class="selecter selecter-s5">
-                                                <input type="hidden" name="singer_category" id="singer" value="<%= @record.singer_category %>"/>    
-                                                <div class="selecter-selected" data-value="<%= @record.singer_category %>">
-                                                    <span class="selecter-text"><%= @record.singer_category %></span>
+                                                <input type="hidden" name="singer_category" id="singer" value="<%= @track.singer_category %>"/>    
+                                                <div class="selecter-selected" data-value="<%= @track.singer_category %>">
+                                                    <span class="selecter-text"><%= @track.singer_category %></span>
                                                     <em class="selecter-arrow">◆</em>
                                                 </div>
                                                 <div class="selecter-options">
@@ -190,23 +190,23 @@
                                     <tr class="music original">
                                         <td>作词</td>
                                         <td colspan="2">
-                                            <input value="<%= @record.author %>" name="author" type="text" class="input150" id="input">    
+                                            <input value="<%= @track.author %>" name="author" type="text" class="input150" id="input">    
                                             <span class="ml5 mr5">作曲</span>
-                                            <input value="<%= @record.composer %>" name="composer" type="text" class="input150" id="input2"></td>
+                                            <input value="<%= @track.composer %>" name="composer" type="text" class="input150" id="input2"></td>
                                     </tr>
                                     <tr class="music original">
                                         <td>编曲</td>
                                         <td colspan="2">
-                                            <input value="<%= @record.arrangement %>" name="arrangement" type="text" class="input150" id="input">    
+                                            <input value="<%= @track.arrangement %>" name="arrangement" type="text" class="input150" id="input">    
                                             <span class="ml5 mr5">后期</span>
-                                            <input value="<%= @record.post_production %>" name="post_production" type="text" class="input150" id="input2"></td>
+                                            <input value="<%= @track.post_production %>" name="post_production" type="text" class="input150" id="input2"></td>
                                     </tr>
                                     <tr class="non_music">
                                         <td>作者</td>
                                         <td colspan="2">
-                                            <input value="<%= @record.author %>" name="author" type="text" class="input150" id="input">    
+                                            <input value="<%= @track.author %>" name="author" type="text" class="input150" id="input">    
                                             <span class="ml5 mr5">播音</span>
-                                            <input value="<%= @record.announcer %>" name="announcer" type="text" class="input150" id="input2"></td>
+                                            <input value="<%= @track.announcer %>" name="announcer" type="text" class="input150" id="input2"></td>
                                     </tr>
                                     <tr class="music lyric">
                                         <td class="vAlign_top">歌词</td>
@@ -224,7 +224,7 @@
                                         </td>
                                     </tr>
 
-                                    <% if !@record.is_public %>
+                                    <% if !@track.is_public %>
                                     <tr id="public_tr">
                                         <td class="vAlign_top">是否公开</td>
                                         <td colspan="2">
@@ -240,13 +240,13 @@
                                     <% end %>
 
                                     <% if @album_list.present? %>
-                                    <tr id="appendToAlbum" public="true" <% if !@record.is_public %> style="display:none" <% end %> >
+                                    <tr id="appendToAlbum" public="true" <% if !@track.is_public %> style="display:none" <% end %> >
                                         <td>添加到专辑</td>
                                         <td colspan="2">
                                             <div id="album_id" class="selecter selecter-s5">
-                                                <input type="hidden" name="album_id" value="<%= @record.album_id %>"/>
-                                                <div class="selecter-selected" data-value="<%= @record.album_id %>">
-                                                    <span class="selecter-text"><%= (@record.album_id and @record.album_title) ? @record.album_title[0..30] : '无' %></span>
+                                                <input type="hidden" name="album_id" value="<%= @album && @album.id %>"/>
+                                                <div class="selecter-selected" data-value="<%= @album && @album.id %>">
+                                                    <span class="selecter-text"><%= (@album.id and @album.title) ? @album.title[0..30] : '无' %></span>
                                                     <em class="selecter-arrow">◆</em>
                                                 </div>
                                                 <div class="selecter-options">

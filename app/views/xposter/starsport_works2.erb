@@ -38,18 +38,18 @@
       <div class="starsportWorks_bg1"></div>
       <div class="starsportWorks_content">
         <div class="starsportWorksList">
-          <% @tirs.each_with_index do |tir,index| %>
-          <% user = @profile_users[tir.uid] %>
-          <div class="starsportWorksListItem" sound_id="<%= tir.track_id %>">
+          <% @tracks.each_with_index do |track,index| %>
+          <% user = @profile_users[track.uid] %>
+          <div class="starsportWorksListItem" sound_id="<%= track.id %>">
             <div class="bd">
-              <img src="<%= picture_url('track', tir.cover_path, '180') %>" src=''>
+              <img src="<%= picture_url('track', track.cover_path, '180') %>" src=''>
               <a class="playBtn"></a>
               <span class="playcountIcon"><%= @plays_counts[index] %></span>
-              <a class="starsportLikeBtn <%= 'liked' if @is_favorited[tir.track_id] %>"><%= @favorites_counts[index] %></a>
+              <a class="starsportLikeBtn <%= 'liked' if @is_favorited[track.id] %>"><%= @favorites_counts[index] %></a>
               <div class="mask"></div>
             </div>
             <div class="btm">
-              <div class="soundName"><%= tir.title %></div>
+              <div class="soundName"><%= track.title %></div>
               <div class="user"><%= user && user.nickname %></div>
             </div>
           </div>
@@ -62,18 +62,18 @@
       <div class="starsportWorks_bg1"></div>
       <div class="starsportWorks_content">
         <div class="starsportWorksList">
-          <% @tirs2.each_with_index do |tir,index| %>
-          <% user = @profile_users[tir.uid] %>
-          <div class="starsportWorksListItem" sound_id="<%= tir.track_id %>">
+          <% @tracks2.each_with_index do |track,index| %>
+          <% user = @profile_users[track.uid] %>
+          <div class="starsportWorksListItem" sound_id="<%= track.id %>">
             <div class="bd">
-              <img src="<%= picture_url('track', tir.cover_path, '180') %>" src=''>
+              <img src="<%= picture_url('track', track.cover_path, '180') %>" src=''>
               <a class="playBtn"></a>
               <span class="playcountIcon"><%= @plays_counts2[index] %></span>
-              <a class="starsportLikeBtn <%= 'liked' if @is_favorited[tir.track_id] %>"><%= @favorites_counts2[index] %></a>
+              <a class="starsportLikeBtn <%= 'liked' if @is_favorited[track.id] %>"><%= @favorites_counts2[index] %></a>
               <div class="mask"></div>
             </div>
             <div class="btm">
-              <div class="soundName"><%= tir.title %></div>
+              <div class="soundName"><%= track.title %></div>
               <div class="user"><%= user && user.nickname %></div>
             </div>
           </div>

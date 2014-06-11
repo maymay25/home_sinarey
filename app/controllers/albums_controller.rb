@@ -59,23 +59,29 @@ class AlbumsController < ApplicationController
       end
     end
 
-    @all_tracks_count = TrackRecord.shard(@album.uid).where(tracks_conds).count
+    all_records = TrackRecord.shard(@album.uid).where(tracks_conds)
+    @all_records_count = all_records.count
 
-    @tracks = TrackRecord.shard(@album.uid).where(tracks_conds).order(order).offset((@page - 1) * @per_page).limit(@per_page)
+    @page_records = all_records.order(order).offset((@page - 1) * @per_page).limit(@per_page)
 
-    #专辑下的声音，每一个的播放计数都要
-    track_ids = @tracks.collect{|r| r.track_id }
-    if track_ids.length > 0
-      @tracks_play_count = $counter_client.getByIds(Settings.counter.track.plays, track_ids)
+    @track_ids = @page_records.map(&:track_id)
+    if @track_ids.present?
+      tracks = Track.mfetch(@track_ids,true)
+      @tracks = tracks.inject({}) do |hash,track|
+        hash[track.id] = track
+        hash
+      end
+      @track_ids = tracks.map(&:id)
+      @tracks_play_count = $counter_client.getByIds(Settings.counter.track.plays, @track_ids)
     end
 
     @plays_count = $counter_client.get(Settings.counter.album.plays, @album.id)
 
-    if @tracks && @tracks[0] && @tracks[0].track_id
-      @init_track_play_count = $counter_client.get(Settings.counter.track.plays, @tracks[0].track_id)
-      @init_track_favorite_count = $counter_client.get(Settings.counter.track.favorites, @tracks[0].track_id)
-      @init_track_share_count = $counter_client.get(Settings.counter.track.shares, @tracks[0].track_id)
-      @init_track_comment_count = $counter_client.get(Settings.counter.track.comments, @tracks[0].track_id)
+    if tracks && (@first_track=tracks[0]) && @first_track.id
+      @first_track_play_count = $counter_client.get(Settings.counter.track.plays, @first_track.id)
+      @first_track_favorite_count = $counter_client.get(Settings.counter.track.favorites, @first_track.id)
+      @first_track_share_count = $counter_client.get(Settings.counter.track.shares, @first_track.id)
+      @first_track_comment_count = $counter_client.get(Settings.counter.track.comments, @first_track.id)
     end
 
     @category_name,@category_title = nil,nil
@@ -260,9 +266,15 @@ class AlbumsController < ApplicationController
     @album_rich = TrackSetRich.shard(@album.id).where(track_set_id: @album.id).first
     if @album.is_crawler || @album.records_order.nil? || @album.records_order.empty? 
       direction = @album.is_records_desc ? 'desc' : 'asc'
-      @tracks = TrackRecord.shard(@current_uid).where(uid: @current_uid, album_id: @album.id, is_public: true, is_deleted: false, status: [0, 1]).order("order_num #{direction}, created_at #{direction}")
+      @records = TrackRecord.shard(@current_uid).where(uid: @current_uid, album_id: @album.id, is_public: true, is_deleted: false, status: [0, 1]).order("order_num #{direction}, created_at #{direction}")
     else
-      @tracks = TrackRecord.shard(@current_uid).where(uid: @current_uid, album_id: @album.id, is_public: true, is_deleted: false, status: [0, 1]).order("field(id,#{@album.records_order})")
+      @records = TrackRecord.shard(@current_uid).where(uid: @current_uid, album_id: @album.id, is_public: true, is_deleted: false, status: [0, 1]).order("field(id,#{@album.records_order})")
+    end
+
+    track_ids = @records.map(&:track_id)
+    @tracks = Track.mfetch(track_ids,true).inject({}) do |hash,track|
+      hash[track.id] = track
+      hash
     end
 
     @category = CATEGORIES[@album.category_id]
@@ -414,7 +426,7 @@ class AlbumsController < ApplicationController
     topic = album.to_topic_hash.merge(is_feed: true, op_type: removeSound, is_off: is_off, ip: get_client_ip)
     $rabbitmq_channel.fanout(Settings.topic.album.destroyed, durable: true).publish(Oj.dump(topic, mode: :compat), content_type: 'text/plain', persistent: true)
     bunny_logger = ::Logger.new(File.join(Settings.log_path, "bunny.#{Time.new.strftime('%F')}.log"))
-    bunny_logger.info "album.destroyed.topic #{album.id} #{album.title} #{album.nickname} #{album.updated_at.strftime('%R')}"
+    bunny_logger.info "album.destroyed.topic #{album.id} #{album.title} #{album.uid} #{album.updated_at.strftime('%R')}"
 
     halt render_json({})
   end
@@ -434,13 +446,23 @@ class AlbumsController < ApplicationController
     
     halt render_json([]) unless @current_uid
 
-    records_list = TrackRecord.shard(@current_uid).where(uid: @current_uid, op_type: TrackRecordTemp::OP_TYPE[:UPLOAD], album_id: nil, is_public: true, is_deleted: false).order('id desc').limit(100)
+    records_list = TrackRecord.shard(@current_uid).where(uid: @current_uid, op_type: TrackRecordTemp::OP_TYPE[:UPLOAD], album_id: nil, is_public: true, is_deleted: false, status: [0,1]).order('id desc').limit(100)
+    
+    track_ids = records_list.map(&:track_id)
+
+    tracks = Track.mfetch(track_ids,true).inject({}) do |hash,track|
+      hash[track.id] = track
+      hash
+    end
+
     response = []
     records_list.each do |r|
+      track = tracks[r.track_id]
+      next if track.nil?
       data = {}
       data[:id] = r.id
-      data[:title] = r.title
-      data[:sound_id] = r.track_id
+      data[:title] = track.title
+      data[:sound_id] = track.id
       response << data
     end
     render_json(response)

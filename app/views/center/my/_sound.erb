@@ -87,13 +87,20 @@
                 <% if @track_records_count > 0 %>
                 <div class="body_list_wrap">
                     <ul class="body_list" sound_ids="<%= @tracks.each_value.collect{|t|t.id}.join(",") %>">
-                        <% @track_records.each_with_index do |r,i| %>
+                        <% @track_records.each do |r| %>
                         <%
                           t = @tracks[r.track_id]
                           next if t.nil? or t.is_deleted
+                          
                           album = @albums[t.album_id]
                           user = @users[t.uid]
                           is_favorited = @is_favorited[t.id]
+                          index ||= 0
+                          track_play_count = @track_plays_counts[index]
+                          track_favorite_count = @track_favorites_counts[index]
+                          track_comment_count = @track_comments_counts[index]
+                          track_share_count = @track_shares_counts[index]
+                          index += 1
                         %>
                         <li class="item" sound_id="<%= t.id %>">
                             <div class="content_wrap">
@@ -113,13 +120,13 @@
                                                 </span>
                                             </div>
                                             <% if r.op_type == 2 %><span>【转采】</span><% end %>
-                                            <span class="sound_playcount" title="<%= @track_plays_counts[i] %>次播放"><%= @track_plays_counts[i] %></span>
+                                            <span class="sound_playcount" title="<%= track_play_count %>次播放"><%= track_play_count %></span>
 
                                             <div class="personal_operate">
                                                 <% if r.op_type != 2 %>
                                                 <a class="personal_editBtn" href="/edit_track/<%= t.id %>">编辑</a>
                                                 <% end %>
-                                                <a class="personal_deleteBtn destroyBtn" destroy_id="<%= t.id %>">删除</a>
+                                                <a class="personal_deleteBtn destroyBtn" destroy_id="<%= r.id %>">删除</a>
                                                 <% if t.is_public %>
                                                 <a class="personal_addtoAlbum" data-options="<%= oj_dump({source:t.user_source,track_id:t.id,record_id:t.id}) %>"><% if t.album_id %>更改专辑<% else %>添加到专辑<% end %></a>
                                                 <% end %>
@@ -148,14 +155,14 @@
                                                 <i class="privacyIcon" record_id="<%= t.id %>" title="私密声音"></i>
                                                 <% end %>
                                             </a>
-                                            <span class="sound_playcount" title="<%= @track_plays_counts[i] %>次播放"><%= @track_plays_counts[i] %></span>
+                                            <span class="sound_playcount" title="<%= track_play_count %>次播放"><%= track_play_count %></span>
                                             <div class="fr"><span class="sound_position">00:00</span>/<span class="sound_duration"><%= parse_duration t.duration %></span></div>
 
                                             <div class="personal_operate">
                                                 <% if r.op_type != 2 %>
                                                 <a class="personal_editBtn" href="/edit_track/<%= t.id %>">编辑</a>
                                                 <% end %>
-                                                <a class="personal_deleteBtn destroyBtn" destroy_id="<%= t.id %>">删除</a>
+                                                <a class="personal_deleteBtn destroyBtn" destroy_id="<%= r.id %>">删除</a>
                                                 <% if t.is_public %>
                                                 <a class="personal_addtoAlbum" data-options="<%= oj_dump({source:t.user_source,track_id:t.id,record_id:t.id}) %>"><% if t.album_id %>更改专辑<% else %>添加到专辑<% end %></a>
                                                 <% end %>
@@ -211,9 +218,9 @@
                                         <span class="createtime"><%= parse_time_until_now(r[:created_at]) %></span>
                                         <div class="fr">
                                             <a class="downloadToMobile link1">下载到手机</a>
-                                            <a href="javascript:;" class="likeBtn link1 <%= 'is-sound-liked' if is_favorited %>">赞(<span class="count"><%= @track_favorites_counts[i] %></span>)</a>
-                                            <a href="javascript:;" class="commentBtn link1">评论(<span class="count"><%= @track_comments_counts[i] %></span>)</a>
-                                            <a href="javascript:;" class="forwardBtn link1">转采(<span class="count"><%= @track_shares_counts[i] %></span>)</a>
+                                            <a href="javascript:;" class="likeBtn link1 <%= 'is-sound-liked' if is_favorited %>">赞(<span class="count"><%= track_favorite_count %></span>)</a>
+                                            <a href="javascript:;" class="commentBtn link1">评论(<span class="count"><%= track_comment_count %></span>)</a>
+                                            <a href="javascript:;" class="forwardBtn link1">转采(<span class="count"><%= track_share_count %></span>)</a>
                                             <% if t.status == 0 %>
                                             <a href="javascript:;" class="link1" notice="待审核声音暂时不能分享...">分享</a>
                                             <% else %>

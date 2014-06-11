@@ -11,10 +11,6 @@ class CenterController < ApplicationController
   ### 个人中心 -- 首页timeline
   def index_page
 
-
-    # type --- 1:粉丝 /2:选人 /3:全体非机器人主播
-    # to_uids --- 选人的场合，接收者id数组
-
     redirect_to_root
 
     if params[:nickname]

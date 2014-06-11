@@ -11,9 +11,9 @@ require "sinatra/content_for"
 require "sinatra/cookies"
 
 #load core
+require File.join(Sinarey.core_root, 'config/settings.rb')
 require File.join(Sinarey.core_root, 'config/initializers')
 
-require File.join(Sinarey.core_root, 'app/models/settings.rb')
 require File.join(Sinarey.core_root, 'app/helpers/inet.rb')
 require File.join(Sinarey.core_root, 'app/helpers/core_helper.rb')
 require File.join(Sinarey.core_root, 'app/helpers/apn_dispatch_helper.rb')
