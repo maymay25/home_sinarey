@@ -761,8 +761,12 @@ class CenterController < ApplicationController
       return
     end
 
-    @latest_track = LatestTrack.where(uid: @u.uid).first
-    @latest_album = LatestAlbum.where(uid: @u.uid).first
+    track_tmp = LatestTrack.where(uid: @u.uid).first
+    @latest_track = track_tmp && Track.fetch(track_tmp.track_id)
+
+    album_tmp = LatestAlbum.where(uid: @u.uid).first
+    @latest_album = album_tmp && TrackSet.fetch(album_tmp.album_id)
+
     @latest_favorite = LatestFavorite.where(uid: @u.uid).first
 
 

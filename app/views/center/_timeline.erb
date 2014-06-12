@@ -155,7 +155,7 @@
                     <div class="user_detail_right right">
                         <div class="like">
                             <a href="<%= link_path("/#{@u.uid}/favorites/") %>">
-                                <img src="<%= (@latest_favorite and @latest_favorite.track_cover_path) ? picture_url('track', @latest_favorite.track_cover_path, '180') : static_url("/css/img/common/mycenter_sound.jpg") %>" alt="">
+                                <img src="<%= (@latest_favorite && @latest_favorite.track_cover_path) ? picture_url('track', @latest_favorite.track_cover_path, '180') : static_url("/css/img/common/mycenter_sound.jpg") %>" alt="">
                             </a>
                                 <span class="bg"></span>
                             <a class="title" href="<%= link_path("/#{@u.uid}/favorites/") %>">    
@@ -164,7 +164,7 @@
                         </div>
                         <div class="album">
                             <a href="<%= link_path("/#{@u.uid}/album/") %>">
-                                <img src="<%= (@latest_album and @latest_album.album_cover_path) ? picture_url('album', @latest_album.album_cover_path, '180') : static_url("/css/img/common/mycenter_album.jpg") %>" alt="">
+                                <img src="<%= (@latest_album && @latest_album.cover_path) ? picture_url('album', @latest_album.cover_path, '180') : static_url("/css/img/common/mycenter_album.jpg") %>" alt="">
                             </a>
                                 <span class="bg"></span>
                             <a class="title" href="<%= link_path("/#{@u.uid}/album/") %>">    
@@ -173,7 +173,7 @@
                         </div>
                         <div class="sound">
                             <a href="<%= link_path("/#{@u.uid}/sound/") %>">
-                                <img src="<%= (@latest_track and @latest_track.track_cover_path) ? picture_url('track', @latest_track.track_cover_path, '180') : static_url("/css/img/common/mycenter_favorite.jpg") %>" alt="">
+                                <img src="<%= (@latest_track && @latest_track.cover_path) ? picture_url('track', @latest_track.cover_path, '180') : static_url("/css/img/common/mycenter_favorite.jpg") %>" alt="">
                             </a>
                             <span class="bg"></span>
                             <a class="title" href="<%= link_path("/#{@u.uid}/sound/") %>">

@@ -174,9 +174,6 @@ class MsgcenterController < ApplicationController
     end
 
     track = Track.fetch(params[:track_id])
-
-    track_user = get_profile_user_basic_info(track.uid)
-
     halt render_json({res: false, message: "", msg: '该声音不存在'}) if track.nil? or track.is_deleted
 
     halt render_json({res: false, message: "", msg: '抱歉，该声音正在审核中'}) if track.status == 0
@@ -184,6 +181,9 @@ class MsgcenterController < ApplicationController
     halt render_json({res: false, message: "", msg: '该声音已经下架'}) if track.status != 1
 
     halt render_json({res: false, message: "", msg: '私密声音不能评论'}) unless track.is_public
+
+    track_user = get_profile_user_basic_info(track.uid)
+    halt render_json({res: false, message: "", msg: "无法评论该用户的声音"}) unless track_user.nil?
 
     if params[:parent_id] and !params[:parent_id].empty?
       # 回复评论
@@ -219,6 +219,7 @@ class MsgcenterController < ApplicationController
       # 评论
       comment = Comment.create(uid: @current_uid,
         track_id: track.id,
+        track_uid: track.uid,
         second: params[:second],
         parent_id: master_comment_id,
         content: params[:content]
@@ -255,6 +256,7 @@ class MsgcenterController < ApplicationController
       # 评论
       comment = Comment.create(uid: @current_uid,
         track_id: track.id,
+        track_uid: track.uid,
         upload_source: 2,
         second: params[:second],
         parent_id: nil,

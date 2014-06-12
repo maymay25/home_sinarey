@@ -1130,7 +1130,8 @@ module UploadsHelper
     TrackRich.create(track_id: track.id, rich_intro: cleaned_rich_intro) if cleaned_rich_intro.present?
     
     # 创建record记录
-    record = TrackRecord.create(op_type: 1,
+    record = TrackRecord.create(
+      op_type: 1,
       uid: @current_uid,  
       track_id: track.id,
       status: track.status,

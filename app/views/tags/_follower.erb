@@ -36,6 +36,9 @@
           next
         end
         is_follow,be_followed = @follow_status[user.uid]
+        follower_count = @user_tracks_counts[i]
+        track_count = @user_followers_counts[i]
+        following_count = @user_followings_counts[i]
         %>
         <li class="item" >
           <div class="content_wrap">
@@ -50,9 +53,9 @@
                 <%= user.personalSignature %>
               </div>
               <div class="detail_bottom">
-                <span class="left follower_counter"><%= followers_counts[i] %></span>
-                <span class="left sound_counter"><%= tracks_counts[i] %></span>
-                <span class="left attention_counter"><%= followings_counts[i] %></span> 
+                <span class="left follower_counter"><%= follower_count %></span>
+                <span class="left sound_counter"><%= track_count %></span>
+                <span class="left attention_counter"><%= following_count %></span> 
               </div>
             </div>
             <div class="operate_btns">

@@ -5,7 +5,7 @@ gem 'thin'
 
 gem 'activerecord', '~> 3.2',require: ['active_record']
 
-gem 'ting_model', '0.3.3'
+gem 'ting_model', '0.3.4'
 
 if RUBY_PLATFORM =~ /mingw/
   gem 'redis', '3.0.6'

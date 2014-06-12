@@ -128,7 +128,7 @@
                                                 <% end %>
                                                 <a class="personal_deleteBtn destroyBtn" destroy_id="<%= r.id %>">删除</a>
                                                 <% if t.is_public %>
-                                                <a class="personal_addtoAlbum" data-options="<%= oj_dump({source:t.user_source,track_id:t.id,record_id:t.id}) %>"><% if t.album_id %>更改专辑<% else %>添加到专辑<% end %></a>
+                                                <a class="personal_addtoAlbum" data-options="<%= oj_dump({source:t.user_source,track_id:t.id,record_id:r.id}) %>"><% if t.album_id %>更改专辑<% else %>添加到专辑<% end %></a>
                                                 <% end %>
                                             </div>
 

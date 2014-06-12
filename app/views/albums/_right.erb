@@ -3,9 +3,9 @@ other_albums = Album.shard(album.uid).where(uid: album.uid).where("id <>#{album.
 
 album_ids = other_albums.collect{ |a| a.id }
 if album_ids.count > 0
-  _album_tracks_counts = $counter_client.getByIds(Settings.counter.album.tracks, album_ids)
+  album_tracks_counts = $counter_client.getByIds(Settings.counter.album.tracks, album_ids)
 else
-  _album_tracks_counts = []
+  album_tracks_counts = []
 end
 %>
 
@@ -32,7 +32,7 @@ end
         </div>
         <div class="right">
           <a href="<%= link_path("/#{album.uid}/album/#{album.id}") %>" title="<%= album.title %>">《<%= album.title.truncate(16) %>》</a>
-          <span><%= _album_tracks_counts[i] %>个声音</span>
+          <span><%= album_tracks_counts[i] %>个声音</span>
         </div>
       </div>
     </li>

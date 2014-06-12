@@ -464,24 +464,18 @@ class TracksController < ApplicationController
       halt render_json({res: false, errors: [['dirty_words', album_dirts]]}) if album_dirts.size > 0
 
       # 创建新专辑
-      album = Album.new
+      album = TrackSet.new
       album.title = params[:album_title]
       album.intro = params[:album_intro] || ""
       album.short_intro = (params[:album_intro] &&  params[:album_intro][0,100])
       album.uid = @current_uid
-      album.nickname = @current_user.nickname
-      album.avatar_path = @current_user.logoPic
-      album.is_v = @current_user.isVerified
-      album.dig_status = calculate_dig_status(@current_user)
-      album.human_category_id = @current_user.vCategoryId
       album.category_id = track.category_id
       album.tags = track.tags
       album.cover_path = track.cover_path
       album.user_source = track.user_source
-      album.is_publish = true
       album.is_public = true
       album.status = calculate_default_status(@current_user)
-      album.records_order = params[:record_id]
+      album.records_order = params[:record_id].to_s
       album.save
 
       track.update_attributes(album_id: album.id, album_title: album.title, album_cover_path: album.cover_path) if record.op_type == 1

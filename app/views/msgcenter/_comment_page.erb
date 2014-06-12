@@ -43,13 +43,13 @@
                     <% @comments.each do |msg| %>
                     <% 
                     if msg.track_id
-                      tir = TrackInRecord.fetch(msg.track_id)
-                      if tir.nil? or !tir.is_public or tir.is_deleted or tir.status != 1
+                      track = Track.fetch(msg.track_id)
+                      if track.nil? or !track.is_public or track.is_deleted or track.status != 1
                         msg.destroy
                         next
                       end
 
-                      comment = Comment.shard(tir.track_id).where(id: msg.comment_id, is_deleted: false).first
+                      comment = Comment.shard(track.id).where(id: msg.comment_id, is_deleted: false).first
                       unless comment # 对应评论不存在
                         msg.destroy 
                         next

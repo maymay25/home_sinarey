@@ -206,7 +206,7 @@
                   <% if r.op_type==TrackRecordTemp::OP_TYPE[:UPLOAD] %>
                   <a href="<%= "/edit_track/#{track.id}" %>">编辑</a>
                   <% end %>
-                  <a class="destroyBtn" href="javascript:;" destroy_id="<%= track.id %>">删除</a>
+                  <a class="destroyBtn" href="javascript:;" destroy_id="<%= r.id %>">删除</a>
                 </div>
                 <% end %>
                 <div class="operate">

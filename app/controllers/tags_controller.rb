@@ -115,11 +115,6 @@ class TagsController < ApplicationController
           @follow_status[follow.following_uid] = [true,follow.is_mutual]
         end
       end
-    else
-      @tagfollowers = []
-      @user_tracks_counts = []
-      @user_followers_counts = []
-      @user_followings_counts = []
     end
     
     @this_title = "#{@tag_name} 喜马拉雅-听我想听"

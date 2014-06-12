@@ -20,7 +20,7 @@ right_tagfollowers = follower_uids.collect{ |uid| profile_users[uid] }
     @followers_counts = $counter_client.getByIds(Settings.counter.user.followers, uids)
     follows = Following.shard(@current_uid).where(uid: @current_uid, following_uid: uids).select('following_uid, is_mutual')
     follows.each do |f|
-      @follow_status[user.following_uid] = [true,user.is_mutual]
+      @follow_status[f.following_uid] = [true,f.is_mutual]
     end
   else
     @tracks_counts, @followers_counts = [], []
