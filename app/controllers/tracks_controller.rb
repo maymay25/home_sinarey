@@ -297,41 +297,23 @@ class TracksController < ApplicationController
       end
     end
     
-    # 记录我转发的声音
+    
     record_hash = {
       track_id: track.id,
-      track_uid: track.uid, # 原声音发布者
+      uid: @current_uid,
       op_type: TrackRecordTemp::OP_TYPE[:RELAY],
       is_public: true,
       is_publish: true,
-      singer: track.singer,
-      singer_category: track.singer_category,
-      author: track.author,
-      arrangement: track.arrangement,
-      post_production: track.post_production,
-      resinger: track.resinger,
-      announcer: track.announcer,
-      composer: track.composer,
-      allow_download: track.allow_download,
-      allow_comment: track.allow_comment,
-      cover_path: track.cover_path,
       comment_content: "",  # 异步添加值
       comment_id: nil,  # 异步添加值
-      waveform: track.waveform,
-      upload_id:track.upload_id,
       status: 1
     }
+
+    # 创建我的声音记录
     record = TrackRecord.create(record_hash)
 
     # 声音的转发数  +1
     $counter_client.incr(Settings.counter.track.shares, track.id, 1)
-
-    #同步到Origin表
-    record_origin = TrackRecordOrigin.new
-    record_origin.id = record.id
-    record_origin.created_at = record.created_at
-    record_origin.updated_at = record.updated_at
-    record_origin.update_attributes(record_hash)
 
     sharing_to = params[:sharing_to]
     share_content = cut_str(content.to_s.strip, 60, '..')
@@ -532,6 +514,10 @@ class TracksController < ApplicationController
       $counter_client.decr(Settings.counter.user.tracks, record.uid, 1)
       $counter_client.decr(Settings.counter.track.shares, record.track_id, 1)
 
+      #软删声音的转采记录
+      repost = TrackRepost.shard(record.track_id).where(uid: @current_uid, track_id: record.track_id, is_deleted: false).first
+      repost.update_attribute(:is_deleted, true) if repost
+
       # 转采的声音 所在专辑的声音数 -1
       if record.album_id
         $counter_client.decr(Settings.counter.album.tracks, record.album_id, 1)
@@ -593,6 +579,18 @@ class TracksController < ApplicationController
   # 转采列表
   def track_relay_list_template
     set_no_cache_header
+
+    all_relays = TrackRepost.shard(params[:id]).where(track_id: params[:id], is_deleted: false).order("id desc")
+
+    @page = ( tmp=params[:page].to_i )>0 ? tmp : 1
+    @per_page = 10
+
+    @relays_count = all_relays.count
+    @relays = all_relays.offset((@page-1)*@per_page).limit(@per_page)
+
+    all_uids = @relays.map(&:uid)
+    @profile_users = $profile_client.getMultiUserBasicInfos(all_uids)
+
     render_to_string(partial: :_track_relay_list)
   end
 
@@ -604,7 +602,7 @@ class TracksController < ApplicationController
 
     @track = Track.fetch(params[:id])
     halt '' if @track.nil? or @track.is_deleted or @track.status != 1
-    @comments_count = Comment.shard(@track.id).where(track_id: @track.id).count
+    @comments_count = Comment.shard(@track.id).where(track_id: @track.id, is_deleted: false).count
     @comments = Comment.shard(@track.id).where(track_id: @track.id).order('id desc').limit(10)
 
     uids = @comments.map(&:uid)
@@ -620,9 +618,13 @@ class TracksController < ApplicationController
 
     @track = Track.fetch(params[:id])
     halt '' if @track.nil? or @track.is_deleted or @track.status != 1
-    all_reposts = TrackRepost.shard(@track.id).where(track_id: @track.id, op_type: 2)
+    all_reposts = TrackRepost.shard(@track.id).where(track_id: @track.id, is_deleted: false)
     @relays_count = all_reposts.count
     @relays = all_reposts.order("id desc").limit(10)
+
+    uids = @relays.map(&:uid)
+    @users = $profile_client.getMultiUserBasicInfos(uids)
+
     render_to_string(partial: :_feed_relay_list)
   end
 

@@ -4,7 +4,7 @@ recomm_ids = $recommend_client.recentVTrack(category_id, nil, 1, 20).ids
 <% if recomm_ids.present? %>
   <% tracks = Track.mfetch(recomm_ids, true) %>
   <% if tracks.size > 0 -%>
-    <% sample_ids = tracks.sample(5).map{|s| s.track_id} %>
+    <% sample_ids = tracks.sample(5).map(&:id) %>
     <% tracks.each do |track| %>
       <div class="recommendSoundPanel" <% unless sample_ids.include?(track.id) -%> style="display:none;" <% end -%> >
         <div class="soundface">

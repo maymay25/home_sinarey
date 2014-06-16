@@ -248,14 +248,14 @@
                                     </div>
                                     <p class="cl"></p>
                                 </div>
-                                <% if lastest_track -%>
-                                <div class="miniPlayer2 mgLR15 mgT10" sound_id="<%= lastest_track.id %>">
+                                <% if lastest_track && lastest_track.track_id -%>
+                                <div class="miniPlayer2 mgLR15 mgT10" sound_id="<%= lastest_track.track_id %>">
                                     <div class="player_titleBar">
                                         <div class="left">
                                             <a class="playBtn"></a>
                                         </div>
                                         <div class="right">
-                                            <a class="title" href="<%= link_path("/#{lastest_track.uid}/sound/#{lastest_track.id}") %>" title="<%= lastest_track.track_title %>"><%= lastest_track.track_title %></a>
+                                            <a class="title" href="<%= link_path("/#{lastest_track.uid}/sound/#{lastest_track.track_id}") %>" title="<%= lastest_track.track_title %>"><%= lastest_track.track_title %></a>
                                             <%= '【转采】' if lastest_track.is_resend %>
                                         </div>
                                     </div>

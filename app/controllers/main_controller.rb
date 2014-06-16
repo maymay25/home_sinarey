@@ -10,7 +10,9 @@ class MainController < ApplicationController
 
   #新版未登录首页
   def index
-    p Track.gtn(217142)
+
+    #p TrackSet.gtn(5153)
+
     set_no_cache_header
     halt erb(:index2,layout:false) unless @current_uid
     erb :index

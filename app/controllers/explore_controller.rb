@@ -35,30 +35,12 @@ class ExploreController < ApplicationController
     end
 
     @wall_user = get_recommend_user(nil,1,  6)[:list]
+    server_data = $recommend_client.recentVTrack(nil, nil, 1, 4)
+    @wall_new_sound = Track.mfetch(server_data.ids, true)
 
-    begin
-      server_data = $recommend_client.recentVTrack(nil, nil, 1, 4)
-    rescue RuntimeError => e
-      server_data = nil
-      logger.fatal(e.backtrace.first)
-    end
-
-    if server_data
-      @wall_new_sound = Track.mfetch(server_data.ids, true)
-
-      #通知删除不存在的声音
-      miss_sum = server_data.ids.length-@wall_new_sound.length-1
-      if miss_sum > 0
-        not_exist_list = server_data.ids - @wall_new_sound.collect{|r| r.track_id }
-        $backend_client.delRecentVTrack(nil, nil, not_exist_list)
-      end
-
-    else
-      @wall_new_sound = []
-    end
+    p @wall_new_sound
 
     category_ids = [1,2,3,4,5,6,7,8,9,10,11]
-
     @category_datas = []
     category_ids.each do |cid|
       category = CATEGORIES[cid]

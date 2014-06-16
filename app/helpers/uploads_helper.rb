@@ -884,7 +884,7 @@ module UploadsHelper
       track.waveform = transcode_data['waveform']
       track.is_crawler = false
       track.upload_source = 2 # 网站上传
-      track.uid = @current_user..uid # 源发布者id
+      track.uid = @current_user.uid # 源发布者id
       #track.nickname = @current_user.nickname # 源发布者昵称
       #track.avatar_path = @current_user.logoPic #源发布者头像
       #track.is_v = @current_user.isVerified

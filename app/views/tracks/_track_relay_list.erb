@@ -1,32 +1,23 @@
-<%
-all_relays = TrackRepost.shard(params[:id]).where(track_id: params[:id], is_deleted: false).order("id desc")
 
-page = ( tmp=params[:page].to_i )>0 ? tmp : 1
-per_page = 10
-
-relays_count = all_relays.count
-relays = all_relays.offset((page-1)*per_page).limit(per_page)
-
-%>
-<ul class="
-commentList">
-  <% relays.each do |relay| %>
+<ul class="commentList">
+  <% @relays.each do |relay| %>
+  <% user = @profile_users[relay.uid]; next if user.nil? %>
   <li class="listItem">
     <div class="comment2">
       <div class="left">
         <a class="userface" href="<%= link_his_path(relay.uid) %>" card="<%= relay.uid %>">
-          <img alt="<%= relay.nickname %>" src="<%= picture_url('header', relay.avatar_path, 60) %>" data-options="defaultImg:person_60">
+          <img alt="<%= user.nickname %>" src="<%= picture_url('header', user.logoPic, 60) %>" data-options="defaultImg:person_60">
         </a>
       </div>
       <div class="right">
         <div class="comment_titleBar">
-          <a href="<%= link_his_path(relay.uid) %>" card="<%= relay.uid %>"><%= relay.nickname %></a>
+          <a href="<%= link_his_path(relay.uid) %>" card="<%= relay.uid %>"><%= user.nickname %></a>
         </div>
         <div class="comment_content"><%== (relay.comment_content and !relay.comment_content.empty?) ? simple_format(puts_face(relay.comment_content)) : "转采声音" %></div>
         <div class="comment_bottom">
           <span class="comment_createtime"><%= relay.created_at.strftime('%-m月%-d日 %H:%M') %></span>
           <% if relay.comment_id %>
-          <a href="javascript:;" class="replyBtn" data-options="<%= oj_dump({c_id: relay.comment_id, c_second: '', c_nickname: relay.nickname}) %>">回复</a>
+          <a href="javascript:;" class="replyBtn" data-options="<%= oj_dump({c_id: relay.comment_id, c_second: '', c_nickname: user.nickname}) %>">回复</a>
           <% end %>
         </div>
         <div class="reply_box_entry"></div>
@@ -37,5 +28,5 @@ commentList">
 </ul>
 
 <div class="pagingBar mgT30">
-  <%== paginate CustomPagination.new(relays_count,page,per_page), {outer_window: 1, theme: 'explore'} %>
+  <%== paginate CustomPagination.new(@relays_count,@page,@per_page), {outer_window: 1, theme: 'explore'} %>
 </div>

@@ -1,16 +1,16 @@
 <% if @comments.present? %>
     <% @comments.each do |comment| %>
-    <% user = @users[comment.uid] %>
+    <% user = @users[comment.uid] ; next if user.nil? %>
     <li class="listItem">
         <div class="comment">
             <div class="left">
                 <a class="userface" card="<%= comment.uid %>" href="<%= link_his_path(comment.uid) %>">
-                    <img src="<%= picture_url('header', user&&user.logoPic, '60') %>" alt="" data-options="defaultImg:person_60">
+                    <img src="<%= picture_url('header', user.logoPic, '60') %>" alt="" data-options="defaultImg:person_60">
                 </a>
             </div>
             <div class="right">
                 <div class="comment_titleBar">
-                    <a href="<%= link_his_path(comment.uid) %>"><%= user && user.nickname %></a>
+                    <a href="<%= link_his_path(comment.uid) %>"><%= user.nickname %></a>
                     <span><% if comment.second %>在声音 <%= parse_duration comment.second %> 处<% end %>的评论</span>
                 </div>
                 <div class="comment_content"><%= puts_face(comment.content).html_safe %>

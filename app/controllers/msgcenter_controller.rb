@@ -183,7 +183,7 @@ class MsgcenterController < ApplicationController
     halt render_json({res: false, message: "", msg: '私密声音不能评论'}) unless track.is_public
 
     track_user = get_profile_user_basic_info(track.uid)
-    halt render_json({res: false, message: "", msg: "无法评论该用户的声音"}) unless track_user.nil?
+    halt render_json({res: false, message: "", msg: "无法评论该用户的声音"}) if track_user.nil?
 
     if params[:parent_id] and !params[:parent_id].empty?
       # 回复评论
