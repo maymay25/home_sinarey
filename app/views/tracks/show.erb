@@ -1,4 +1,4 @@
-<% seo_track_info = {title:@track.title,category_title:@category_title,album_title:@track.album_title,author:@track.author,nickname:@track.nickname,tags:@track.tags,intro:@track.intro,composer:@track.composer,announcer:@track.announcer} %>
+<% seo_track_info = {title:@track.title,category_title:@category_title,author:@track.author,nickname:@track_user.nickname,tags:@track.tags,intro:@track.intro,composer:@track.composer,announcer:@track.announcer} %>
 <%== erb :_seo_meta, locals: {seo_meta:{ name: "track", id: @track.id, category_id: @track.category_id, data: seo_track_info }} %> 
 <%== erb :_friendly_link, locals: {friendly_link:{  name: "track", category_name: @category_name }} %>
 
