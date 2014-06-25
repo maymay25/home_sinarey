@@ -1,0 +1,5 @@
+$("#mainbox").html('<%== escape_javascript erb(:_message_page) %>');
+
+require(["page/setting/message"], function(page){
+    page.init();
+});

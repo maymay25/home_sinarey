@@ -1,0 +1,483 @@
+class WelcomeController < ApplicationController
+
+  set :views, ['welcome','application']
+
+  def dispatch(action)
+    super(:welcome,action)
+    method(action).call
+  end
+
+  def download_page
+    erb :download,layout:false
+  end
+
+  def download_pc_page
+    redirect '/' unless @current_user && @current_user.isVerified
+    erb :download_pc,layout:false
+  end
+
+  def about_us_page
+    @this_title = "关于喜马拉雅 喜马拉雅-听我想听"
+    erb :about_us
+  end
+
+  def contact_us_page
+    @this_title = "联系我们 喜马拉雅-听我想听"
+    erb :contact_us
+  end
+
+  def official_news_page
+    @this_title = "官方新闻 喜马拉雅-听我想听"
+
+    @page = (tmp=params[:page].to_i)>0 ? tmp :1
+    @per_page = 20
+
+    @news_count = News.count
+    @news_list = News.order('time_at desc').offset((@page-1)*@per_page).limit(@per_page)
+    erb :official_news
+  end
+
+  def join_us_page
+    @this_title = "加入我们 喜马拉雅-听我想听"
+    erb :join_us
+  end
+
+  def download1_page
+    erb :download1,layout:false
+  end
+
+  def dload_page
+    erb :dload,layout:false
+  end
+
+
+  # //`` 版权 ``\\
+
+  #版权申请状态查询
+  def show_copyright
+    return redirect_to_login if @current_uid.nil?
+    @account = Account.where(uid:@current_uid).first
+    return render text:'只有合作播主才能申请版权' if @account.nil?
+
+    if params[:id]
+      #显示单个申请的状态
+      @bean = Bean.where(id:params[:id],uid:@current_uid,status:[1,2,3,4,5]).first
+      return render_404 if @bean.nil?
+      @track = Track.fetch(@bean.track_id) if @bean.track_id
+      halt erb(:show_copyright)
+    else
+      @beans = Bean.where(uid:@current_uid,status:[1,2,3,4,5]).order('id desc').page(params[:page]).per(50)
+
+      halt erb(:list_copyright)
+    end
+  end
+
+
+  #版权申请表单
+  def new_copyright
+    return redirect_to_login if @current_uid.nil?
+
+    #前提0:喜马拉雅的官方Account得先创建
+    ximalaya = Account.where(uid:0).first
+    return render text:'喜马拉雅的官方Account的记录还未创建，account.uid须设为0,请联系管理员.' if ximalaya.nil?
+
+    #前提1:必须已经拥有account记录
+    @account = Account.where(uid:@current_uid).first
+    return render text:'只有合作播主才能申请版权' if @account.nil?
+
+    #读取表单草稿
+    @bean = Bean.where(uid:@current_uid,status:7).first
+
+    #读取不到则创建初始表单草稿
+    if @bean.nil?
+      default = default_copyright_columns()
+      @bean = Bean.create(default)
+    end
+
+    @track = Track.fetch(@bean.track_id) if @bean.track_id
+
+    halt erb(:new_copyright)
+  end
+
+  #保存用户的版权申请草稿
+  def save_copyright_draft
+    return render json:{res:false} if @current_uid.nil?
+
+    account = Account.where(uid:@current_uid).first
+    return render json:{res:false,msg:'只有合作播主才能申请版权'} if account.nil?
+    return render json:{res:false,msg:'错误！参数有误'} if params[:bean_id].blank?
+
+    bean = Bean.where(uid:@current_uid,id:params[:bean_id],status:[7,8]).first
+    return render json:{res:false,msg:'错误！记录已经不存在'} if bean.nil?
+
+    temp = bean_form_columns()
+    bean.update_attributes(temp)
+    render_json({res:true}) 
+  end
+
+  #版权申请表单提交(或更新)
+  def create_copyright
+    return render json:{res:false} if @current_uid.nil?
+
+    account = Account.where(uid:@current_uid).first
+    return render json:{res:false,msg:'只有合作播主才能申请版权'} if account.nil?
+
+    return render json:{res:false,msg:'错误！参数有误，请刷新重试'} if params[:bean_id].blank?
+
+    bean = Bean.where(uid:@current_uid,id:params[:bean_id]).first
+    return render json:{res:false,msg:'错误！记录已经不存在'} if bean.nil?
+    return render json:{res:false,msg:'错误！只有待处理状态下的表单可以编辑'} if [1,7].exclude? bean.status
+
+    #DONE 验证最终表单数据的正确性
+    catch_error = catch_form_data_error()
+    return render json:{res:false}.merge(catch_error) if catch_error
+
+    #DONE 根据 bean_track_id  获取play_path_64 填入bean表
+    track = Track.fetch(params[:bean_track_id])
+    return render json:{res:false,msg:'选择的声音不存在',dom_name:'bean_track_id'} if track.nil? or track.uid!=@current_uid
+    temp = bean_form_columns()
+    temp[:track_play_path_64] = track.play_path_64
+
+    #DONE 将account_file里的记录，复制一份到bean_file 作为版权提交的附件
+    account_files = AccountFile.where(uid:@current_uid)
+    bean_account_files = {}.tap do |hash|
+      BeanFile.where(bean_id:bean.id,file_type:'2').each{|bf| hash[bf.account_file_id] = bf }
+    end
+    account_files.each do |af|
+      file_name = "acount_"+af.file_path.to_s.split('/').last
+      if bean_file = bean_account_files[af.id]
+        bean_file.update_attributes(file_name:file_name,file_path:af.file_path)
+      else
+        BeanFile.create(bean_id:bean.id,account_file_id:af.id,file_type:'2',file_name:file_name,file_path:af.file_path)
+      end
+    end
+
+    #DONE 将bean里的声音信息，复制一份到bean_file 作为版权提交的样品
+    file_name = Time.now.strftime('%H%M%S')+temp[:track_play_path_64][-10,10]
+    if bean_track_file = BeanFile.where(bean_id:bean.id,file_type:'1').first
+      bean_track_file.update_attributes(file_name:file_name,file_path:temp[:track_play_path_64])
+    else
+      BeanFile.create(bean_id:bean.id,file_type:'1',account_file_id:0,file_name:file_name,file_path:temp[:track_play_path_64])
+    end
+
+    # ------这里备份一下核对过的喜马拉雅官方资料
+    # name:'上海证大喜马拉雅网络科技有限公司',
+    # alia:'',
+    # alia_type:'本名',
+    # certificate_type:'企业法人营业执照',
+    # city:'上海',
+    # county:'浦东新',
+    # credential_number:'310115002001484',
+    # legal_type:'企业法人',
+    # is_copy:'F',
+    # nationality:'中国',
+    # province:'上海',
+    # address:'上海市浦东新区丁香路1208号2层3单元'
+
+    #ximalaya的官方信息存在Account表uid=0的记录里
+    ximalaya = Account.where(uid:0).first
+
+    #DONE 将ximalaya的附件，也复制一份到bean_file 作为版权提交的附件
+    ximalaya_files = AccountFile.where(uid:ximalaya.uid)
+    bean_account_files = {}.tap do |hash|
+      BeanFile.where(bean_id:bean.id).each{|bf| hash[bf.account_file_id] = bf }
+    end
+    ximalaya_files.each do |xf|
+      file_name = "ximalaya_"+xf.file_path.to_s.split('/').last
+      if bean_file = bean_account_files[xf.id]
+        bean_file.update_attributes(file_type:'2',file_name:file_name,file_path:xf.file_path)
+      else
+        BeanFile.create(bean_id:bean.id,account_file_id:xf.id,file_type:'2',file_name:file_name,file_path:xf.file_path)
+      end
+    end
+
+    #DONE 删除bean相关的 applicant,author,copy_right_owner 避免重复
+    Applicant.where(bean_id:bean.id).delete_all
+    Author.where(bean_id:bean.id).delete_all
+    CopyrightOwner.where(bean_id:bean.id).delete_all
+
+    #DONE 创建当前用户的applicant,author,copy_right_owner记录
+    aplt = Applicant.create( bean_id:bean.id,
+        name:account.name,
+        appliciant_address:params[:appliciant_address],
+        appliciant_cellphone:params[:appliciant_cellphone],
+        appliciant_contact:params[:appliciant_contact],
+        appliciant_email:params[:appliciant_email],
+        appliciant_fax:params[:appliciant_fax],
+        appliciant_zip_code:params[:appliciant_zip_code],
+        tel:params[:appliciant_tel] )
+    Author.create( bean_id:bean.id,
+        author_name:account.name,
+        author_sign:account.alia,
+        works_sign_type:account.alia_type )
+    CopyrightOwner.create( bean_id:bean.id,
+        name:account.name,
+        alia:account.alia,
+        alia_type:account.alia_type,
+        certificate_type:account.certificate_type,
+        city:account.city,
+        county:account.county,
+        credential_number:account.credential_number,
+        is_copy:'S',
+        legal_type:account.legal_type,
+        nationality:account.nationality,
+        province:account.province )
+
+    #DONE 创建ximalaya的applicant,author,copy_right_owner记录
+    #ximalaya'申请人'的邮编、联系人、联系电话、邮箱、手机号、传真号都用播主的资料
+    Applicant.create( bean_id:bean.id,
+        name:ximalaya.name,
+        appliciant_address:ximalaya.address,
+        appliciant_cellphone:aplt.appliciant_cellphone,
+        appliciant_contact:aplt.appliciant_contact,
+        appliciant_email:aplt.appliciant_email,
+        appliciant_fax:aplt.appliciant_fax,
+        appliciant_zip_code:aplt.appliciant_zip_code,
+        tel:aplt.tel )
+    Author.create( bean_id:bean.id,
+        author_name:ximalaya.name,
+        author_sign:ximalaya.alia,
+        works_sign_type:ximalaya.alia_type )
+    CopyrightOwner.create( bean_id:bean.id,
+        name:ximalaya.name,
+        alia:ximalaya.alia,
+        alia_type:ximalaya.alia_type,
+        certificate_type:ximalaya.certificate_type,
+        city:ximalaya.city,
+        county:ximalaya.county,
+        credential_number:ximalaya.credential_number,
+        is_copy:'F', #跟运营确认后设成F
+        legal_type:ximalaya.legal_type,
+        nationality:ximalaya.nationality,
+        province:ximalaya.province )
+
+    #DONE 拼凑 填入bean表
+    #作品申请书 applybook
+    str = "<p style='text-align: center; font-size: 18px;'>作品自愿登记</p>"
+    str += "<p style='text-align: center;'><strong style='font-size: 26px;'>申&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 请&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 书</strong></p>"
+    str += "<p><strong style='font-size: 18px;'>上海市版权局：</strong></p>"
+    str += "<p style='text-indent:2em;'>由 #{account.name} 创作于 #{temp[:completion_date]} 的作品 #{temp[:work_name]} 属合作创作，经协议约定，版权依法归属双方共有，特此向贵局提出作品自愿登记申请，望批准。</p>"
+    str += "<p>&nbsp;</p>"
+    str += "<p style='text-align: right;'><strong style='font-size: 18px;'>申请人签章：#{account.name},#{ximalaya.name}</strong></p>"
+    str += "<p style='text-align: right;'><strong style='font-size: 18px;'>#{Time.now.strftime('%y年%m月%d日')}</strong></p>"
+    temp[:applybook] = str
+
+    #权力保证书 guarantee_right
+    str = "<p style='text-align: center; font-size: 18px;'>作品自愿登记</p>"
+    str += "<p style='text-align: center;'><strong style='font-size: 26px;'>权&nbsp;利&nbsp;保&nbsp;证&nbsp;书</strong></p>"
+    str += "<p>&nbsp;</p>"
+    str += "<p>本人（单位）保证所申请登记的如下作品（制品）的权利归本人（单位）所有，保证提交的文件真实、合法。如有不实，本人愿承担一切法律责任。</p>"
+    str += "<p>&nbsp;</p>"
+    str += "<p>作品（制品）名称：#{temp[:work_name]}</p>"
+    str += "<p>&nbsp;</p>"
+    str += "<p>&特此保证。</p>"
+    str += "<p>&nbsp;</p>"
+    str += "<p>申请人（签章）：#{account.name},#{ximalaya.name}</p>"
+    str += "<p>&nbsp;</p>"
+    str += "<p style='text-align: right;'><strong style='font-size: 18px;'>#{Time.now.strftime('%y年%m月%d日')}</strong></p>"
+    temp[:guarantee_right] = str
+
+    #作品说明书 manu_work
+    str = "<p style='text-align: center; font-size: 18px;'>作品自愿登记</p>"
+    str += "<p style='text-align: center; font-size: 26px;'><strong>作&nbsp;品&nbsp;说&nbsp;明&nbsp;书</strong></p>"
+    str += "<p><strong style='font-size: 18px;'>上海市版权局：</strong></p>"
+    str += "<p>设计理念：#{temp[:design_concept]}</p>"
+    str += "<p>主要特征描述：#{temp[:feature_desc]}</p>"
+    str += "<p>&nbsp;</p>"
+    str += "<p>创作人：#{account.name}</p>"
+    str += "<p>创作过程描述：#{temp[:process_desc]}</p>"
+    str += "<p>作品用途：#{temp[:purpose]}</p>"
+    str += "<p>&nbsp;</p>"
+    str += "<p style='text-align: right;'><strong style='font-size: 18px;'>著作权人签章：#{account.name},#{ximalaya.name}</strong></p>"
+    str += "<p style='text-align: right;'><strong style='font-size: 18px;'>#{Time.now.strftime('%y年%m月%d日')}</strong></p>"
+    temp[:manu_work] = str
+
+
+    # authors --- 作者名，若多个作者，英文逗号隔开
+    temp[:authors] = "#{account.name},#{ximalaya.name}"
+
+    # copyrights --- 著作权人，若多个著作权人，英文逗号隔开
+    temp[:copyrights] = "#{account.name},#{ximalaya.name}"
+
+    #DONE 更改草稿状态为待处理
+    temp[:status] = 1 if bean.status==7
+
+    bean.update_attributes(temp)
+
+    render_json({res:true,msg:'提交成功',bean_id:bean.id})
+  end
+
+  #取消版权申请
+  def cancel_copyright
+    return render json:{res:false} if @current_uid.nil?
+    if bean = Bean.where(uid:@current_uid,id:params[:bean_id],status:[1,7]).first
+      bean.update_attributes(status:6)
+    end
+    render_json({res:true})
+  end
+
+  #编辑版权申请表单 (只在待处理状态,错误状态下有效)
+  def edit_copyright
+    return render json:{res:false} if @current_uid.nil?
+
+    return redirect_to_copyright_list if params[:id].blank?
+
+    ximalaya = Account.where(uid:0).first
+    return render text:'喜马拉雅的官方Account的记录还未创建，account.uid须设为0,请联系管理员.' if ximalaya.nil?
+
+    @account = Account.where(uid:@current_uid).first
+    return render text: '只有合作播主才能申请版权' if @account.nil?
+
+    @bean = Bean.where(uid:@current_uid,id:params[:id]).first
+    return redirect_to_copyright_list if @bean.nil?
+    return redirect_to_copyright_list if ![1,8].include?(@bean.status)
+
+    @track = TrackInRecord.fetch(@bean.track_id) if @bean.track_id
+
+    @edit_flag = true
+
+    erb :new_copyright
+  end
+
+
+  #跳转到版权列表页
+  def redirect_to_copyright_list
+    redirect '/copyright/show'
+  end
+
+  #版权记录的默认值
+  def default_copyright_columns
+      columns = {
+        apply_type:'0', #由著作权人申请
+        work_type:'S', #录音制品
+        work_type_desc:'',
+        produce_type:'原创', #作品创作性质
+        produce_type_desc:'',
+        electronic_media:'DVD-ROM', #电子介质
+        electronic_media_num:'1',
+        papger_media:'',
+        papger_media_num:'',
+        is_need_water_mark:'0', #不需要水印
+        is_test:'F', #设置为正式环境
+        completion_nation:'中国', # 创作完成国家
+        is_published:'02', #已发表
+        published_nationality:'中国', #发表国家
+        power_obtain_way:'原始', #权利取得方式
+        power_obtain_desc:'',
+        power_own_type:'ALL', #权利携有状况
+        power_own_type_detail:'',
+        power_own_desc:'',
+        work_station_name:11, #版权中心
+        power_belong_way:'合作作品',
+        power_belong_desc:'',
+        uid:@current_uid,
+        status:7 #草稿状态
+      }
+  end
+
+  #用户填写的版权表单字段
+  def bean_form_columns
+    form_columns = {
+      work_name:params[:bean_work_name],
+      track_id:params[:bean_track_id],
+      completion_date:params[:bean_completion_date],
+      completion_city:params[:bean_completion_city],
+      published_date:params[:bean_published_date],
+      published_city:params[:bean_published_city],
+      design_concept:params[:bean_design_concept],
+      feature_desc:params[:bean_feature_desc],
+      process_desc:params[:bean_process_desc],
+      purpose:params[:bean_purpose]
+    }
+    form_columns.delete_if{|key,value|value.nil?}
+    form_columns
+  end
+
+  def catch_form_data_error
+    #申请人信息
+    return {dom_name:'appliciant_address',msg:'通信地址未填'} if params[:appliciant_address].blank?
+    return {dom_name:'appliciant_zip_code',msg:'邮政编码未填'} if params[:appliciant_zip_code].blank?
+    return {dom_name:'appliciant_contact',msg:'联系人未填'} if params[:appliciant_contact].blank?
+    return {dom_name:'appliciant_tel',msg:'联系电话未填'} if params[:appliciant_tel].blank?
+
+    #版权表单
+    return {dom_name:'bean_work_name',msg:'作品名称未填'} if params[:bean_work_name].blank?
+    return {dom_name:'bean_work_name',msg:'作品名称太长，不能多于64字符(32汉字)'} if str_is_longer_than(params[:bean_work_name],32)
+    return {dom_name:'bean_track_id',msg:'未选择声音'} if params[:bean_track_id].blank?
+    return {dom_name:'bean_completion_date',msg:'创作完成日期未填'} if params[:bean_completion_date].blank?
+    return {dom_name:'bean_completion_date',msg:'创作完成日期格式有误'} if params[:bean_completion_date]!=params[:bean_completion_date].match(/\A[0-9]{4}-[0-9]{2}-[0-9]{2}\z/).to_s
+    return {dom_name:'bean_completion_city',msg:'创作完成点点未选城市'} if params[:bean_completion_city].blank?
+    return {dom_name:'bean_published_date',msg:'首次发表时间未填'} if params[:bean_published_date].blank?
+    return {dom_name:'bean_published_date',msg:'首次发表时间格式有误'} if params[:bean_published_date]!=params[:bean_published_date].match(/\A[0-9]{4}-[0-9]{2}-[0-9]{2}\z/).to_s
+    return {dom_name:'bean_published_city',msg:'首次发表地点未选城市'} if params[:bean_published_city].blank?
+    return {dom_name:'bean_design_concept',msg:'设计理念未填'} if params[:bean_design_concept].blank?
+    return {dom_name:'bean_feature_desc',msg:'主要特征描述未填'} if params[:bean_feature_desc].blank?
+    return {dom_name:'bean_process_desc',msg:'创作过程描述未填'} if params[:bean_process_desc].blank?
+    return {dom_name:'bean_purpose',msg:'作品用途未填'} if params[:bean_purpose].blank?
+    return nil
+  end
+
+
+  def str_is_longer_than(str,sum)
+    if str.length > sum and str.bytesize > 2*sum
+      return true
+    else
+      return false
+    end
+  end
+
+  def str_not_longer_than(str,sum)
+    if str.length <= sum or str.bytesize <= 2*sum
+      return true
+    else
+      return false
+    end
+  end
+
+  # \\.. 版权 ..//
+
+
+
+  def silian_sound
+    now = Time.new
+    today = Time.new(now.year, now.mon, now.day)
+    deads = DeadTrack.where('created_at >= ? and created_at < ?', today, today + 86400)
+    deads.map{|dead| "#{request.protocol}#{request.host_with_port}/#{dead.uid}/sounsilian_soundd/#{dead.track_id}" }.join("\n")
+  end
+
+  def silian_album
+    now = Time.new
+    today = Time.new(now.year, now.mon, now.day)
+    deads = DeadAlbum.where('created_at >= ? and created_at < ?', today, today + 86400)
+    deads.map{|dead| "#{request.protocol}#{request.host_with_port}/#{dead.uid}/album/#{dead.album_id}" }.join("\n")
+  end
+
+  def silian_user
+    now = Time.new
+    today = Time.new(now.year, now.mon, now.day)
+    deads = DeadUser.where('created_at >= ? and created_at < ?', today, today + 86400)
+    deads.map{|dead| "#{request.protocol}#{request.host_with_port}/#{dead.uid}" }.join("\n")
+  end
+
+  def cache_file
+    #File.read("#{Sinarey.root}/app/views/welcome/cache_page.erb")
+    IO.read("#{Sinarey.root}/app/views/welcome/cache_page.erb")
+  end
+
+  def cache_nil
+    erb :cache_page,layout:false
+  end
+
+  def cache_redis
+    CMSREDIS.get(:home_sinarey_cache)
+  end
+
+  def set_redis_cache
+    CMSREDIS.set(:home_sinarey_cache,File.read("#{Sinarey.root}/app/views/welcome/cache_page.erb"))
+  end
+
+  def del_redis_cache
+    CMSREDIS.del(:home_sinarey_cache)
+  end
+
+end

@@ -1,0 +1,30 @@
+  <div class="register-tip fixed_bottom">
+    <div class="register-tip-bg">          
+    </div>
+    <div class="register-tip-con">
+      <div class="register-tip-wrap">
+        <a class="register-tip-video"></a>
+        <div class="register-tip-txt">
+          <ul class="content digit-container"  id="user_digit" data-digit="0">
+            <li class="digit-warp"><a class="digit">-</a></li>
+          </ul>
+          <span class="content">位优质播主，</span>
+          <ul class="content digit-container" id="voice_digit" data-digit="0">
+            <li class="digit-warp"><a class="digit">-</a></li>
+          </ul>
+          <span class="content">条好声音，</span>
+          <br>
+          <div>
+            新闻资讯、小说曲艺、养生幼教、培训财经应有尽有！
+          </div>
+        </div>
+        <div class="register-tip-panel">
+          快速登录:
+          <a class="sinaLogBtn" data-baidu="home_join" href="javascript:;" title="新浪微博登录"></a>
+          <a class="qqLogBtn" data-baidu="home_join" href="javascript:;" title="QQ登录"></a>
+          <a class="renrenLogBtn" data-baidu="home_join" href="javascript:;" title="人人网登录"></a>
+        </div>
+        <a href="javascript:;" title="隐藏" class="register-tip-btn2"></a>
+      </div>
+    </div>
+  </div>

@@ -1,0 +1,12 @@
+# Logfile created on 2014-06-19 14:52:07 +0800 by logger.rb/41954
+2014-06-19 14:52:07 | _200_ | 176ms | 127.0.0.1 | POST | http://local.ximalaya.com/notices
+2014-06-19 14:52:25 | _200_ | 35 ms | 127.0.0.1 | POST | http://local.ximalaya.com/notices
+2014-06-19 14:53:55 | _500_ | 21 ms | 127.0.0.1 | GET  | http://local.ximalaya.com
+2014-06-19 14:53:55 | _404_ | 219ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-19 14:53:55 | _404_ | 74 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/favicon.ico
+2014-06-19 14:54:10 | _200_ | 136ms | 127.0.0.1 | GET  | http://local.ximalaya.com
+2014-06-19 14:54:12 | _200_ | 1107ms | 127.0.0.1 | GET  | http://local.ximalaya.com/18/feed.ajax
+2014-06-19 14:54:13 | _200_ | 231ms | 127.0.0.1 | GET  | http://local.ximalaya.com/following_groups
+2014-06-19 14:54:16 | _200_ | 210ms | 127.0.0.1 | GET  | http://local.ximalaya.com/sounds/188171/expend_box
+2014-06-19 14:54:17 | _200_ | 150ms | 127.0.0.1 | GET  | http://local.ximalaya.com/track_blocks/avatars?track_ids=188171
+2014-06-19 14:54:17 | _200_ | 62 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/tracks/188171.json

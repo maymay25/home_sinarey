@@ -1,0 +1,5 @@
+$("#mainbox").html('<%== escape_javascript erb(:_notice_page) %>');
+
+require(['page/message/notice'], function(page) {
+    page.init();
+});

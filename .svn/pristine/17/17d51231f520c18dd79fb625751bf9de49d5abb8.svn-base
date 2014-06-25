@@ -1,0 +1,30 @@
+<% seo_album_info = {title:@album.title,category_title:@category_title,tags:@album.tags,intro:@album.intro} %>
+
+<%== erb :_seo_meta, locals: {seo_meta:{ name: "album", id: @album.id, category_id: @album.category_id, data: seo_album_info }} %> 
+<%== erb :_friendly_link, locals: {friendly_link:{ name: "album", category_name: @category_name }} %>
+
+<%== erb :_show %>
+
+<% content_for :script_own do  %>
+
+  <script type="text/javascript">
+
+    require(["page/final/final_album"], function(page){
+        page.init();
+    });
+
+  </script>
+
+  <script type="text/javascript">
+    var bds_config = {'snsKey':{'tsina':'1371363673','tqq':'100261563','renren':'4aca8c00f63648208a0c9dd5ca74d348'},'bdDesc':'喜马拉雅好声音','bdText':"我觉得《<%== escape_javascript @album.title %>》听起来挺不错的，你觉得呢？（分享自 @喜马拉雅好声音 ）"};
+    if(document.getElementById("bdshell_js"))document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + new Date().getHours();
+  </script>
+
+<% end %>
+
+
+<% if !@album.is_v %>
+  <% content_for :head do  %>
+    <meta name="robots" content="nofollow" />
+  <% end %>
+<% end %>

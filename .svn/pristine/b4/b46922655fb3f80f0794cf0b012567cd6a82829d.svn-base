@@ -1,0 +1,136 @@
+<div id="msgLetterDetail" class="mainbox_wrapper">
+    <div class="mainbox_left">
+        <div class="msg_container">
+            <div class="msg_header">
+                <span class="title">消息中心</span>
+                <ul class="nav_list">
+                    <li class="nav_item">
+                        <a href="<%= link_path "/msgcenter/notice" %>">系统通知</a>
+                    </li>
+                    <li class="nav_item">
+                        <a href="<%= link_path "/msgcenter/referme" %>">@我的</a>
+                    </li>
+                    <li class="nav_item">
+                        <a href="<%= link_path "/msgcenter/comment" %>">评论</a>
+                    </li>
+                    <li class="nav_item on">
+                        <a href="javascript:;">私信</a>
+                    </li>
+                    <li class="nav_item">
+                        <a href="<%= link_path "/msgcenter/like" %>">赞</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="msg_body">
+                <div class="msg_body_top">
+                    <div class="left">
+                        <span class="title">私信</span>
+                        <span class="count"></span>
+                    </div>
+                </div>
+                <div class="msg_list_wrap">
+                    <div class="letter_list_header">
+                        <div class="left"><a href="<%= link_path "/msgcenter/letter" %>">返回所有私信</a>&gt;共<span id="message_count"><%= @chats.count %></span>条私信</div>
+                    </div>
+                    <div class="letter_send">
+                        <div class="content_wrap_left">
+                            <div class="picture">
+                                <img src="<%= picture_url('header', @current_user.logoPic, '60') %>">
+                            </div>
+                            <div class="detail">
+                                <div class="detail_letter">
+                                    <div class="others_letter">
+                                        <div class="letter_content">
+                                            <textarea class="letter_input"></textarea>
+                                            <span class="arrow_left"></span>
+                                        </div>
+                                    </div>
+                                    <div class="detail_bottom">
+                                        <div class="left"><span class="message_icon">发私信给<%= @with_user.nickname %></span></div>
+                                        <div class="right">
+                                            <span class="charCount">还剩<em>145</em>字</span>
+                                            <a class="faceBtn" href="javascript:;"></a>
+                                            <a class="submitBtn" href="javascript:;" data-options="nickname:'<%= @with_user.nickname %>'"><span>发送</span></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="letter_del_all">                            
+                        <div class="btn_wrap">
+                            <span class="btn_del">批量删除</span>
+                        </div>
+                        <div class="btn_wrap cancel">
+                            取消
+                        </div>
+                        <div class="btn_wrap confirm">
+                            <span class="btn_del">确认删除</span>
+                        </div>
+                    </div>
+
+                    <ul class="letter_detail_list">
+                        <% @chats.each do |chat| %>
+                        <% if chat.is_in %>
+                        <li class="letter_detail_item">
+                            <div class="content_wrap_right">
+                                <div class="picture">
+                                    <a href="<%= link_his_path(chat.with_uid) %>">
+                                        <img card="<%= @with_user.uid %>" alt="<%= @with_user.nickname %>" src="<%= @with_user.uid==2 ? static_url('/css/img/common/laya_86.jpg') : picture_url('header', @with_user.logoPic, '60') %>" data-options="defaultImg:person_60">
+                                    </a>
+                                </div>
+                                <div class="detail">
+                                    <div class="detail_letter">
+                                        <div class="others_letter">
+                                            <div class="letter_content">
+                                                <input type="checkbox" value="<%= chat.id %>" />
+                                                <div>
+                                                    <%== simple_format(puts_face(chat.content)) %>
+                                                </div>
+                                                <div class="pubdate"><%= parse_time_until_now(chat.created_at) %></div>
+                                                <span class="arrow_right"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <% else %>
+                        <li class="letter_detail_item">
+                            <div class="content_wrap_left">
+                                <div class="picture">
+                                    <img alt="<%= @current_user.nickname %>" src="<%= picture_url('header', @current_user.logoPic, '60') %>" data-options="defaultImg:person_60">
+                                </div>
+                                <div class="detail">
+                                    <div class="detail_letter">
+                                        <div class="others_letter">
+                                            <div class="letter_content">
+                                                <input type="checkbox" value="<%= chat.id %>">
+                                                <div>
+                                                    <%== simple_format(puts_face(chat.content)) %>
+                                                </div>
+                                                <div class="pubdate"><%= parse_time_until_now(chat.created_at) %></div>
+                                                <span class="arrow_left"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <% end %>
+                        <% end %>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="mainbox_right">
+        <div class="msg_helper">
+            <div class="msg_header_title">私信小帮助</div>
+            <div class="question">不想让陌生人发信骚扰？</div>
+            <div class="answer">去<a href="/#/personal_settings/privacy">隐私设置</a>进行隐私权限设置</div>
+        </div>
+    </div>
+</div>

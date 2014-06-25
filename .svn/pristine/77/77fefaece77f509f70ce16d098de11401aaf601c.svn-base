@@ -1,0 +1,84 @@
+# Logfile created on 2014-05-21 14:16:48 +0800 by logger.rb/41954
+I, [2014-05-21T14:16:48.575105 #3724]  INFO -- : 2014-05-21 14:16:48 +0800 1,测试群发私信,18,0}
+I, [2014-05-21T14:16:57.607008 #3724]  INFO -- : 2014-05-21 14:16:57 +0800 1,测试群发私信,18,0}
+I, [2014-05-21T14:18:27.349981 #3724]  INFO -- : 2014-05-21 14:18:27 +0800 1,测试群发私信,18,0}
+I, [2014-05-21T14:18:29.110157 #3724]  INFO -- : 2014-05-21 14:18:29 +0800 1,测试群发私信,18,0}
+I, [2014-05-21T14:18:29.338180 #3724]  INFO -- : 2014-05-21 14:18:29 +0800 1,测试群发私信,18,0}
+I, [2014-05-21T14:18:51.576404 #3724]  INFO -- : 2014-05-21 14:18:51 +0800 1,测试群发私信,18,0}
+I, [2014-05-21T14:18:51.593405 #3724]  INFO -- : 2014-05-21 14:18:51 +0800 1,测试群发私信,18,0}
+E, [2014-05-21T14:21:25.759821 #3724] ERROR -- : 2014-05-21 14:21:25 +0800 NoMethodError: undefined method `get_badge' for #<MessagesSendWorker:0x73789b0 @jid="2d1a2c19b178f329e49bb780"> 
+ d:/apps/home_sinarey/app/workers/methods/messages_send_worker_methods.rb:104:in `block in messages_send'
+d:/apps/home_sinarey/app/workers/methods/messages_send_worker_methods.rb:58:in `each'
+d:/apps/home_sinarey/app/workers/methods/messages_send_worker_methods.rb:58:in `messages_send'
+d:/apps/home_sinarey/app/workers/methods/messages_send_worker_methods.rb:4:in `call'
+d:/apps/home_sinarey/app/workers/methods/messages_send_worker_methods.rb:4:in `perform'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/processor.rb:52:in `block (2 levels) in process'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:122:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:122:in `block in invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/server/active_record.rb:6:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:124:in `block in invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/server/retry_jobs.rb:62:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:124:in `block in invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/server/logging.rb:11:in `block in call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/logging.rb:22:in `with_context'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/server/logging.rb:7:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:124:in `block in invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:127:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:127:in `invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/processor.rb:51:in `block in process'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/processor.rb:94:in `stats'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/processor.rb:50:in `process'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/calls.rb:25:in `public_send'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/calls.rb:25:in `dispatch'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/calls.rb:122:in `dispatch'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/actor.rb:322:in `block in handle_message'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/actor.rb:416:in `block in task'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/tasks.rb:55:in `block in initialize'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/tasks/task_fiber.rb:13:in `block in create'
+E, [2014-05-21T14:21:25.820827 #3724] ERROR -- : 2014-05-21 14:21:25 +0800 NoMethodError: undefined method `get_badge' for #<MessagesSendWorker:0x7441d10 @jid="e0d8fd09d9bef03f50b94693"> 
+ d:/apps/home_sinarey/app/workers/methods/messages_send_worker_methods.rb:104:in `block in messages_send'
+d:/apps/home_sinarey/app/workers/methods/messages_send_worker_methods.rb:58:in `each'
+d:/apps/home_sinarey/app/workers/methods/messages_send_worker_methods.rb:58:in `messages_send'
+d:/apps/home_sinarey/app/workers/methods/messages_send_worker_methods.rb:4:in `call'
+d:/apps/home_sinarey/app/workers/methods/messages_send_worker_methods.rb:4:in `perform'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/processor.rb:52:in `block (2 levels) in process'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:122:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:122:in `block in invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/server/active_record.rb:6:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:124:in `block in invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/server/retry_jobs.rb:62:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:124:in `block in invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/server/logging.rb:11:in `block in call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/logging.rb:22:in `with_context'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/server/logging.rb:7:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:124:in `block in invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:127:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:127:in `invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/processor.rb:51:in `block in process'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/processor.rb:94:in `stats'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/processor.rb:50:in `process'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/calls.rb:25:in `public_send'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/calls.rb:25:in `dispatch'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/calls.rb:122:in `dispatch'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/actor.rb:322:in `block in handle_message'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/actor.rb:416:in `block in task'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/tasks.rb:55:in `block in initialize'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/tasks/task_fiber.rb:13:in `block in create'
+I, [2014-05-21T14:31:55.933832 #6708]  INFO -- : 2014-05-21 14:31:55 +0800 18 pushed
+I, [2014-05-21T14:31:55.934832 #6708]  INFO -- : 2014-05-21 14:31:55 +0800 18 pushed
+I, [2014-05-21T14:31:56.071845 #6708]  INFO -- : 2014-05-21 14:31:56 +0800 19 pushed
+I, [2014-05-21T14:31:56.072846 #6708]  INFO -- : 2014-05-21 14:31:56 +0800 19 pushed
+I, [2014-05-21T14:31:56.178856 #6708]  INFO -- : 2014-05-21 14:31:56 +0800 20 pushed
+I, [2014-05-21T14:31:56.178856 #6708]  INFO -- : 2014-05-21 14:31:56 +0800 2,测试群发私信--选人,18,3}
+I, [2014-05-21T14:31:56.180856 #6708]  INFO -- : 2014-05-21 14:31:56 +0800 20 pushed
+I, [2014-05-21T14:31:56.180856 #6708]  INFO -- : 2014-05-21 14:31:56 +0800 2,测试群发私信--选人,18,3}
+I, [2014-05-21T14:31:58.515090 #6708]  INFO -- : 2014-05-21 14:31:58 +0800 18 pushed
+I, [2014-05-21T14:31:58.575096 #6708]  INFO -- : 2014-05-21 14:31:58 +0800 19 pushed
+I, [2014-05-21T14:31:58.576096 #6708]  INFO -- : 2014-05-21 14:31:58 +0800 18 pushed
+I, [2014-05-21T14:31:58.691107 #6708]  INFO -- : 2014-05-21 14:31:58 +0800 20 pushed
+I, [2014-05-21T14:31:58.691107 #6708]  INFO -- : 2014-05-21 14:31:58 +0800 2,测试群发私信--选人,18,3}
+I, [2014-05-21T14:31:58.694108 #6708]  INFO -- : 2014-05-21 14:31:58 +0800 19 pushed
+I, [2014-05-21T14:31:58.791117 #6708]  INFO -- : 2014-05-21 14:31:58 +0800 20 pushed
+I, [2014-05-21T14:31:58.791117 #6708]  INFO -- : 2014-05-21 14:31:58 +0800 2,测试群发私信--选人,18,3}
+I, [2014-05-21T14:34:27.518989 #6708]  INFO -- : 2014-05-21 14:34:27 +0800 3,测试群发私信--全体非机器人主播,18,0}
+I, [2014-05-21T14:34:27.518989 #6708]  INFO -- : 2014-05-21 14:34:27 +0800 3,测试群发私信--全体非机器人主播,18,0}

@@ -1,0 +1,28 @@
+
+<%== erb :_seo_meta, locals: {seo_meta:{ name: "user", id: params[:uid], data: @u, custom: "user_tracks" }} %> 
+<%== erb :_friendly_link, locals: {friendly_link:{ name: "user", uid: params[:uid] }} %>
+
+<%== erb :_sound_page %>
+
+<% content_for :script_own do  %>
+<script type="text/javascript">
+  require(["page/center/sound"], function(page){
+      page.init();
+  });
+
+  if(document.getElementById("bdshell_js")){
+    document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + new Date().getHours();
+  }
+
+  if(window.bdShare){
+    bdShare.fn.init();
+  }
+
+</script>
+<% end %>
+
+<% if !@u.isVerified %>
+  <% content_for :head do  %>
+    <meta name="robots" content="nofollow" />
+  <% end %>
+<% end %>

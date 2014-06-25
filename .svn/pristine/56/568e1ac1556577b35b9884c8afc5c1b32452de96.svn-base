@@ -1,0 +1,13 @@
+<% codeid = SecureRandom.uuid %>
+<tr class="" id="tr_validcode">
+    <td class="vAlign_top" style="padding-top:8px;">验证码<em>*</em></td>
+    <td colspan="2" style="vertical-align:top;height:63px;" class="">
+        <input type="text" name="validcode" class="input150">
+        <input type="hidden" name="codeid" value="<%= codeid %>" />
+        <img id="img_validcode" src="<%= File.join(Settings.check_outer_root, "/getcode?codeId=#{codeid}") %>" style="width:97px;height:35px;margin-left:3px; ">
+        <span style="display:inline-block;vertical-align:top;">
+            <span class="c01"></span>
+            <br/><a id="btn_validcode" href="javascript:;"><u>看不清，换一张</u></a>
+        </span>
+    </td>
+</tr>

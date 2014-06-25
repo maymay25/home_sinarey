@@ -1,0 +1,413 @@
+<!--录制信息 start-->        
+<div id="record_info">
+    <div class="conInfo">
+        <div class="conWrap">
+            <div class="conMain conMain_add_img">
+                <form autocomplete="off" action="/edit_track/<%= @track.id %>/update" method="post">
+
+                    <div id="info_table_warp">
+                        <div class="infoTit">
+                            <h3 class="h_info" id="voice_info_title">编辑声音</h3>
+                        </div>
+                        <div class="tbInfo">
+                            <div class="dv-phone">
+                                <img src="<%= picture_url('track', @track.cover_path, '100') %>" />
+                            </div>
+                            <table  cellspacing="20">
+                                <tbody>
+                                    <tr>
+                                        <td class="vAlign_top">
+                                            标题
+                                            <em>*</em>
+                                        </td>
+                                        <td colspan="2">
+                                            <input value="<%= @track.title %>" name="title" type="text" class="inputW1" id="title">    
+                                            <br/>
+                                            <span class="c01 tip">标题不要超过40个字哦</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="vAlign_top">图片</td>
+                                        <td colspan="2">
+                                            <div id="imageWrap">
+
+                                                <div class="imgBox2" style="<%= "display:none;" if @track_pictures.length>0 or (@track.cover_path and @track.cover_path!="") %>">
+                                                    <div class="imgItem">
+                                                        <img alt="<%= @track.title %>" src="<%= static_url 'css/img/common/track_100.jpg' %>">
+                                                        <input type="hidden" name="image">
+                                                        <div class="imgLoading"></div>
+                                                    </div>
+                                                </div>
+
+                                                <div id="soundImgBox">
+                                                    <% @track_pictures.each_with_index do |track_picture,index| %>
+                                                    <div class="imgBox <%= "is-fenmian" if index==0 %>" image_id="<%= track_picture.id %>" src640="<%= picture_url('track',track_picture.picture_path,'640') %>" src="<%= picture_url('track',track_picture.picture_path,'100') %>">
+                                                        <a class="del"></a>
+                                                        <div class="imgItem">
+                                                            <img src="<%= picture_url('track',track_picture.picture_path,'100') %>">
+                                                            <input type="hidden" name="image[]" value="<%= track_picture.id %>">
+                                                            <div class="imgLoading"></div>
+                                                        </div>
+                                                        <div class="setfenmian">设为封面</div>
+                                                        <div class="isfenmian"></div>
+                                                    </div>
+                                                    <% end %>
+
+                                                    <% if @track_pictures.length==0 and @track.cover_path and @track.cover_path!="" %>
+                                                        <div class="imgBox is-fenmian" image_id="0" src640="<%= picture_url('track',@track.cover_path,'640') %>" src="<%= picture_url('track',@track.cover_path,'100') %>">
+                                                            <a class="del"></a>
+                                                            <div class="imgItem">
+                                                                <img src="<%= picture_url('track',@track.cover_path,'100') %>">
+                                                                <input type="hidden" name="image[]" value="0">
+                                                                <div class="imgLoading"></div>
+                                                            </div>
+                                                            <div class="setfenmian">设为封面</div>
+                                                            <div class="isfenmian"></div>
+                                                        </div>
+                                                    <% end %>
+
+                                                </div>
+                                                <input type="hidden" name="destroy_images" value="">
+                                            </div>
+                                            <a class="uploadPicBtn" id="uploadPicBtn" href="javascript:;">上传图片</a>
+                                            <br>    
+                                            <span class="c01 sound-image-tips">亲，注意要上传大图哦~~ 文件大小&lt;3M,尺寸最好&gt;500X500。最多支持四张图片</span>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="vAlign_top">简介</td>
+                                        <td colspan="2">
+                                            <input id="description" type="hidden" name="intro" value="<%= @track.intro %>">    
+                                            <input type="hidden" name="intro_images" value="">  
+                                            <textarea id="" rows="10" cols="30" name="rich_intro"><%= @rich_intro %></textarea>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            来源
+                                        </td>
+                                        <td colspan="2">
+                                          <% case @track.user_source when 1 %>
+                                            原创<input type="hidden" value="1" class="input150" id="origin"></input>
+                                          <% when 2 %>
+                                            采集<input type="hidden" value="2" class="input150" id="origin"></input>
+                                          <% end %>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            类型
+                                            <em>*</em>
+                                        </td>
+                                        <td colspan="2">
+                                            <div id="genre" class="selecter selecter-s5 ">
+                                                <input type="hidden" name="categories" value="<%= @category.id %>"/>
+                                                <div class="selecter-selected" data-value="<%= @category.id %>">
+                                                    <span class="selecter-text"><%= @category.title %></span>
+                                                    <em class="selecter-arrow">◆</em>
+                                                </div>
+                                                <div class="selecter-options">
+                                                    <ul>
+                                                        <% CHOOSE_CATEGORIES.each do |c| %>    
+                                                        <li class="selecter-item" data-value="<%= c.id %>">
+                                                            <%= c.title %>
+                                                        </li>
+                                                        <% end %>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div id="genre_sub" class="selecter selecter-s5">
+                                                <input type="hidden" name="categories_music" value="<%= @track.music_category.blank? ? '未设置' : @track.music_category %>"/>
+                                                <div class="selecter-selected" data-value="<%= @track.music_category.blank? ? '未设置' : @track.music_category %>">
+                                                    <span class="selecter-text">
+                                                        <%= @track.music_category.blank? ? '未设置' : @track.music_category %>
+                                                    </span>
+                                                    <em class="selecter-arrow">◆</em>
+                                                </div>
+                                                <div class="selecter-options">
+                                                    <ul>
+                                                        <% MUSIC_CATEGORIES.each do |title| %>    
+                                                        <li class="selecter-item" data-value="<%= title %>">
+                                                            <%= title %>
+                                                        </li>
+                                                        <% end %>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <span class="c01">该信息必填</span>
+                                        </td>
+                                    </tr>
+  
+                                    <tr>
+                                      <td>声音标签</td>
+                                        <td colspan="2">
+                                            <div class="tagBtnList">
+                                                <% @track.tags.split(",").each do |tag| %>
+                                                <a class="tagBtn2" href="javascript:;">
+                                                    <span><%= tag %></span>
+                                                </a>
+                                                <% end if @track.tags %>
+                                            </div>
+                                            <%= "未设置" if @track.tags.nil? || @track.tags=="" %>
+                                        </td>
+                                    </tr>
+
+                                    <tr class="music cover">
+                                        <td>原唱</td>
+                                        <td colspan="2">
+                                            <input value="<%= @track.singer %>" name="singer" type="text" class="input150" id="input">    
+                                            <span class="ml5 mr5">翻唱</span>
+                                            <input value="<%= @track.resinger %>" name="resinger" type="text" class="input150" id="input2">
+                                        </td>
+                                    </tr>
+                                    <tr class="music sideman">
+                                        <td>原唱</td>
+                                        <td colspan="2">
+                                            <input value="<%= @track.singer %>" name="singer" type="text" class="input150" id="input" />
+                                        </td>
+                                    </tr>
+                                    <tr class="music original">
+                                        <td>演唱</td>
+                                        <td colspan="2">
+                                            <input value="<%= @track.singer %>" name="singer" type="text" class="input150" id="input">    
+                                            <div id="origin" class="selecter selecter-s5">
+                                                <input type="hidden" name="singer_category" id="singer" value="<%= @track.singer_category %>"/>    
+                                                <div class="selecter-selected" data-value="<%= @track.singer_category %>">
+                                                    <span class="selecter-text"><%= @track.singer_category %></span>
+                                                    <em class="selecter-arrow">◆</em>
+                                                </div>
+                                                <div class="selecter-options">
+                                                    <ul>
+                                                        <% ["男歌手","女歌手","组合","乐队","其他"].each do |sc| %>
+                                                        <li class="selecter-item" data-value="<%= sc %>"><%= sc %></li>
+                                                        <% end %>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr class="music original">
+                                        <td>作词</td>
+                                        <td colspan="2">
+                                            <input value="<%= @track.author %>" name="author" type="text" class="input150" id="input">    
+                                            <span class="ml5 mr5">作曲</span>
+                                            <input value="<%= @track.composer %>" name="composer" type="text" class="input150" id="input2"></td>
+                                    </tr>
+                                    <tr class="music original">
+                                        <td>编曲</td>
+                                        <td colspan="2">
+                                            <input value="<%= @track.arrangement %>" name="arrangement" type="text" class="input150" id="input">    
+                                            <span class="ml5 mr5">后期</span>
+                                            <input value="<%= @track.post_production %>" name="post_production" type="text" class="input150" id="input2"></td>
+                                    </tr>
+                                    <tr class="non_music">
+                                        <td>作者</td>
+                                        <td colspan="2">
+                                            <input value="<%= @track.author %>" name="author" type="text" class="input150" id="input">    
+                                            <span class="ml5 mr5">播音</span>
+                                            <input value="<%= @track.announcer %>" name="announcer" type="text" class="input150" id="input2"></td>
+                                    </tr>
+                                    <tr class="music lyric">
+                                        <td class="vAlign_top">歌词</td>
+                                        <td colspan="2">
+                                            <textarea name="lyric" id="lyric" cols="30" rows="10"><%= @lyric %></textarea>
+                                        </td>
+                                    </tr>
+                                    <tr class="non_music">
+                                        <td class="vAlign_top">文案</td>
+                                        <td colspan="2">
+                                            <span class="ph_input">
+                                                <span class="ph_label" style=""></span>
+                                                <textarea name="lyric" id="lyric2" cols="30" rows="10"><%= @lyric %></textarea>
+                                            </span>
+                                        </td>
+                                    </tr>
+
+                                    <% if !@track.is_public %>
+                                    <tr id="public_tr">
+                                        <td class="vAlign_top">是否公开</td>
+                                        <td colspan="2">
+                                            <input type="radio" name="is_public" value="1" style="vertical-align: -1px;margin-right: 3px;">    
+                                            公开
+                                            <span class="c01">所有人可见(公开后，无法再设置为私密)</span>
+                                            <br/><br/>    
+                                            <input type="radio" name="is_public" value="0" style="vertical-align: -1px;margin-right: 3px;" checked="checked">    
+                                            私密
+                                            <spanclass="c01">仅自己可见</span>
+                                        </td>
+                                    </tr>
+                                    <% end %>
+
+                                    <% if @album_list.present? %>
+                                    <tr id="appendToAlbum" public="true" <% if !@track.is_public %> style="display:none" <% end %> >
+                                        <td>添加到专辑</td>
+                                        <td colspan="2">
+                                            <div id="album_id" class="selecter selecter-s5">
+                                                <input type="hidden" name="album_id" value="<%= @album && @album.id %>"/>
+                                                <div class="selecter-selected" data-value="<%= @album && @album.id %>">
+                                                    <span class="selecter-text"><%= (@album.id and @album.title) ? @album.title[0..30] : '无' %></span>
+                                                    <em class="selecter-arrow">◆</em>
+                                                </div>
+                                                <div class="selecter-options">
+                                                    <ul>
+                                                        <li class="selecter-item" title="无" data-value="">无</li>
+                                                        <% @album_list.each do |album| %>    
+                                                        <li class="selecter-item" title="<%= album.title %>" data-value="<%= album.id %>">
+                                                            <%= album.title[0..30] if album.title %>
+                                                        </li>
+                                                        <% end %>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <% end %>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="infoTit" style="display:none;">
+                        <a class="a_btn" href="javascript:;" id="open_close" closed="1">
+                            <!--收起-->展开</a>
+                        <h3 class="h_info">高级设置</h3>
+                    </div>
+                    <!--权限设置、下载设置、评论设置，暂无-->    
+                    <table class="tbInfo hidden" cellspacing="20" id="advanced_settings">
+                        <tbody>
+                            <tr>
+                                <td>权限设置</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>
+                                    <input type="radio" id="" value="">公开，所有人都能看到</td>
+                                <td>
+                                    <input type="radio" id="" value="">私密，仅自己可见</td>
+                                <td>
+                                    <input type="radio" id="" value="">    
+                                    加密，输入密码后可见
+                                    <input type="text" name="access_password" id="access_password"></td>
+                            </tr>
+                            <tr>
+                                <td>下载设置</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>
+                                    <input type="radio" name="allow_download" id="allow_download" value="" checked="checked">公开下载</td>
+                                <td>
+                                    <input type="radio" name="allow_download" id="allow_download" value="">关闭下载</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>评论设置</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td>
+                                    <input type="radio" name="allow_comment" id="allow_comment" value="" checked="checked">允许评论</td>
+                                <td>
+                                    <input type="radio" name="allow_comment" id="allow_comment" value="">关闭评论</td>
+                                <td>&nbsp;</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div public="true">
+                        <div class="infoTit">
+                            <h3 class="h_info">分享到</h3>
+                        </div>
+                        <table class="tbInfo share_panel" cellspacing="20" has_bind_share="true">
+                            <tbody>
+                                <tr>
+                                    <td style="width:56px;">&nbsp;</td>
+                                    <td id="shareSound" colspan="4" style="width:615px;">
+                                        <div class="socialVerify" data-name="tSina" data-type="track">
+                                            <div class="socialVerify_tit">新浪微博</div>
+                                            <div class="socialVerify_status">已绑定</div>
+                                            <a class="socialVerify_operate" href="javascript:;">配置</a>
+
+                                            <div class="select"></div>
+                                        </div>
+                                        <div class="socialVerify shareqzone" data-name="qzone" data-type="track">
+                                            <div class="socialVerify_tit">QQ空间</div>
+                                            <div class="socialVerify_status">已绑定</div>
+                                            <a class="socialVerify_operate" href="javascript:;">配置</a>
+                                            <div class="select"></div>
+                                        </div>
+
+                                        <div class="socialVerify shareqqwb" data-name="tQQ" data-type="track">
+                                            <div class="socialVerify_tit">腾讯微博</div>
+                                            <div class="socialVerify_status">已绑定</div>
+                                            <a class="socialVerify_operate" href="javascript:;">配置</a>
+                                            <div class="select"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="share_content_tr">
+                                    <td class="vAlign_top">分享内容</td>
+                                    <td style="" colspan="4">
+                                        <textarea id="share_content" default_sound_text="" default_album_text=""></textarea>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <table class="tbInfo btd" style="position:relative;">
+                        <tbody>
+                            <tr >
+                                <td>&nbsp;</td>
+                                <td align="right">
+                                    <input type="checkbox" style="margin-left:90px;" name="input9" id="agreeDeal" checked="checked">    
+                                    我已阅读并同意
+                                    <a class="a_tdu apply_deal" href="javascript:;">用户协议与隐私协议</a>
+                                </td>
+                                <td align="right" style="width:220px;">
+                                    <span>
+                                        <span class="infoErr" id="infoErr"></span>
+                                    </span>
+                                    <a href="javascript:;" class="confirmBtn" id="submit_save">保存</a>
+                                    <a  href="<%= link_path "/#{@current_uid}/sound" %>" id="cancel_save" class="cancelBtn">取消</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </form>
+            </div>
+          </div>
+
+          <p class="lineHeight30"><!--等待上传的时候，不妨完善一下您的声音文件信息吧：--></p>
+
+        </form>
+
+      </div>
+    </div>
+</div>
+<!--录制信息 end-->        
+
+
+<% content_for :script_own do -%>
+
+<%== erb :_upload_js_config %>
+
+<script type="text/javascript">
+
+  require(['page/upload/edit_track'], function(page) {
+  page.init();
+  });
+    
+</script>
+
+<% end %>

@@ -1,0 +1,68 @@
+<div id="discoverSound">
+    <div class="layout_top">
+        <div class="dis_sound_top">
+            <div class="left">
+                <div class="hallo"></div>
+            </div>
+            <div class="right">
+                <ul class="nav_list fr" id='nav_condition'>
+
+                    <li class="nav_item <%= "on" if params[:condition].blank? or params[:condition]=='daily' %>" condition="daily">
+                        <a href="javascript:;">24小时最热</a>
+                    </li>
+                    <li class="nav_item <%= "on" if params[:condition]=="hot" %>" condition="hot">
+                        <a href="javascript:;">精彩推荐</a>
+                    </li>
+                    <li class="nav_item <%= "on" if params[:condition]=="favorite" %>" condition="favorite">
+                        <a href="javascript:;">最多赞过的</a>
+                    </li>
+                    <li class="nav_item last <%= "on" if params[:condition]=="recent" %>" condition="recent">
+                        <a href="javascript:;">最新上传</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="dis_nav">
+        <span id="crumb_all"><a>全部</a></span>
+        <span id="crumb_sub" class="hidden">&gt;&gt; <a></a></span>
+        <span id="crumb_tag" class="hidden">&gt;&gt; <span></span></span>
+    </div>
+    <div class="layout_left">
+        <div class="dis_sound_sort">
+
+            <ul class="sort_list">
+
+                <% @categories.each do |category| %>
+                <li cid="<%= category.id %>" class="<%= 'on' if params[:category].to_i == category.id.to_i %>">
+                    <a href="javascript:;" ><%= category.title %></a>
+                </li>
+                <% end %>
+
+                <div class="tags_panel">
+                    <div class="tag_wrap">
+                        <% @categories.each do |category| %>
+                            <div data-cache="<%= category.id %>">
+                                <% category.tags.each do |tag| %>
+                                    <a class="tagBtn" href="javascript:;" tid="<%= tag %>"><span><%= tag %></span></a>
+                                <% end if category.tags %>
+                            </div>
+                        <% end %>
+                    </div>
+                    <a class="pin_btn" href="javascript:;"></a>
+                </div>
+                
+            </ul>
+        </div>
+    </div>
+    <div class="layout_right">
+        <div id="pin_holder" style="height:0;overflow: hidden;"></div>
+        <div class="waterfall_container">
+
+        </div>
+    </div>
+
+    <%== $waterfall_item_template %>
+
+</div>
+

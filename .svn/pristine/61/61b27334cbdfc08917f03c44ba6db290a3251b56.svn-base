@@ -1,0 +1,127 @@
+<div id="msgMetion" class="mainbox_wrapper">
+    <div class="mainbox_left">
+        <div class="msg_container">
+            <div class="msg_header">
+                <span class="title">消息中心</span>
+                <ul class="nav_list">
+                    <li class="nav_item">
+                        <a href="<%= link_path "/msgcenter/notice" %>">系统通知</a>
+                    </li>
+                    <li class="nav_item on">
+                        <a href="javascript:;">@我的</a>
+                    </li>
+                    <li class="nav_item">
+                        <a href="<%= link_path "/msgcenter/comment" %>">评论</a>
+                    </li>
+                    <li class="nav_item">
+                        <a href="<%= link_path "/msgcenter/letter" %>">私信</a>
+                    </li>
+                    <li class="nav_item">
+                        <a href="<%= link_path "/msgcenter/like" %>">赞</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="msg_body">
+                <div class="msg_body_top">
+                    <div class="left">
+                        <span class="title">@我的</span>
+                        <span class="count">(<%= @refermes_all_count %>个)</span>
+                    </div>
+                    <div class="right">
+                        <ul class="sub_nav_list">
+                            <li class="item first <%= 'on' if params[:type].to_s=="" %>"><a href="<%= link_path "/msgcenter/referme" %>">全部</a></li>
+                            <li class="item <%= 'on' if params[:type]=="comment" %>"><a href="<%= link_path "/msgcenter/referme?type=comment" %>">@我的评论(<%= @refermes_comment_count %>)</a></li>
+                            <li class="item <%= 'on' if params[:type]=="relay" %>"><a href="<%= link_path "/msgcenter/referme?type=relay" %>">@我的声音(<%= @refermes_relay_count %>)</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <ul class="msg_notice_list">
+                    <% @refermes.each do |msg| %>
+                        <% if msg.message_type == 8 %>
+                        <% has_content = (msg.content && !msg.content.empty?) %>
+                        <li class="msg_notice_item">
+                            <div class="content_wrap">
+                                <div class="picture">
+                                    <a href="<%= link_his_path(msg.uid) %>">
+                                        <img width="60px" height="60px" alt="<%= msg.nickname %>" src="<%= picture_url('header', msg.avatar_path, '60') %>" data-options="defaultImg:person_60" >
+                                    </a>
+                                </div>
+                                <div class="detail">
+                                    <div class="detail_top">
+                                        <span>
+                                            <a class="from" href="<%= link_his_path(msg.uid) %>" card="<%= msg.uid %>"><%= msg.nickname %></a>
+                                        </span>
+                                        <span>转采了你的</span>
+                                        <span>
+                                            <a class="where" href="<%= link_path("/#{msg.track_uid}/sound/#{msg.track_id}") %>"><%= msg.track_title %></a>
+                                        </span>
+                                        <% if msg.content and !msg.content.empty? %><span>并留下评论</span><% end %>
+                                    </div>
+                                    <% if has_content %>
+                                    <div class="detail_content">
+                                        <%= puts_face(msg.content).html_safe if msg.content and !msg.content.empty? %>
+                                    </div>
+                                    <% end %>
+                                    <div class="detail_bottom">
+                                        <span class="left"><%= parse_time_until_now(msg.created_at) %></span>
+                                        <span class="right">
+                                            <% if has_content %>
+                                            <a href="javascript:;" class="replyBtn" data-options="<%= oj_dump({c_id: msg.comment_id, c_second: msg.second, c_nickname: msg.nickname, t_id: msg.track_id}) %>">回复</a>
+                                            <% end %>
+                                        </span>
+                                    </div>
+                                    <div class="reply_box_entry"></div>
+                                </div>
+                            </div>
+                        </li>
+                        <% else %>
+                        <li class="msg_notice_item">
+                            <div class="content_wrap">
+                                <div class="picture">
+                                    <a href="<%= link_his_path(msg.uid) %>">
+                                        <img width="60px" height="60px" alt="<%= msg.nickname %>" src="<%= picture_url('header', msg.avatar_path, '60') %>" data-options="defaultImg:person_60" >
+                                    </a>
+                                </div>
+                                <div class="detail">
+                                    <div class="detail_top">
+                                    <span>
+                                        <a class="from" href="<%= link_his_path(msg.uid) %>" card="<%= msg.uid %>"><%= msg.nickname %></a>
+                                    </span>
+                                        <span>在</span>
+                                    <span>
+                                        <a class="where" href="<%= link_path("/#{msg.track_uid}/sound/#{msg.track_id}") %>"><%= msg.track_title %></a>
+                                    </span>
+                                        <span>的评论里提到了你</span>
+                                    </div>
+                                    <div class="detail_content">
+                                        <%= puts_face(msg.content).html_safe %>
+                                    </div>
+                                    <div class="detail_bottom">
+                                        <span class="left"><%= parse_time_until_now(msg.created_at) %></span>
+                                        <span class="right"><a href="javascript:;" class="replyBtn" data-options="<%=  oj_dump({c_id: msg.comment_id, c_second: msg.second, c_nickname: msg.nickname, t_id: msg.track_id}) %>">回复</a></span>
+                                    </div>
+                                    <div class="reply_box_entry"></div>
+                                </div>
+                                
+                            </div>
+                        </li>
+                        <% end %>
+                    <% end %>
+                </ul>
+                <div class="pagingBar mgTB20">
+                    <%== paginate CustomPagination.new(@refermes_count,@page,@per_page), {outer_window: 1, url:"/msgcenter/referme", link_path: @current_uid.present?} %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%== $reply_box_template %>
+
+    <div class="mainbox_right">
+        <div class="msg_helper">
+            <div class="msg_header_title">@设置小帮助</div>
+            <div class="question">不想被陌生人@骚扰？</div>
+            <div class="answer">去<a href="/#/personal_settings/privacy">隐私设置</a>管理@权限</div>
+        </div>
+    </div>
+</div>

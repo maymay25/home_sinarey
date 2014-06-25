@@ -1,0 +1,18 @@
+<% if @seo_meta_name %>
+  <%== erb :_seo_meta, locals: {seo_meta:{ name: @seo_meta_name, category_id: params[:category], data: {categry_title: @init_category_title ? "全部" : @init_category_title}}} %> 
+<% else %>
+  <%== erb :_seo_meta, locals: {seo_meta:{ default_key: "json:cms_data_discovery_hot_page" }} %> 
+<% end %>
+
+<%== erb :_seo_meta, locals: {seo_meta:{ default_key: "json:cms_data_discovery_page" }} %> 
+<%== erb :_friendly_link, locals: {friendly_link:{ name: "discovery", category_name: @init_category_name }} %>
+
+<%== erb :_sound_page %>
+
+<% content_for :script_own do  %>
+  <script type="text/javascript">
+  require(['page/discovery/dis_sound'], function(page) {
+      page.init();
+  });
+  </script>
+<% end %>

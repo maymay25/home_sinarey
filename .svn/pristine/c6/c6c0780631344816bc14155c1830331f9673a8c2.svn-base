@@ -1,0 +1,9 @@
+$("#mainbox").html('<%== escape_javascript erb(:_favorites_page) %>');
+
+require(["page/center/favorites"], function(page){
+    page.init();
+});
+
+<% if @this_title %>
+document.title="<%== escape_javascript @this_title %>";
+<% end %>

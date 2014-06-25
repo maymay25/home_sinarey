@@ -1,0 +1,19 @@
+<%
+recomm_ids = $recommend_client.recentVTrack(category_id, nil, 1, 20).ids
+%>
+<% if recomm_ids.present? %>
+  <% tracks = Track.mfetch(recomm_ids, true) %>
+  <% if tracks.size > 0 -%>
+    <% sample_ids = tracks.sample(5).map(&:id) %>
+    <% tracks.each do |track| %>
+      <div class="recommendSoundPanel" <% unless sample_ids.include?(track.id) -%> style="display:none;" <% end -%> >
+        <div class="soundface">
+          <a href="<%= link_path "/#{track.uid}/sound/#{track.id}" %>" class="imgWrapper">
+            <img alt="<%= track.title %>" src="<%= picture_url('track', track.cover_path, '180') %>">
+          </a>
+        </div>
+        <a href="<%= link_path "/#{track.uid}/sound/#{track.id}" %>" class="recommendSoundPanel_title"><%= track.title %></a>
+      </div>
+    <% end %>
+  <% end -%>
+<% end %>

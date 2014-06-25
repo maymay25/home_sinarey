@@ -1,0 +1,92 @@
+<div class="mainbox_wrapper">
+  <div class="mainbox_left">
+    <div class="tagPanel gapModuleB">
+      <div class="tagWrapper"></div>
+      <div class="fl">
+        <div class="tagHead">
+          <span class="tagName"><%= @tag_name %></span>&nbsp;&nbsp;<span>已有<span class="tagCount"><%= @tagfollowers_count %></span>人感兴趣</span>
+        </div>
+        <div class="count">
+          声音<a href="<%= link_path("/tag/#{@tag_name}") %>"><%= @tagtracks_count %></a><span></span>
+          感兴趣<a class="tagCount" href="<%= link_path("/tag/#{@tag_name}/follower") %>"><%= @tags_followers_count %></a>
+        </div>
+      </div>
+      <a class="interestBtn <% if @is_follow %>already<% end %>" data-tag="<%= @tag_name %>" href="javascript:;">
+        <span class="interest">
+          <em>+</em>
+          <span>感兴趣</span>
+        </span>
+        <span class="uninterest">不感兴趣</span>
+      </a>
+    </div>
+    <div class="soundTab">
+      <div class="fl">
+        <strong class="tab_title">对该标签感兴趣的人</strong>
+      </div>
+    </div>
+
+    <div class="body_list_wrap">
+      <% ban_users_count = 0 %>
+      <ul class="body_list follow_list">
+      <% @tagfollowers.each_with_index do |user, i| %>
+        <%
+        next if user.nil?
+        if user.isLoginBan
+          ban_users_count += 1
+          next
+        end
+        is_follow,be_followed = @follow_status[user.uid]
+        follower_count = @user_tracks_counts[i]
+        track_count = @user_followers_counts[i]
+        following_count = @user_followings_counts[i]
+        %>
+        <li class="item" >
+          <div class="content_wrap">
+            <div class="picture">
+              <img alt="<%= user.nickname %>" card="<%= user.uid %>" class="tx" src="<%= picture_url('header', user.logoPic, '60') %>">
+            </div>
+            <div class="detail">
+              <div class="detail_top">
+                <a class="username" card="<%= user.uid %>" href="<%= link_his_path(user.uid) %>"><%= user.nickname %><i class="VIcon"></i></a>
+              </div>
+              <div class="detail_content">
+                <%= user.personalSignature %>
+              </div>
+              <div class="detail_bottom">
+                <span class="left follower_counter"><%= follower_count %></span>
+                <span class="left sound_counter"><%= track_count %></span>
+                <span class="left attention_counter"><%= following_count %></span> 
+              </div>
+            </div>
+            <div class="operate_btns">
+              <% if @current_uid != user.uid %>
+              <a class="sendLetterBtn" href="javascript:;" data-options="nickname:'<%= user.nickname %>'"><span class="icon">发私信</span></a>
+              <a class="addBtn2 <%= "already" if is_follow %> <%= "both" if be_followed %>" data-options="<%= {uid:user.uid,is_follow:is_follow,be_followed:be_followed,nickname:user.nickname}.to_json[1..-2] %>" href="javascript:;">
+                <span class="default"><%= (is_follow && be_followed) ? "相互" : is_follow ? "已" : "" %>关注</span>
+                <span class="hover">取消</span>
+              </a>
+              <% end %>
+            </div>
+          </div>
+        </li>
+        <% end %>
+      </ul>
+
+      <% if ban_users_count > 0 %>
+        <div class="hintTxt2">根据相关法律法规和政策，部分用户已屏蔽。</div>
+      <% end %>
+
+      <div class="pagingBar mgTB20">
+        <%== paginate CustomPagination.new(@tagfollowers_count,@page,@per_page), {outer_window: 1, url:"/tag/#{@tag_name}/follower", link_path: @current_uid.present?} %>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="mainbox_right">
+    <div class="ad1">
+      <%== erb :_advertise, locals: { id: 728786, width:'200px',height:'80px' } %>
+    </div>
+  </div>
+
+</div> 

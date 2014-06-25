@@ -1,0 +1,63 @@
+<link href="<%= css_url '/css/passport/passport.css' %>" rel="stylesheet" type="text/css" />
+<!--主体 start-->
+<div id="home_wrapper">
+    <div id="home_containter">
+        <div class="personalSet aboutUs aboutUs-news">
+
+            <div class="personalSet-main">
+                <div class="personalSet-main-tit"> <strong>公司新闻</strong>
+                </div>
+                <div class="aboutUs-panel">
+
+                    <ul class="news-panel">
+                        <% @news_list.each do |news| %>
+                        <li>
+                            <span class="fr"><%= news.time_at.strftime('%Y年%m月%d日') %></span>
+                            <span>[<%= news.website %>]</span>
+                            <span><a target="_blank" href="<%= news.link %>"><%= news.title %></a></span>
+                        </li>
+                        <% end %>
+                    </ul>
+
+
+                    <div class="page-bar">
+                        <%== paginate CustomPagination.new(@news_count,@page,@per_page), {outer_window: 1} %>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="personalSet-side">
+                <div class="personalSet-side-tit"> <strong>关于我们</strong>
+                </div>
+                <div class="personalSet-side-con">
+                    <ul class="personalSet-side-list">
+                        <li>
+                            <a class="ico_5" href="/help/aboutus/">关于喜马拉雅</a>
+                        </li>
+                        <li>
+                            <a class="ico_6" href="/help/contact_us">联系我们</a>
+                        </li>
+                         <li class="selectAbout">
+                            <a class="ico_7" href="javascript:;">公司新闻</a>
+                        </li>
+                        <li>
+                            <a class="ico_9" href="/help/join_us">招纳贤士</a>
+                        </li>
+                    </ul>
+                    <a class="personalSet-apply" href="/verify/"></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div></div>
+</div>
+<!--主体 end-->
+
+<% content_for :script_own do  %>
+<script>
+  requirejs(["page/404"], function (page) {
+    page.init();
+  });
+</script>
+<% end %>

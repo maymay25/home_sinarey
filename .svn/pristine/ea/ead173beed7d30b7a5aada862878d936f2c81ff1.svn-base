@@ -1,0 +1,413 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="<%= static_url "/poster/css/poster.css" %>" rel="stylesheet" type="text/css">
+<title>喜马拉雅</title>
+<%== erb :_check_redirect %>
+</head>
+<body>
+
+<div class="starsport">
+	<div class="starsportPopupWrap" id="starsportPopup">
+		<div class="starsportPopup">
+			<p>1.注册喜马拉雅账号，上传头像并且绑定邮箱或者手机</p>
+			<p>
+				2.录制音频并私信五星体育官方活动账号：“ <em><a href="http://www.ximalaya.com/9485923/" target="_blank">谁来解说世界杯</a></em> 
+				”告知参赛作品名称
+				<br/>
+				<a class="starsportLink" href="/xposter/starsport_help" target="_blank">(点击查看上传录制声音教程)</a>
+			</p>
+			<p>3.官方采集音频后私信回复则参选成功</p>
+			<p>4.参选成功，声音将展示在作品展示页面上</p>
+			<a class="starsportCloseBtn" id="starsportCloseBtn" title="关闭"></a>
+		</div>
+	</div>
+	<div class="starsportHd">
+		<div class="starsportHdInner">
+			<a class="starsport_logo" href="http://www.ximalaya.com"></a>
+			<span class="starsportHd_slogan">声色世界杯</span>
+
+			<div class="bdsharebuttonbox" style="float:right;margin-top: 12px;width: 150px;">
+				<a href="#" class="bds_more" data-cmd="more"></a>
+				<a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+				<a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+				<a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+				<a href="#" class="bds_tqq" data-cmd="tqq" title="分享到腾讯微博"></a>
+				<a href="#" class="bds_renren" data-cmd="renren" title="分享到人人网"></a>
+			</div>
+			<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"告别平淡！共享激情！喜马拉雅联合五星体育，谁来解说世界杯！赶紧参加！！！","bdMini":"2","bdMiniList":false,"bdPic":"<%= static_url "/poster/startsport.jpg" %>","bdStyle":"0","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+
+		</div>
+	</div>
+	<div class="starsportBanner">
+		<div class="starsportBannerBtnWrap">
+			<a class="starsportBtn" id="starsportBtn">立即报名</a>
+		</div>
+	</div>
+	<div class="starsportNavBar">
+		<a class="on" href="javascript:;">大赛首页</a>
+		<a href="/xposter/starsport_works">作品展示</a>
+	</div>
+	<div class="starsportBd js-scrollPaging-wrapper">
+		<div class="starsportNavBar2Wrap js-scrollPaging-navBarWrapper">
+			<ul class="starsportNavBar2 js-scrollPaging-navBar">
+				<li class="on">
+					<a href="#a1">大赛简介</a>
+				</li>
+				<li>
+					<a href="#a2">大赛流程</a>
+				</li>
+				<li>
+					<a href="#a3">晋级奖励</a>
+				</li>
+				<li>
+					<a href="#a4">奖品设置</a>
+				</li>
+				<li>
+					<a href="#a5">活动细则</a>
+				</li>
+				<li>
+					<a href="#a6">合作单位</a>
+				</li>
+			</ul>
+		</div>
+		<div class="starsportIntro js-scrollPaging-page">
+			<a id="a1"></a>
+			<div class="starsportIntro_tit tit-pos1">大赛简介</div>
+			<div class="starsportIntro_bg1"></div>
+			<div class="starsportIntro_txt1">
+				<div>
+					中国最具活力的体育专业广播频率五星体育广播（FM94.0），联合中国最大的声音分享平台喜马拉雅网为广大球迷朋友打造大型球迷互动竞赛—— <em>《声色世界杯》之“谁来解说世界杯”</em>
+					。
+				</div>
+				<div>线上玩“声”，进行火爆球迷录音竞赛；线下成“色”，在著名足球评论员和神秘国脚的带领下，现场互动比拼。</div>
+				<div>参与活动就有机会获得奖品，最终优胜者还有机会加入到五星体育广播的世界杯直播解说以及相关世界杯节目中，并赢得丰厚大奖。</div>
+				<div>告别平淡，尽享激情，声色世界杯，感受足球魅力。还在等什么，快一起来玩儿吧！</div>
+
+			</div>
+			<div class="starsportIntro_boxWrap">
+				<div class="starsportIntro_box">
+					<div class="left">
+						<img src="<%= static_url '/poster/css/img/starsport/user2.jpg' %>"/></div>
+					<div class="right" style=" margin-top: 17px; ">
+						著名足球评论员:许俊君
+						<br/>
+						<div class="rightTxt">
+							他是JJ
+							<br/>
+							他不是林俊杰
+							<br/>
+							他是XJJ：许俊君
+							<br/>
+							他最喜欢巴萨，最讨厌皇马
+							<br/>
+							他已经好久不玩《超级玛丽》
+							<br/>
+							但他的节目就叫《超级马力》
+							<br/>
+							你觉得自己学富五车？那就放马过来
+							<br/>
+							每个工作日下午18点，他在五星体育广播，等着你！
+							<br/>
+						</div>
+					</div>
+				</div>
+				<div class="starsportIntro_box">
+					<div class="left">
+						<img src="<%= static_url '/poster/css/img/starsport/user1.jpg' %>"/></div>
+					<div class="right">
+						著名足球评论员:俞佳男
+						<br/>
+						<div class="rightTxt">
+							他自以为体育知识学富五车——其实，还是有那么一点；
+							<br/>
+							他自以为比赛数据了然于胸——其实，他经常前颠后倒；
+							<br/>
+							他自以为是个幽默的男生——其实，他兼职写写冷笑话；
+							<br/>
+							他自以为是五星体育广播最大的乌鸦——其实，这是事实；
+							<br/>
+							虽然，他有这样或者那样的缺点；
+							<br/>
+							不过，他乐于倾听，喜欢分享；
+							<br/>
+							他是佳男，每个工作日下午17点的《体坛怡佳壹》和您讨论最热的体育话题，不见不散。
+						</div>
+					</div>
+				</div>
+				<div class="starsportIntro_box">
+					<div class="left">
+						<img src="<%= static_url '/poster/css/img/starsport/user3.jpg' %>"/></div>
+					<div class="right">
+						神秘国足
+						<br/>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="starsportIntro starsportIntro-pos1 js-scrollPaging-page">
+			<a id="a2"></a>
+			<div class="starsportIntro_tit tit-pos2">大赛流程</div>
+			<div class="starsportIntro_bg2"></div>
+			<div class="starsportIntro_txt2">
+				<p>流程说明</p>
+				5月1日0点——5月18日24点：在线征集声音
+				<br/>
+				5月20日：公布20名优秀参赛选手和网络人气之星名单
+				<br/>
+				5月下旬：20名选手参加训练营，加入导师门下，接受专业培训，评选出最终10强
+				<br/>
+				5月31日：训练营产生的十强选手和网络人气之星，亲临五星体育FM94.0活动现场参加最后的决赛，角逐冠军。
+			</div>
+		</div>
+		<div class="starsportIntro starsportIntro-pos2 js-scrollPaging-page">
+			<a id="a3"></a>
+			<div class="starsportIntro_tit tit-pos3">晋级奖励</div>
+			<div class="starsportIntro_bg3"></div>
+			<div class="starsportIntro_txt3">
+				<div class="starsportIntro_list">
+					<div class="left">1.</div>
+					<div class="right">
+						根据活动规则，在三周内选出20名选手，加入导师门下，经过专业培训，评选出最终十强！于5月31日亲临五星体育FM94.0活动现场参加最后的决赛，角逐冠军。
+						<br/>
+						<br/>
+					</div>
+				</div>
+				<div class="starsportIntro_list">
+					<div class="left">2.</div>
+					<div class="right">
+						五星体育广播周一至周五17：00-18:00的《体坛怡加壹》栏目，将会电话连线参赛选手，畅谈心路历程（参赛感想，决赛展望等）。并有机会参加五星体育广播周日13:00-14:00的《星期运动汇》栏目，参与现场节目。
+						<br/>
+						<br/>
+					</div>
+				</div>
+				<div class="starsportIntro_list">
+					<div class="left">3.</div>
+					<div class="right">
+						经过专业导师意见和网络人气指数综合产生的二十强的选手将于5月下旬参加训练营，参观五星体育直播间，邀请沪上知名解说员以及球员进行零距离互动游戏活动，并将接受导师的专业培训和辅导。
+						<br/>
+						<br/>
+					</div>
+				</div>
+				<div class="starsportIntro_list">
+					<div class="left">4.</div>
+					<div class="right">训练营产生的十强选手和网络人气之星将于5月31日，进行总决赛，最终决出“谁来解说世界杯”的前三甲。</div>
+				</div>
+
+			</div>
+		</div>
+		<div class="starsportIntro starsportIntro-pos3 js-scrollPaging-page">
+			<a id="a4"></a>
+			<div class="starsportIntro_tit tit-pos4">奖品设置</div>
+			<div class="starsportIntro_bg4"></div>
+			<div class="starsportIntro_txt4">
+				<div class="starsportIntro_list">
+					<div class="left">1.</div>
+					<div class="right">
+						冠军获得价值5000元的神秘奖品（1名）
+						<br/>
+						<br/>
+					</div>
+				</div>
+				<div class="starsportIntro_list">
+					<div class="left">2.</div>
+					<div class="right">
+						亚军获得价值3000元的神秘奖品（1名）
+						<br/>
+						<br/>
+					</div>
+				</div>
+				<div class="starsportIntro_list">
+					<div class="left">3.</div>
+					<div class="right">
+						季军获得价值2000元的神秘奖品（1名）
+						<br/>
+						<br/>
+					</div>
+				</div>
+				<div class="starsportIntro_list">
+					<div class="left">4.</div>
+					<div class="right">
+						入围十强选手以及网络人气之星，将获得价值1000元奖品
+						<br/>
+						<br/>
+					</div>
+				</div>
+				<div class="starsportIntro_list">
+					<div class="left">5.</div>
+					<div class="right">
+						入围二十强选手，将获得价值500元奖品
+						<br/>
+						<br/>
+					</div>
+				</div>
+				<div class="starsportIntro_list">
+					<div class="left">6.</div>
+					<div class="right">所有参加比赛的选手均有机会获得50元纪念品（100名）</div>
+				</div>
+			</div>
+		</div>
+		<div class="starsportIntro starsportIntro-pos4 js-scrollPaging-page">
+			<a id="a5"></a>
+			<div class="starsportIntro_tit tit-pos5">活动细则</div>
+			<div class="starsportIntro_bg5"></div>
+			<div class="starsportIntro_txt5">
+				<div class="starsportIntro_list">
+					<div class="left">1.</div>
+					<div class="right">
+						征集时间：5月1日0点~18日24点
+						<br/>
+						<br/>
+
+					</div>
+				</div>
+				<div class="starsportIntro_list">
+					<div class="left">2.</div>
+					<div class="right">
+						报名方式：用手机登陆喜马拉雅官方客户端，录制音频并私信五星体育广播官方活动账号“谁来解说世界杯”即可报名参加，官方采集音频后私信回复则参选成功。
+						<br/>
+						<br/>
+
+					</div>
+				</div>
+				<div class="starsportIntro_list">
+					<div class="left">3.</div>
+					<div class="right">
+						录音作品要求：活动口号（
+						<em>告别平淡，尽享激情</em>
+						）+自我介绍+个人靓照（为参赛声音添加照片即可）。录制时间不少于30秒，否则视为无效作品。
+						<br/>
+						<br/>
+
+					</div>
+				</div>
+				<div class="starsportIntro_list">
+					<div class="left">4.</div>
+					<div class="right">
+						参赛规则：以官方账号私信回复确认作品有效为准，已入选决赛选手和备选选手将不做重复选拔。
+						<br/>
+						<br/>
+
+					</div>
+				</div>
+				<div class="starsportIntro_list">
+					<div class="left">5.</div>
+					<div class="right">
+						网络人气之星以网络投票数量为准。
+						<br/>
+						<br/>
+
+					</div>
+				</div>
+				<div class="starsportIntro_list">
+					<div class="left">6.</div>
+					<div class="right">可以重复投稿，以官方采集为准。</div>
+				</div>
+			</div>
+		</div>
+		<div class="starsportIntro starsportIntro-pos5 js-scrollPaging-page">
+			<a id="a6"></a>
+			<div class="starsportIntro_tit tit-pos6">合作单位</div>
+			<div class="starsportIntro_bg6"></div>
+			<div class="starsportIntro_txt6">
+				<p>主办方</p>
+				<div class="sp2"></div>
+				<div class="sp1"></div>
+				<div class="sp3"></div>
+				<div class="sp4"></div>
+			</div>
+		</div>
+	</div>
+	<div class="starsportFoot">
+		网络文化经营许可证-文网文[2010]150号&nbsp;&nbsp;&nbsp;&nbsp; 北京那里汇聚网络科技有限公司 京ICP备12017437号-1 网络110报警服务
+		<br>
+		Copyright © 2011-2012 www.ximalaya.com lnc.ALL Rights Reserved&nbsp;&nbsp;&nbsp;&nbsp; 请使用者仔细阅读喜马拉雅网 使用协议 和 版权声明
+	</div>
+</div>
+
+<script type="text/javascript" src="http://lib.sinaapp.com/js/jquery/1.7.2/jquery.min.js"></script>
+<script>
+window.onload = function(){
+  var starsportBtn = document.getElementById("starsportBtn");
+  var starsportPopup = document.getElementById("starsportPopup");
+  var close=document.getElementById("starsportCloseBtn");
+
+  starsportBtn.onclick = function(){
+  starsportPopup.style.display = "block";
+  }
+  
+  close.onclick = function(){
+  starsportPopup.style.display = "none";
+  }
+  
+}
+function init(top, right){
+	var $document = $(document);
+	var $navBarWrapper = $(".js-scrollPaging-navBarWrapper").css({
+		"position" : "absolute",
+		"top" : top,
+		"left" : "auto",
+		"right" : right
+	});
+	var dubIntroNavTop = $navBarWrapper.offset().top;
+	var dubIntroNavLeft = $navBarWrapper.offset().left;
+	
+	var clientHeight = document.documentElement.clientHeight;
+	var $wrapper = $(".js-scrollPaging-wrapper");
+	var $navBar = $wrapper.find(".js-scrollPaging-navBar");
+	var $navBarLi = $navBar.find("li");
+	var $navBarLiOn = $navBarLi.eq(0);
+	var $page = $wrapper.find(".js-scrollPaging-page");
+	var pageTops = $page.map(function(){
+		return $(this).offset().top;
+	});
+	var pageBottoms = $page.map(function(){
+		return $(this).offset().top + $(this).height();
+	});
+	
+	$navBarLi.off("click").on("click", function(){
+		var $el = $(this);
+		setTimeout(function(){
+			$navBarLiOn.removeClass("on");
+			$navBarLiOn = $el;
+			$navBarLiOn.addClass("on");	
+		},40);
+	});
+	$(window).off("scroll").scroll(function(e) {
+		var scrollTop = $document.scrollTop();
+		if(scrollTop > dubIntroNavTop){
+			$navBarWrapper.css({
+				"position" : "fixed",
+				"top" : 20,
+				"left" : dubIntroNavLeft,
+				"right": "auto"
+			});
+		}else{
+			$navBarWrapper.css({
+				"position" : "absolute",
+				"top" : top,
+				"left" : "auto",
+				"right" : right
+			});
+		}
+		for(var i=0,len=pageTops.length;i<len;i++){
+			var pageTop = pageTops[i];
+			var pageBottom = pageBottoms[i];
+			var num = i;
+			if(pageBottom<scrollTop+clientHeight && pageBottom>scrollTop){
+				$navBarLiOn.removeClass("on");
+				$navBarLiOn = $navBarLi.eq(i).addClass("on");
+			}
+		}
+	});	
+}
+window.onresize = function(){
+	init(0, -60);
+}
+init(0, -60);
+</script>
+
+</body>
+
+</html>

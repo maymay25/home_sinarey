@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="<%= static_url "/poster/css/poster.css" %>" rel="stylesheet" type="text/css">
+<title>喜马拉雅</title>
+<%== erb :_check_redirect %>
+</head>
+<body>	
+<div class="starsport">
+	<div class="starsportHd">
+		<div class="starsportHdInner">
+			<a class="starsport_logo" href="http://www.ximalaya.com"></a>
+			<span class="starsportHd_slogan">声色世界杯</span>
+		</div>
+	</div>
+	<div class="starsportHelp"></div>
+	<div class="starsportFoot">
+		网络文化经营许可证-文网文[2010]150号&nbsp;&nbsp;&nbsp;&nbsp; 北京那里汇聚网络科技有限公司 京ICP备12017437号-1 网络110报警服务
+		<br>
+		Copyright © 2011-2012 www.ximalaya.com lnc.ALL Rights Reserved&nbsp;&nbsp;&nbsp;&nbsp; 请使用者仔细阅读喜马拉雅网 使用协议 和 版权声明
+	</div>
+</div>
+	
+
+</body>
+
+</html>

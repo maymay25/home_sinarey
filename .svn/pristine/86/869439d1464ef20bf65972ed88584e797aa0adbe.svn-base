@@ -1,0 +1,5 @@
+$("#mainbox").html('<%== escape_javascript erb(:_letter_page) %>');
+
+require(['page/message/letter'], function(page) {
+    page.init();
+});

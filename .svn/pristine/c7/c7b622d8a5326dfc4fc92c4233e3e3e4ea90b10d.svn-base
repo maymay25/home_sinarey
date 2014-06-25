@@ -1,0 +1,52 @@
+<% if @feeds!=nil %>
+  <% datas = @feeds.datas %>
+  <% if @feeds.totalSize.nil? %>
+    <% @feeds.totalSize=0 %>
+  <%end%>
+  <% totalPage = @feeds.totalSize/3 %>
+  <%if datas and datas.size()!=0%>
+    <% @all_play_list=nil %>
+	  <% @users = $profile_client.getMultiUserBasicInfos(@feed_uids) %>
+    <% datas.each do |data| %>
+      <% if !data.nil? %>
+        <% @type = data.type %>
+        <%if @type=='ff' %><!-- 处理关注 -->
+          <%== erb :'my/feeds/_follow', locals: {feed:data} %>
+        <% elsif @type=='fu' %><!--处理上传和创建专辑-->
+          <%== erb :'my/feeds/_upload', locals: {feed:data} %>
+        <% elsif @type=='fc' %>
+          <%== erb :'my/feeds/_comment', locals: {feed:data} %>
+        <% elsif @type=='fl' %>
+          <%== erb :'my/feeds/_like', locals: {feed:data}%>
+        <% elsif @type=='ft' %>
+          <%== erb :'my/feeds/_tag', locals: {feed:data} %>
+        <% elsif @type=='fts' %>
+          <%== erb :'my/feeds/_transmit', locals: {feed:data} %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% else %>
+    <% if @feeds.totalSize == 0 %>
+      <div class="noItem">
+        <span class="noItemTit">本组还没有动态</span><br/>
+        <span>
+            为本组 <a href="/#/<%= @current_uid %>/follow">添加</a> 更多人
+        </span>
+      </div>
+    <% elsif @feeds.delNum!=0 %>
+      <div class="noItem">          
+        <span class="noItemTit">当前页动态已被好友删除</span><br>
+        <span>立即<a href="javascript:;" class="reload_feed">重新加载</a></span>
+      </div>
+    <% end %>
+  <% end %>
+<% else %>
+    <% totalPage=0 %>
+<% end %>
+<% if @all_play_list %>
+    <script type="text/javascript">
+        require(["page/home/feed"], function(feed){
+            feed.initList('all_play_list', '<%= @all_play_list %>');
+        });
+    </script>
+<% end %>

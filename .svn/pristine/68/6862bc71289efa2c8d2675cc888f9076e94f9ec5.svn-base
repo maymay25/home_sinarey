@@ -1,0 +1,181 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="<%= static_url "/poster/css/poster.css" %>" rel="stylesheet" type="text/css">
+<title>喜马拉雅</title>
+<%== erb :_check_redirect %>
+</head>
+<body>	
+	<div class="dubWrap">
+		<div class="dubHd">
+			<a class="dubHd_logo" href="http://www.ximalaya.com"></a>
+			<a class="dubHdBtn" href="/xposter/dub_works">展示区</a>
+			<a class="dubHdBtn on" href="/xposter/dub_dub">配音首页</a>
+			<a class="dubHdBtn" href="/xposter/dub">大赛首页</a>
+		</div>
+		<div class="dubPopupWrap" id="dubPopup">
+			<div class="dubPopup">
+				<p>1.注册账号，上传头像并绑定邮箱或手机。</p>
+				<p>
+					2.上传配音作品，并私信“
+					<a href="http://www.ximalaya.com/8227231" target="_blank">译声一试</a>
+					”官方账号。
+				</p>
+				<p>3.审核通过，作品将展示在展示区上。</p>
+				<p>4.通过初赛，工作人员将会邮件或电话通知复赛安排。</p>
+				<a class="dubCloseBtn" id="dubCloseBtn" title="关闭"></a>
+			</div>
+		</div>
+		<div class="dubBanner">
+			<div class="dubBannerBtnWrap">
+				<a class="dubApplyBtn" id="dubApplyBtn"></a>
+			</div>
+			<div class="dubBanner2"></div>
+		</div>
+		<div class="dubIntroWrap">
+			<div class="dubIntroNavBarWrap navBar-dub">
+				<span class="dubIntroNavBarBg1"></span>
+				<ul class="dubIntroNavBar">
+					<li class="on">
+						<a href="#dubA1">大赛细则</a>
+					</li>
+					<li>
+						<a href="#dubA2">大赛安排</a>
+					</li>
+				</ul>
+				<span class="dubIntroNavBarBg2"></span>
+			</div>
+			<div class="dubIntro">
+				<a id="dubA1"></a>
+				<div class="dubIntro_tit2">大赛细则</div>
+				<div class="dubIntro_txt2">
+					1、登陆网站，注册账号，上传头像并绑定邮箱或手机。
+					<br/>	
+					2、以个人为单位参加2014“译声一试”影视翻译配音大赛。
+					<br/>	
+					3、上传1-2分钟的声音表演片段进行参赛。
+					<br/>	
+					4、可通过喜马拉雅手机客户端录制配音片段；也可登入“喜马拉雅网”上传录制好的配音片段。初赛作品统一命名格式：片段名_喜马拉雅电台用户昵称。
+					<br/>	
+					5、上传音频后，私信“
+					<a href="http://www.ximalaya.com/8227231" target="_blank">译声一试</a>
+					”官方账号，私信内容为“参加译声一试+个人真实信息（姓名，性别，出生年月，居住地，联系方式，职业，获奖情况等）”
+					<br/>	
+					6、限投稿一次，经确认后，主办方不再接受参赛作品的替换。
+					<br/>	
+					7、初赛决出30强选手进入复赛。
+					<br/>	
+					8、复赛决出12强选手进入决赛。
+					<br/>	
+					9、决赛选手根据赛制要求完成比赛，获得配音类各项奖次。
+					<br/>	
+				</div>
+			</div>
+			<div class="dubIntro">
+				<a id="dubA2"></a>
+				<div class="dubIntro_tit2">大赛安排</div>
+				<div class="dubIntro_txt2">
+					5月01日——6月16日&nbsp;&nbsp;网络报名、初赛
+					<br/>	
+					6月17日——7月上旬&nbsp;&nbsp;初赛评审
+					<br/>	
+					7月中下旬&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;复赛、决赛、颁奖（上海）
+					<br/>	
+
+				</div>
+			</div>
+			<div class="dubFooter">
+				网络文化经营许可证-文网文[2010]150号     北京那里汇聚网络科技有限公司 京ICP备12017437号-1 网络110报警服务
+				<br/>	
+				Copyright © 2011-2012 www.ximalaya.com lnc.ALL Rights Reserved     请使用者仔细阅读喜马拉雅网 使用协议 和 版权声明
+			</div>
+		</div>
+	</div>
+<%== erb :_script %>
+	
+<script type="text/javascript" src="http://lib.sinaapp.com/js/jquery/1.7.2/jquery.min.js"></script>
+<script>
+window.onload = function(){
+  var dubApplyBtn = document.getElementById("dubApplyBtn");
+  var dubPopup = document.getElementById("dubPopup");
+  var close=document.getElementById("dubCloseBtn");
+
+  dubApplyBtn.onclick = function(){
+  dubPopup.style.display = "block";
+  }
+  
+  close.onclick = function(){
+  dubPopup.style.display = "none";
+  }
+  
+}
+function init(){
+	var $document = $(document);
+	var $dubIntroNav = $(".dubIntroNavBarWrap").css({
+		"position" : "absolute",
+		"top" : 220,
+		"left" : "auto",
+		"right" : -190
+	});
+	var dubIntroNavTop = $dubIntroNav.offset().top;
+	var dubIntroNavLeft = $dubIntroNav.offset().left;
+	
+	var clientHeight = document.documentElement.clientHeight;
+	var $dubIntroWrap = $(".dubIntroWrap");
+	var $dubIntroNavBar = $dubIntroWrap.find(".dubIntroNavBar");
+	var $dubIntroNavBarLi = $dubIntroNavBar.find("li");
+	var $dubIntroNavBarLiOn = $dubIntroNavBarLi.eq(0);
+	var $dubIntro = $dubIntroWrap.find(".dubIntro");
+	var dubIntroTops = $dubIntro.map(function(){
+		return $(this).offset().top;
+	});
+	var dubIntroBottoms = $dubIntro.map(function(){
+		return $(this).offset().top + $(this).height();
+	});
+	
+	$dubIntroNavBarLi.off("click").on("click", function(){
+		var $el = $(this);
+		setTimeout(function(){
+			$dubIntroNavBarLiOn.removeClass("on");
+			$dubIntroNavBarLiOn = $el;
+			$dubIntroNavBarLiOn.addClass("on");	
+		},40);
+	});
+	$(window).off("scroll").scroll(function(e) {
+		var scrollTop = $document.scrollTop();
+		if(scrollTop > dubIntroNavTop){
+			$dubIntroNav.css({
+				"position" : "fixed",
+				"top" : 20,
+				"left" : dubIntroNavLeft,
+				"right": "auto"
+			});
+		}else{
+			$dubIntroNav.css({
+				"position" : "absolute",
+				"top" : 220,
+				"left" : "auto",
+				"right" : -190
+			});
+		}
+		for(var i=0,len=dubIntroTops.length;i<len;i++){
+			var dubIntroTop = dubIntroTops[i];
+			var dubIntroBottom = dubIntroBottoms[i];
+			var num = i;
+			if(dubIntroBottom<scrollTop+clientHeight && dubIntroBottom>scrollTop){
+				$dubIntroNavBarLiOn.removeClass("on");
+				$dubIntroNavBarLiOn = $dubIntroNavBarLi.eq(i).addClass("on");
+			}
+		}
+	});	
+}
+window.onresize = function(){
+	init();
+}
+init();
+</script>
+
+</body>
+
+</html>

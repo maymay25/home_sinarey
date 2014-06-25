@@ -1,0 +1,4 @@
+Gemfile.lock
+/config/core.root
+*.pid
+*.swp

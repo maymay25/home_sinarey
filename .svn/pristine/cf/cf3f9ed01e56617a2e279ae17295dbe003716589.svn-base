@@ -1,0 +1,11 @@
+<% albums.each do |album| %>
+<li class="formAlubmItem" data-album-id="<%= album.id %>">
+  <div class="content_wrap">
+    <div class="picture">
+      <a class="albumface" href="javascript:;"><span><img alt="" src="<%= picture_url('album', album.cover_path, '180') %>"></span></a>
+    </div>
+    <div class="tit"><%= album.title %></div>
+    <div class="selectIcon"></div>
+  </div>
+</li>
+<% end if albums %>

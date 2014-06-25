@@ -1,0 +1,4 @@
+*
+!db
+!sidekiq
+!.gitignore

@@ -1,0 +1,1 @@
+<%== paginate CustomPagination.new(@totalPage*@pageSize,@page,@pageSize), {outer_window: 1, theme: 'explore'} %>

@@ -1,0 +1,149 @@
+<% if feed && feed.uid && @users[feed.uid] %>
+  <%
+    user = @users[feed.uid]
+    track_album = feed.albumId
+    track_upload_des = track_album ? '上传了一个声音到' : '上传了一个声音'
+    track_url = link_path("/#{user.uid}/sound/#{feed.toTid}")
+    is_favorited = @current_uid && Favorite.shard(@current_uid).where(uid: @current_uid, track_id: feed.toTid).any?
+  %>
+    <%
+    if feed.toTid
+      plays_count, favorites_count, shares_count, comments_count = $counter_client.getByNames([
+            Settings.counter.track.plays, 
+            Settings.counter.track.favorites,
+            Settings.counter.track.shares,
+            Settings.counter.track.comments
+          ], feed.toTid)
+    else
+      plays_count = 0
+      favorites_count = 0
+      shares_count = 0
+      comments_count = 0
+    end
+%>
+<li class="listItem">
+    <div class="feed" sound_id="<%= feed.toTid %>">
+        <div class="left">
+            <a class="userface" href="<%= link_his_path(user.uid) %>" card="<%= user.uid %>">
+            <img src="<%= picture_url('header', user.logoPic, '60') %>" alt="<%= user.nickname %>">
+            </a>
+        </div>
+        <div class="right">
+            <div class="feed_operate">
+                <a href="javascript:;" class="closeBtn" title="删除" feed_id='fu_<%= feed.id %>'></a>
+            </div>
+            <div class="feed_title">
+                <a href="<%= link_his_path(user.uid) %>" card="<%= user.uid %>">
+                    <%= user.nickname %>
+                    <% if user.isVerified %><i class="VIcon">&nbsp;</i><% end %>
+                </a>
+				<% if feed.uploadSource and feed.uploadSource!=2%>
+					<a class="iphoneBtn"><span class="mobileFrom"><em>来自<%= get_upload_source feed.uploadSource %></em>
+                        <i class="mobileFrom_arrow"></i></span></a>
+				<% end %>
+				<span><%= track_upload_des %></span><%if track_album %><a class="link2" href="<%= link_path("/#{user.uid}/album/#{feed.albumId}") %>">《<%= feed.albumName %>》</a> <% end %>
+            </div>
+            <div class="feed_content">
+                <div class="sound">
+                    <div class="sound_unexpandBox">
+                        <div class="sound_titlebar">
+                            <a class="sound_title" href="<%=track_url %>"><%= feed.title %></a>
+                            <span title="<%= plays_count %>次播放" class="sound_playcount"><%= plays_count %></span>
+                        </div>
+                        <div class="smallPlayer">
+                            <a class="playBtn" href="javascript:;"></a> <span class="duration"><%= parse_duration(feed.duration) %></span>
+                            <% if feed.wtImagePath && feed.wtImagePath != 'null' && !feed.wtImagePath.empty? %>
+                            <div class="pin" sound_popsrc="<%= feed.toTid %>">
+                              <a class="soundface">
+                                <img src="<%= picture_url('track', feed.wtImagePath, 30) %>" alt="<%= feed.title %>" data-options="defaultImg:track_30" />
+                                <span></span>
+                            </a>
+                            </div>
+                            <% end %>
+                        </div>
+                    </div>
+                    <div class="sound_expandBox">
+                        <div class="sound_titlebar">
+                            <a class="sound_title" href="<%= track_url %>"><%= feed.title %></a>
+                            <span class="sound_playcount" title="<%= plays_count %>次播放"><%= plays_count %></span>
+                            <div class="fr"><span class="sound_position">00:00</span>/<span class="sound_duration"><%= parse_duration(feed.duration) %></span></div>
+                        </div>
+                        <div class="feed_middlePlayerBox">
+                            <div class="middlePlayer">
+                                <div class="left">
+                                    <a class="playBtn"></a>
+                                </div>
+                                <div class="right">
+                                    <!-- 进度条 -->
+                                    <div class="player_progressbar">
+                                        <div class="player_progressbarBg"></div>
+                                        <div class="player_seekbar"></div>
+                                        <div class="player_playbar"></div>
+                                        <% if feed.waveform %>
+                                            <div class="player_wavebox" sound_wave="<%= get_wave_url feed.waveform %>" sound_uploadid="<%= feed.uploadId%>"></div>
+                                        <% end %>
+                                         <div class="player_progressbarCoverBg"></div>
+                                        <div class="player_nonius">
+                                            <div class="player_nonius_cover"></div>
+                                            <div class="player_nonius_time">00:00</div>
+                                            <div class="player_nonius_line5"></div>
+                                            <div class="player_nonius_line3"></div>
+                                        </div>
+                                    </div>
+                                    <!-- 二维评论 -->
+                                    <div class="player_commentbar">
+                                    </div>
+                                    <div class="player_operate">
+                                        <a href="javascript:;" class="player_commentbarBtn"  title="显示/隐藏评论"></a>
+                                    </div>
+                                </div>
+                                <% if feed.wtImagePath && !feed.wtImagePath.empty? %>
+                                <div class="pin" sound_popsrc="<%= feed.toTid %>">
+                                    <a class="soundface">
+                                        <img src="<%= picture_url('track', feed.wtImagePath, 30) %>" alt="<%= feed.title %>" data-options="defaultImg:track_30" />
+                                        <span></span>
+                                    </a>
+                                </div>
+                                <% end %>
+                            </div>
+                        </div>
+                        <!--<div class="sound_content">
+                           < feed.intro.truncate(160) if feed.intro >
+                        </div>-->
+                    </div>
+                    <div class="sound_bottom">
+                        <span class="createtime"><%= parse_time_until_now(feed.createdAt.to_datetime) %></span>
+                        <div class="fr">
+                            <a class="downloadToMobile link1">下载到手机</a>
+                            <a class="likeBtn link1 <% if is_favorited -%>is-sound-liked<% end -%>" href="javascript:;" >赞(<span class="count"><%= favorites_count %></span>)</a>
+                            <a class="commentBtn link1" href="javascript:;" >评论(<span class="count"><%= comments_count %></span>)</a>
+                            <a class="forwardBtn link1" href="javascript:;" >转采(<span class="count"><%= shares_count %></span>)</a>
+                              <% bds_config = {
+                                  bdDes:"喜马拉雅好声音",
+                                  text:"我觉得《#{feed.title}》听起来挺不错的，你觉得呢？（分享自 @喜马拉雅好声音 ）",
+                                  title:feed.title,
+                                  pic:picture_url('track', feed.wtImagePath, '180'),
+                                  url:"#{Settings.home_root}/#{user.uid}/sound/#{feed.toTid}"
+                              } %>
+                            <a href="javascript:;" class="bdShareBtn link1" data="<%= oj_dump(bds_config) %>">分享</a>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="comment_box_entry"></div>
+                        <div class="relay_box_entry"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  <% if feed.toTid %>
+    <%
+        if @all_play_list
+            @all_play_list=@all_play_list+','+feed.toTid.to_s
+        else
+            @all_play_list=feed.toTid.to_s
+        end
+    %>
+  <% end %>
+</li>
+<% end %>

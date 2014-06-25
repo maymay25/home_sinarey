@@ -1,0 +1,135 @@
+<div id="personalFollow" class="mgT30">
+    <div class="mainbox_left">
+        <div class="personal_container">
+            <div class="personal_header">
+                <div class="picture">
+                    <a href="<%= link_path("/#{@current_user.uid}/profile") %>">
+                        <img src="<%= picture_url('header', @current_user.logoPic, '60') %>">
+                    </a>
+                </div>
+                <div class="nav_wrap">
+                    <div class="username">
+                        <%= @current_user.nickname %>
+                        <% if @current_user.isVerified %><i class="VIcon">&nbsp;</i><% end %>
+                    </div>
+                    <ul class="nav_list">
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/profile") %>">主页</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/sound/") %>">声音</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/album/") %>">专辑</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/favorites/") %>">赞过的</a></li>
+                        <li class="nav_item on"><a href="<%= link_path("/#{@current_user.uid}/follow/") %>">关注</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/fans/") %>">粉丝</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/listened/") %>">听过</a></li>
+                        <% if @current_user.isVerified %>
+                        <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/publish/") %>">定时发布</a></li>
+                        <% end %>
+                    </ul>
+                </div>
+            </div>
+            <div class="personal_body">
+                <div class="body_top">
+                    <div class="left">
+                        <span class="title fl">我关注的人</span>
+                        <div class="selecter fl group-select selecter-s3" inited="true" val="<%= params[:following_group_id] || 0 %>">
+                            <div class="selecter-selected" data-value="0">
+                                <span class="selecter-text">分组</span> <em class="selecter-arrow">◆</em>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="right">
+                        <ul class="sub_nav_list">
+                            <li class="item first">
+                                <% tail = "following_group_id=#{params[:following_group_id]}" if params[:following_group_id] %>
+                                <a href="<%= link_path("/#{@current_user.uid}/follow/?#{tail}") %>">全部</a>
+                            </li>
+                            <li class="item">
+                                <a href="<%= link_path("/#{@current_user.uid}/follow/?is_mutual=true&#{tail}") %>">相互关注</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="personal_list_head">
+                    <div class="left"><%= (params[:q] and params[:q]!="") ? "找到符合条件的" : params[:is_mutual] ? "相互关注" : "共关注了" %><span class="follows_count"><%= @follows_count %></span>个人</div>
+                    <div class="searchPanel2 right">
+                        <% page_params = {} ;  data_options = page_params.to_s[1..-2] %>
+                        <input class="search_input" type="text" data-options="<%= javascript_data_options(is_mutual:params[:is_mutual]) %>" value="<%= params[:q] %>" name="" autocomplete="off" placeholder="搜索人">                       
+                        <span class="search_btn"></span>
+                    </div>
+                </div>
+
+                <div class="body_list_wrap">
+                    <ul class="body_list follow_list">
+                        <% @follows.each_with_index do |f,i| %>
+                        <%
+                          user = @users[f.following_uid]
+                          next if user.nil?
+                          is_follow,be_followed = @follow_status[user.uid]
+                          group_ids = @follow_group_ids_hash[f.id] || []
+                          if f.is_auto_push
+                            group_ids << '-1'
+                            groups = ['必听组']
+                          else
+                            groups = []
+                          end  
+                          group_ids.each do |group_id|
+                            fg = @fgs[group_id]
+                            next if fg.nil?
+                            groups << escape_javascript(fg.title)
+                          end
+                        %>
+                        <li class="item">
+                            <div class="content_wrap">
+                                <div class="picture">
+                                    <a href="<%= link_path "/#{user.uid}/" %>">
+                                        <img card="<%= user.uid %>" src="<%= picture_url('header', user.logoPic, '60') %>"></div>
+                                    </a>
+                                <div class="detail">
+                                    <div class="detail_top">
+                                        <a class="username" card="<%= user.uid %>" href="<%= link_path "/#{user.uid}/" %>">
+                                            <%= user.nickname %>
+                                            <% if user.isVerified %><i class="VIcon">&nbsp;</i><% end %>
+                                        </a>
+                                    </div>
+                                    <div class="detail_content"><%= user.personalSignature %></div>
+                                    <div class="detail_bottom">
+                                        <a href="<%= link_his_path(user.uid,'sound') %>">
+                                            <span class="left sound_counter"><%= @following_tracks_counts[i] %></span>
+                                        </a>
+                                        <a href="<%= link_his_path(user.uid,'fans') %>">
+                                            <span class="left follower_counter"><%= @following_followers_counts[i] %></span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="operate_btns">
+                                    <a class="sendLetterBtn" href="javascript:;" data-options="nickname:'<%= user.nickname %>'">
+                                        <span class="icon">发私信</span>
+                                    </a>
+                                    <a class="addBtn2 <%= "already" if is_follow %> <%= "both" if be_followed %>" data-options="<%= {uid:user.uid,is_follow:is_follow,be_followed:be_followed,nickname:user.nickname,remove:'li.item',remove_state:false}.to_json[1..-2] %>" href="javascript:;">
+                                        <span class="default"><%= (is_follow && be_followed) ? "相互" : is_follow ? "已" : "" %>关注</span>
+                                        <span class="hover">取消</span>
+                                    </a>
+                                </div>
+                                <div class="group_operate" title="<%= groups.join(',') %>" data-options="uid:<%= user.uid %>,sids:'<%= group_ids.join(',') %>',defaultText:'<%= CGI.escape(cut_groups(groups)) %>'">
+                                    <a class="group"><%= cut_groups(groups) %><span class="arrow_btm"></span></a>                                             
+                                </div>
+                            </div>
+                        </li>
+                        <% end %>
+                    </ul>
+
+                    <div class="pagingBar mgTB20">
+                        <%== paginate CustomPagination.new(@follows_count,@page,@per_page), {outer_window: 1, url:"/#{@current_uid}/follow", link_path: @current_uid.present?} %>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%== erb :'my/_mainbox_right' %>
+    
+
+</div>
+
+

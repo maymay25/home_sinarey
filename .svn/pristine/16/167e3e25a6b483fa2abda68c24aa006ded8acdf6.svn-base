@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset=utf-8 />
+  <title><%= content_for?(:meta_title) ? yield_content(:meta_title) : "喜马拉雅-听我想听" %></title>
+  <meta name="keywords" content="<%= content_for?(:meta_key).confirm && yield_content(:meta_key) %>" />
+  <meta name="description" content="<%= content_for?(:meta_description).confirm && yield_content(:meta_description) %>" />
+  <%== content_for?(:head).confirm && yield_content(:head) %>
+
+  <link href="<%= css_url '/css/web.css' %>" rel="stylesheet" type="text/css" />
+
+  <%== erb :_check_redirect %>
+  <% if @redirect_to_root %>
+  <script>
+    function isLogin(){
+      if(location.host.indexOf("test")!=-1){
+        return document.cookie.indexOf('4&_token=')!=-1; 
+      }else{
+        return document.cookie.indexOf('1&_token=')!=-1; 
+      }
+    }
+    var href = window.location.href;
+    if(isLogin()){
+      if(href.indexOf("#")<0){
+          window.location.replace(href.replace(window.location.host, window.location.host+"/#"));
+      }
+    }
+  </script>
+  <% end %>
+</head>
+
+<body>
+  <%== erb :_content_header, locals: { flag: 'default', bg_num: 1 + rand(11) } %>
+  <div class="bodyBgColor">
+    <div class="mainbox" id="mainbox">
+      <%== yield %>
+    </div>
+  </div>
+  <%== erb :_footer %>
+  <script type="text/javascript" id="bdshare_js" data="type=tools&amp;uid=6455400"></script>
+  <script type="text/javascript" id="bdshell_js"></script>
+
+  <!-- 百度分享初始化 -->
+  <div id="bdshare" class="bdshare_t get-codes-bdshare" style="visibility: hidden;">
+      <span class="bds_more" id='xima_bds_more'></span>
+  </div>
+
+  <script type="text/javascript">
+  if(document.getElementById("bdshell_js")){
+    document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + new Date().getHours();
+  }
+  </script>
+
+  <%== erb :_script %>
+  <% unless @current_uid %>
+    <%== erb :_fixed_bottom_ad %>
+  <% end %>
+  <%== content_for?(:onload).confirm && yield_content(:onload) %>
+  <%== erb :_bdhm %>
+</body>
+</html>
+

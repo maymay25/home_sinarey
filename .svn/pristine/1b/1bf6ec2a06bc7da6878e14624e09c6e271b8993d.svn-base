@@ -1,0 +1,20 @@
+class PersonalSettingsRoute < PersonalSettingsController
+
+  route :get, :post, '/personal_settings/message.ajax'     do dispatch(:message_page) end
+  route :get, :post, '/personal_settings/message'          do dispatch(:message_page) end
+  route :post,       '/personal_settings/update_message'   do dispatch(:update_message) end
+
+  route :get, :post, '/personal_settings/privacy.ajax'     do dispatch(:privacy_page) end
+  route :get, :post, '/personal_settings/privacy'          do dispatch(:privacy_page) end
+  route :post,       '/personal_settings/update_privacy'   do dispatch(:update_privacy) end
+
+  route :get, :post, '/personal_settings/blacklist.ajax'   do dispatch(:blacklist_page) end
+  route :get, :post, '/personal_settings/blacklist'        do dispatch(:blacklist_page) end
+  route :post,       '/home/add_to_blacklist'              do dispatch(:add_to_blacklist) end
+  route :post,       '/home/remove_from_blacklist'         do dispatch(:remove_from_blacklist) end
+
+  route :get, :post, '/personal_settings/feed.ajax'        do dispatch(:feed_page) end
+  route :get, :post, '/personal_settings/feed'             do dispatch(:feed_page) end
+  route :post,       '/personal_settings/update_feed'      do dispatch(:update_feed) end
+
+end

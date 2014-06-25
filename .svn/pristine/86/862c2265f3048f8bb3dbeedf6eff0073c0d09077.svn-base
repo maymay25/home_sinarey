@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset=utf-8 />
+  <%== erb :_seo_meta, locals: {seo_meta:{ default_key: "json:cms_data_home_page" }} %> 
+  <%== erb :_friendly_link, locals: {friendly_link:{ name: "unlogin" }} %>
+  <title><%= content_for?(:meta_title) ? yield_content(:meta_title) : "喜马拉雅-听我想听" %></title>
+  <meta name="keywords" content="<%= content_for?(:meta_key).confirm && yield_content(:meta_key) %>" />
+  <meta name="description" content="<%= content_for?(:meta_description).confirm && yield_content(:meta_description) %>" />
+  <%== content_for?(:head).confirm && yield_content(:head) %>
+  <link href="<%= css_url '/css/web.css' %>" rel="stylesheet" type="text/css" />
+
+  <%== erb :_check_redirect %>
+
+  <% if @current_uid.nil? %>
+  <script>
+    function isLogin(){
+      if(location.host.indexOf("test")!=-1){
+        return document.cookie.indexOf('4&_token=')!=-1; 
+      }else{
+        return document.cookie.indexOf('1&_token=')!=-1; 
+      }
+    }
+    (function(){
+    var href = window.location.href;
+      if(href.indexOf("/#")>=0 && !isLogin()){
+      window.location.href = href.replace(/#\/?/, "");
+    }
+    })();
+  </script>
+  <% end %>
+
+</head>
+
+
+<body class="welcome">
+
+  <div class="welcomeLoading"></div>
+
+  <% bg_num = 1 + rand(11) %>
+  <%== erb :_content_header, locals: { flag: 'default', bg_num: bg_num } %>
+
+  <!--页面内容 start-->
+  <div>
+
+    <div class="welcome_bg hidden">
+      <img id="welcome_bgimg" originsrc="<%= static_url "/css/img/welcome/home_bg_#{bg_num}.jpg" %>" />
+      <div class="mask"></div>
+      <div class="welcome_bd">
+        <div class="welcome_hd"></div>
+        <a class="discover" href="/explore/"></a>
+        <div class="welcome_moblie"><a class="downloadMobile" href="/download/"></a></div>
+
+        <div class="welcome_footer">
+
+          <div class="footer_nav">
+              <a target="_blank" rel="nofollow" href="/help/aboutus/">关于我们</a>
+              <a target="_blank" rel="nofollow" href="/help/contact_us/">联系我们</a>
+              <a target="_blank" rel="nofollow" href="/help/official_news/" >公司新闻</a>
+              <a target="_blank" rel="nofollow" href="https://help.ximalaya.com/" >帮助中心</a>
+              <a target="_blank" rel="nofollow" href="http://blog.ximalaya.com/" >官方博客</a>
+              <a target="_blank" href="/explore/u/">个人电台</a>
+              <a target="_blank" href="/explore/album/" rel="nofollow">热门专辑</a>
+              <a target="_blank" href="/explore/sound/" class="last">热门声音</a>
+          </div>
+          <div class="welcome_footer_cr">
+            <span class="fl">网络文化经营许可证-文网文[2010]150号&nbsp;&nbsp;&nbsp;&nbsp;京ICP备12017437号-1</span>
+            <span class="fr">Copyright © 2011-2012 www.ximalaya.com lnc.ALL Rights Reserved</span>
+          </div>
+          <% if content_for?(:friendly_link) %>
+            <div class="welcome_footer_link">
+              <%== yield_content(:friendly_link) %>
+            </div>
+          <% end %>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+  <!--页面内容 end-->
+
+  <div class="mainbox" id="mainbox">
+
+  </div>
+
+  <% content_for :script_own do  %>
+  <script>
+      requirejs(["page/welcome"], function (page) {
+        page.init();
+      });
+  </script>
+  <% end %>
+
+
+    <%== erb :_footer %>
+
+    <script type="text/javascript" id="bdshare_js" data="type=tools&amp;uid=6455400"></script>
+    <script type="text/javascript" id="bdshell_js"></script>
+
+    <%== erb :_script %>
+    
+    <% if @current_uid.nil? %>
+      <%== erb :_fixed_bottom_ad %>
+    <% end %>
+
+    <!--[if IE 6]>
+    <script src="http://static2.test.ximalaya.com/js/plugin/belatedpng.js"></script>
+    <script type="text/javascript">
+    document.execCommand("BackgroundImageCache",false,true);
+    DD_belatedPNG.fix("div, a, span, li");
+    </script>
+    <![endif]-->
+    <%== erb :_bdhm %>
+</body>
+</html>

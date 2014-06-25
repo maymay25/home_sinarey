@@ -1,0 +1,39 @@
+<% now = Time.new %>
+<script type="text/javascript">
+<% if @current_user %>
+var current_user = {
+'uid': <%== @current_user.uid %>,
+'nickname': '<%== escape_javascript(@current_user.nickname) %>',
+'logoPic': '<%== picture_url("header", @current_user.logoPic, 16) %>',
+'logoPic30': '<%== picture_url("header", @current_user.logoPic, 30) %>',
+'isVerified': <%== @current_user.isVerified %>,
+'province': '<%== (tmp=@current_user.province) && escape_javascript(tmp) %>',
+'city': '<%== (tmp=@current_user.city) && escape_javascript(tmp) %>',
+'personalSignature': '<%== (tmp=@current_user.personalSignature) && escape_javascript(tmp) %>',
+'ptitle': '<%== (tmp=@current_user.ptitle) && escape_javascript(tmp) %>',
+'guidePlayPanel': <%== @current_user.guidePlayPanel %>,
+'guideVoicePanel': <%== @current_user.guideVoicePanel %>,
+'guideSharePanel': <%== @current_user.guideSharePanel %>
+};
+<% else -%>
+var current_user = {};
+<% end -%>
+var config = {
+STATIC_ROOT:"<%== Settings.static_root %>",
+STATIC_PATH:"<%== Settings.static_root %>",
+FDFS_PATH:"<%== Settings.fdfs_root %>",
+LOGIN_PATH:"<%== Settings.login_url %>",
+DIRECT_DTRES_ROOT: "<%== Settings.dtres_root %>",
+TRANSCODING_ROOT: "<%== Settings.transcoding_root %>",
+UPLOAD_ROOT: "<%== Settings.upload_root %>",
+CURRENT_USER: current_user,
+SUGGEST_URL:"<%== Settings.suggest_url %>",
+WARNING_SEQ: "<%== Settings.warning_seq %>",
+PLAYER_PATH: "<%== static_url Settings.player_path %>",
+SERVER_TIME: "<%== now.to_i * 1000 + now.usec / 1000 %>",
+TOKEN_LABEL: "<%== Settings.cookies.token_label %>",
+REMEMBERME_LABEL: "<%== Settings.cookies.remember_me_label %>",
+ASSETS_VERSION: "<%== @assets_version %>"
+};
+config.TIME_GAP = new Date().getTime() - config.SERVER_TIME;
+</script>

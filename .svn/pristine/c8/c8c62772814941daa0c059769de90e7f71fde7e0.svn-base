@@ -1,0 +1,257 @@
+<!-- 头部 start-->
+
+<div class="header">
+  <div class="header_wrapper">
+    <a class="logo" href="<%= link_path "/" %>"></a>
+    <div class="menu <% if flag == 'welcome' %>hidden<% end %>">
+      <% if @current_uid %>
+      <a class="menu_index <%= 'on' if @temp[:page]=="main#index" %>" href="<%= link_path "/" %>">首页</a>
+      <% end %>
+      <a class="menu_explore <%= 'on' if @temp[:page]=="explore#index" %>" href="<%= link_path "/explore/" %>" class="menuItmeDiscover">发现<span></span><i class="bud"></i></a>
+      <a class="menu_u <%= 'on' if @temp[:page]=="explore#user_page" %>" href="<%= link_path "/explore/u" %>" class="wider">个人电台</a>
+      <a class="menu_sound <%= 'on' if @temp[:page]=="explore#sound_page" or @temp[:page]=="explore#seo_sound_page" %>" href="<%= link_path "/explore/sound" %>">声音</a>
+      <a class="menu_album <%= 'on' if @temp[:page]=="explore#album_page" %>" href="<%= link_path "/explore/album" %>">专辑</a>
+      <a rel="nofollow" href="/download" target="_blank">客户端</a>
+    </div>
+    <a class="uploadRecordBtn" href="/upload" target="_blank">上传录制</a>
+
+    <% if @temp[:page]=="main#index" %>
+    <div class="loginPanelBox loginPanelWelBox">
+        <a class="registerBtn" href="<%= Settings.login_url %>">登录</a>
+        <a class="registerBtn" href="<%= Settings.register_url %>">注册</a>
+    </div>
+    <% end %>
+
+  </div>
+</div>
+
+<div class="discoverMenu <% if flag=="welcome" %>hidden<% end %>"  <% if @temp[:page]=="explore#index" %>style="display:block;"<% end %>>
+  
+  <img id="bgimg" originsrc="<%= static_url "/css/img/welcome/home_bg_#{bg_num}.jpg" %>" />
+
+  <div class="discoverMenuMask"></div>
+  <div class="discoverMenu_wrapper">
+    <ul>
+      <li>
+        <a href="<%= link_path '/explore/album?category=1' %>" class="cateBtn2_news"><i></i><span>最新资讯</span></a>
+      </li>
+      <li>
+        <a href="<%= link_path '/explore/album?category=2' %>" class="cateBtn2_music"><i></i><span>音乐</span></a>
+      </li>
+      <li>
+        <a href="<%= link_path '/explore/album?category=3' %>" class="cateBtn2_book"><i></i><span>有声小说</span></a>
+      </li>
+      <li>
+        <a href="<%= link_path '/explore/album?category=12' %>"class="cateBtn2_comic" ><i></i><span>相声评书</span></a>
+      </li>
+      <li>
+        <a href="<%= link_path '/explore/album?category=4' %>" class="cateBtn2_entertainment"><i></i><span>综艺娱乐</span></a>
+      </li>
+      <li>
+        <a href="<%= link_path '/explore/album?category=10' %>" class="cateBtn2_emotion"><i></i><span>情感生活</span></a>
+      </li>
+      <li>
+        <a href="<%= link_path '/explore/album?category=9' %>" class="cateBtn2_culture"><i></i><span>历史人文</span></a>
+      </li>
+      <li>
+        <a href="<%= link_path '/explore/album?category=5' %>" class="cateBtn2_train"><i></i><span>外语</span></a>
+      </li>
+      <li>
+        <a href="<%= link_path '/explore/album?category=13' %>" class="cateBtn2_chair"><i></i><span>培训讲座</span></a>
+      </li>
+      <li>
+        <a href="<%= link_path '/explore/album?category=14' %>" class="cateBtn2_baijia"><i></i><span>百家讲坛</span></a>
+      </li>
+      <li>
+        <a href="<%= link_path '/explore/album?category=15' %>" class="cateBtn2_radioplay"><i></i><span>广播剧</span></a>
+      </li>
+      <li>
+        <a href="<%= link_path '/explore/album?category=16' %>" class="cateBtn2_opera"><i></i><span>戏曲</span></a>
+      </li>
+      <li>
+        <a href="<%= link_path '/explore/album?category=6' %>" class="cateBtn2_kid"><i></i><span>儿童</span></a>
+      </li>
+      <li>
+        <a href="<%= link_path '/explore/album?category=17' %>" class="cateBtn2_radio"><i></i><span>电台</span></a>
+      </li>
+      <li>
+        <a href="<%= link_path '/explore/album?category=8' %>" class="cateBtn2_finance"><i></i><span>商业财经</span></a>
+      </li>
+      <li>
+        <a href="<%= link_path '/explore/album?category=18' %>" class="cateBtn2_it"><i></i><span>IT科技</span></a>
+      </li>
+      <li>
+        <a href="<%= link_path '/explore/album?category=7' %>" class="cateBtn2_health"><i></i><span>健康养生</span></a>
+      </li>
+      <li>
+        <a href="<%= link_path '/explore/album?category=11' %>" class="cateBtn2_other"><i></i><span>其它</span></a>
+      </li>
+    </ul>
+  </div>
+</div>
+<div>
+  <div class="floatHeader">
+    <div class="floatHeader_wrapper">
+      <!-- 浮动头部-->
+      <div class="grobalPlayer">
+        <div class="controlPanel">
+          <div class="progressBar player_progressbar">
+            <div class="playBar player_playbar"></div>
+          </div>
+          <div class="cover"></div>
+          <div class="controls">
+            <a class="prevBtn is-btn-disabled"><span class="disabled"></span></a>
+            <a class="playBtn"><span class="disabled"></span></a>
+            <a class="nextBtn is-btn-disabled"><span class="disabled"></span></a>
+          </div>
+        </div>
+        <a class="orderplayBtn j-player_model" title="顺序播放"></a>
+        <a title="微闻联播130313：猪投上海  沙逼北京 " href="#" class="title">微闻联播130313：猪投上海沙逼</a>
+      </div>
+
+      <div class="searchPanel">
+        <div class="selecter selecter-scope">
+          <input type="hidden" name="" value=""/>
+          <div data-value="all" class="selecter-selected">
+            <span class="selecter-text">全部</span> <em class="selecter-arrow"></em>
+          </div>
+          <div class="selecter-options">
+            <ul>
+              <li data-value="all" class="selecter-item">全部</li>
+              <li data-value="voice" class="selecter-item">声音</li>
+              <li data-value="user" class="selecter-item">用户</li>
+              <li data-value="album" class="selecter-item">专辑</li>
+            </ul>
+          </div>
+        </div>
+        <input type="text" value="" name="textfield" placeholder="搜索声音、专辑、用户" autocomplete="off" keyowrds="">
+        <a class="searchBtn"></a>
+        <div class="results_wrap hidden"></div>
+
+      </div>
+
+
+      <div class="loginPanelBox">
+        <div class="bgVLineL"></div>
+        <div class="loginPanel">
+          <% if @current_uid %>
+            <a href="<%= link_path "/msgcenter/notice" %>" class="getNewMsgBtn"></a>
+            <a href="#" class="goHomeBtn"></a>
+            <a class="userfaceBtn" href="<%= link_path "/#{@current_uid}/profile" %>" title="<%= @current_user.nickname %>">
+               <img alt="" src="<%= picture_url('header',@current_user.logoPic,'60') %>" />
+               <span><%= cut_str(@current_user.nickname, 10) %></span>
+            </a>
+            <div class="loginPanel_accountPop hidden">
+              <ul>
+                <li><a href="<%= link_path "/#{@current_uid}/profile" %>">个人中心</a></li>
+                <li><a href="<%= Settings.profile_url %>" target="_blank">个人设置</a></li>
+                <li><a href="<%= Settings.logout_url %>">退出</a></li>
+              </ul>
+              <div class="bud"></div>
+            </div>
+          <% else %>
+          <a class="loginBtn" href="javascript:;"></a>
+          <a class="registerBtn" href="<%= Settings.register_url %>">注册</a>
+          <% end %>
+
+          <% if @current_uid %>
+           <!-- 账号 -->
+
+            <div class="loginPanel_MenuPop hidden">
+              <ul>
+                <li>
+                  <a href="<%= link_path "/msgcenter/notice/" %>">系统通知</a>
+                </li>
+                <li>
+                  <a href="<%= link_path "/#{@current_uid}/fans" %>">我的粉丝</a>
+                </li>
+                <li>
+                  <a href="<%= link_path "/msgcenter/referme" %>">@我的</a>
+                </li>
+                <li>
+                  <a href="<%= link_path "/msgcenter/comment" %>">评论</a>
+                </li>
+                <li>
+                  <a href="<%= link_path "/msgcenter/letter" %>">私信</a>
+                </li>
+              </ul>
+              <div class="bud"></div>
+            </div>
+
+           <div class="loginPanel_MsgPop hidden">
+            <ul>
+              <li><a href="<%= link_path "/msgcenter/notice" %>">系统通知</a></li>
+              <li><a href="<%= link_path "/msgcenter/referme" %>">@我的</a></li>
+              <li><a href="<%= link_path "/msgcenter/comment" %>">评论</a></li>
+              <li><a href="<%= link_path "/msgcenter/letter" %>">私信</a></li>
+            </ul>
+            <div class="bud"></div>
+            <div class="del"></div>
+           </div>
+          <% else %>
+           <!-- 第三方账号登录 -->
+           <div class="loginPanel_thirdLoginPop hidden">
+            <p><a href="javascript:;" class="qqLoginBtn"></a></p>
+            <p><a href="javascript:;" class="weiboLoginBtn"></a></p>
+            <p><a href="javascript:;" class="renrenLoginBtn"></a></p>
+            <p><a href="javascript:;" class="login_click">用邮箱/手机登录</a></p>
+            <div class="bud"></div>
+           </div>
+           <!-- 本地账号登录 -->
+           <div class="loginPanel_loginPop hidden">
+            <div class="inputLine gapB"><div class="left">账号</div><div class="right"><input type="text" value="" class="username"></div></div>
+            <div class="inputLine"><div class="left">密码</div><div class="right"><input type="password" value="" class="password"></div></div>
+            <div class="inputLine is-inputLine-last"><div class="left"></div>
+              <div class="right">
+                <input type="checkbox" value="" class="rememberMe">记住我
+                &nbsp;<a href="/passport/user_info/show">忘记密码？</a>
+              </div>
+            </div>
+            <a class="submitBtn"></a>
+            <div>
+              <a href="javascript:;" class="qqSmallLoginBtn"></a>
+              <a href="javascript:;" class="weiboSmallLoginBtn"></a>
+              <a href="javascript:;" class="renrenSmallLoginBtn"></a>
+              <a href="javascript:;" class="thirdlogin_click">使用第三方登录</a>
+            </div>
+            <div class="bud"></div>
+           </div>
+          <% end %>
+
+        </div>
+      </div>
+      <div class="volumePanelBox">
+        <div class="bgVLineL"></div>
+        <div class="volumePanelWrapper">
+          <div class="volumePanel">
+                <a class="volumePanel_muteBtn" title="静音"></a>
+                <div class="volumePanel_volumebar_wrapper">
+                  <div class="volumePanel_volumebar">
+                    <div class="volumePanel_volume"></div>
+                    <div class="volumePanel_seekBtn"><div></div></div>
+                  </div>
+                </div>
+                <div class="volumePanel_mark"></div>
+            </div>
+        </div>
+        <div class="bgVLineR"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="upgradePrompt hidden"></div>
+
+</div>
+
+<!--头部 end-->
+
+<!-- mark -->
+
+<% if cookies[:close_download].nil? and !@temp[:view_downloadApp] %>
+<% @temp[:view_downloadApp] = true %>
+<div class="downloadApp">
+  <a href="javascript:;" class="closeBtn" title="关闭"></a>
+  <!-- <span class="tit">移动App</span> -->
+  <a href="/download" target="_blank"><img src="<%= static_url "/css/img/code.png" %>">下载客户端</a>
+</div>
+<% end %>

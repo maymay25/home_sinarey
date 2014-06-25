@@ -1,0 +1,56 @@
+<div class="mainbox_wrapper">
+    <div class="set_container">
+        <div class="set_header">账号设置</div>
+        <div class="set_left">
+            <div class="set_useravatar">
+                <a class="userface" href="<%= link_path "/#{@current_uid}" %>">
+                    <img src="<%= picture_url('header', @current_user.logoPic, '200') %>">
+                </a>
+            </div>
+            <ul class="set_nav">
+                <li><a href="<%= Settings.profile_url %>">个人设置</a></li>
+                <li><a href="<%= link_path "/personal_settings/message" %>">消息设置</a></li>
+                <li class="on">
+                    <a href="<%= link_path "/personal_settings/privacy" %>">隐私设置</a>
+                    <ul class="set_nav sortlist-expand">
+                        <li><a href="<%= link_path "/personal_settings/privacy" %>">通用</a></li>
+                        <li><a href="<%= link_path "/personal_settings/blacklist" %>">黑名单</a></li>
+                        <li class="on"><a href="javascript:;">新鲜事</a></li>
+                    </ul>
+                </li>
+                <li><a href="/passport/header">头像设置</a></li>
+                <li><a href="/passport/sync_set">同步设置</a></li>
+            </ul>
+
+        </div>
+        <div class="set_right">
+            <div class="set_title">新鲜事设置</div>
+            <div class="set_message">
+                <form action="" method="post">
+
+                    <div class="set_Inner">
+                        <div>设置我的以下操作是否发送新鲜事</div>
+                        <ul>
+                            <li>
+                                <input type="checkbox" name="feed_comment" <% if @personal_setting.is_feed_comment %>checked="checked"<% end %> value="1" id="checkbox_feed_comment">                    
+                                <label for="checkbox_feed_comment">评论</label>
+                            </li>
+                            <li>
+                                <input type="checkbox" name="feed_favorite" <% if @personal_setting.is_feed_favorite %>checked="checked"<% end %> value="1" id="checkbox_feed_favorite">                    
+                                <label for="checkbox_feed_favorite">赞</label>
+                            </li>
+                            <li>
+                                <input type="checkbox" name="feed_following" <% if @personal_setting.is_feed_following %>checked="checked"<% end %> value="1" id="checkbox_feed_following">                    
+                                <label for="checkbox_feed_following">关注</label>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="set_operate">
+                        <a class="confirmBtn">保存设置</a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>

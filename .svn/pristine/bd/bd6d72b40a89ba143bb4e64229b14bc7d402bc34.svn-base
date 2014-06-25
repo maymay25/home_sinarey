@@ -1,0 +1,196 @@
+<div id="personalSound" class="mgT30">
+    <div class="mainbox_left">
+        <div class="personal_container">
+            <div class="personal_header">
+                <div class="picture">
+                    <a href="<%= link_path("/#{@u.uid}/") %>">
+                        <img src="<%= picture_url('header', @u.logoPic, '60') %>">
+                    </a>
+                </div>
+                <div class="nav_wrap">
+                    <div class="username">
+                        <%= @u.nickname %>
+                        <% if @u.isVerified %><i class="VIcon">&nbsp;</i><% end %>
+                        <a class="addBtn3 <%= "already" if @is_follow %> <%= "both" if @be_followed %>" data-options="<%= {uid:@u.uid,is_follow:@is_follow,be_followed:@be_followed,nickname:@u.nickname}.to_json[1..-2] %>" href="javascript:;">
+                            <span class="default"><%= (@is_follow && @be_followed) ? "相互" : @is_follow ? "已" : "" %>关注</span>
+                            <span class="hover">取消</span>
+                        </a>
+                    </div>
+                    <ul class="nav_list">
+                        <li class="nav_item"><a href="<%= link_path("/#{@u.uid}/") %>">主页</a></li>
+                        <li class="nav_item on"><a href="<%= link_path("/#{@u.uid}/sound/") %>">声音</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@u.uid}/album/") %>">专辑</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@u.uid}/favorites/") %>">赞过的</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@u.uid}/follow/") %>">关注</a></li>
+                        <li class="nav_item"><a href="<%= link_path("/#{@u.uid}/fans/") %>">粉丝</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="personal_body">
+                <div class="body_top">
+                    <div class="left">
+                        <span class="title"><%= @u.nickname %>的声音</span>
+                    </div>
+                    <div class="right">
+                        <ul class="sub_nav_list">
+                            <li class="item first">
+                                <% 
+                                order = params[:order]=="id asc" ? "id desc" : "id asc"
+                                q = {q:params[:q],order:order}.delete_if{ |key,value| value.nil? or value=="" }
+                                link_params = q.collect{|key,value| "#{key}=#{value}" }.join("&")
+                                 %>
+                                <a href="<%= link_path "/#{@u.uid}/sound/?#{link_params}" %>" class="sort_icon <%= params[:order]=="id asc" ? 'down' : 'up' %>">发布时间</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="personal_list_head">
+                    <div class="left"><%= (params[:q] and params[:q]!="") ? "找到#{@track_records_count}个符合条件的声音" : "共有#{@track_records_count}个声音" %></div>
+                    <div class="searchPanel2 right">                        
+                        <input class="search_input" type="text" value="<%= params[:q] %>" name="" autocomplete="off" placeholder="搜索声音">                      
+                        <span class="search_btn"></span>
+                    </div>
+                </div>
+
+                <% if @track_records %>
+                    <% if @track_records.count>0 %>
+                    <div class="body_list_wrap">
+                        <ul class="body_list" sound_ids="<%= @track_records.collect{|r|r.track_id}.join(",") %>">
+                            <% @track_records.each_with_index do |r,i| %>
+                            <%
+                              t = @tracks[r.track_id]
+                              next if t.nil? or t.is_deleted
+                              album = @albums[t.album_id]
+                              user = @users[t.uid]
+                              is_favorited = @is_favorited[t.id]
+                              index ||= 0
+                              track_play_count = @track_plays_counts[index]
+                              track_favorite_count = @track_favorites_counts[index]
+                              track_comment_count = @track_comments_counts[index]
+                              track_share_count = @track_shares_counts[index]
+                              index += 1
+                            %>
+                            <li class="item">
+                                <div class="content_wrap" sound_id="<%= t.id %>">
+                                    <div class="sound">
+
+                                        <div class="sound_unexpandBox">
+                                            <div class="sound_titlebar">
+                                                <a href="<%= link_path "/#{t.uid}/sound/#{t.id}" %>" class="sound_title"><%= t.title %></a>
+                                                <% if album %><span>&nbsp;&nbsp;来自<a href="<%= link_path "/#{album.uid}/album/#{album.id}" %>">《<%= album.title %>》</a></span><% end %>
+                                                <% if r.op_type == 2 %><span>【转采】</span><% end %>
+                                                <span class="sound_playcount" title="<%= track_play_count %>次播放"><%= track_play_count %></span>
+                                            </div>
+                                            <div class="smallPlayer" sound_uploadid="<%= t.upload_id %>" sound_wave="<%= file_url t.waveform %>">
+                                                <a href="javascript:;" class="playBtn"></a>
+                                                <span class="duration"><%= parse_duration t.duration %></span>
+                                                <% if t.cover_path and t.cover_path!="" %>
+                                                <div class="pin" sound_popsrc="<%= t.id %>">
+                                                    <a href="<%= link_path "/#{t.uid}/sound/#{t.id}" %>" class="soundface">
+                                                        <img alt="" src="<%= picture_url('track', t.cover_path, '60') %>" data-options="defaultImg:track_60">
+                                                        <span></span>
+                                                    </a>
+                                                </div>
+                                                <% end %>
+                                            </div>
+                                        </div>
+
+                                        <div class="sound_expandBox">
+                                            <div class="sound_titlebar">
+                                                <a class="sound_title" href="<%= link_path "/#{t.uid}/sound/#{t.id}" %>"><%= t.title %></a>
+                                                <span class="sound_playcount" title="<%= track_play_count %>次播放"><%= track_play_count %></span>
+                                                <div class="fr"><span class="sound_position">00:00</span>/<span class="sound_duration"><%= parse_duration t.duration %></span></div>
+                                            </div>
+                                            <div class="feed_middlePlayerBox">
+                                                <div class="middlePlayer">
+                                                    <div class="left">
+                                                        <a class="playBtn"></a>
+                                                    </div>
+                                                    <div class="right">
+                                                        <!-- 进度条 -->
+                                                        <div class="player_progressbar">
+                                                            <div class="player_progressbarBg"></div>
+                                                            <div class="player_seekbar"></div>
+                                                            <div class="player_playbar"></div>
+                                                            <% if t.waveform %>
+                                                                <div class="player_wavebox" sound_wave="<%= get_wave_url t.waveform %>" sound_uploadid="<%= t.upload_id %>"></div>
+                                                            <% end %>
+                                                             <div class="player_progressbarCoverBg"></div>
+                                                            <div class="player_nonius">
+                                                                <div class="player_nonius_cover"></div>
+                                                                <div class="player_nonius_time">00:00</div>
+                                                                <div class="player_nonius_line5"></div>
+                                                                <div class="player_nonius_line3"></div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- 二维评论 -->
+                                                        <div class="player_commentbar">
+                                                        </div>
+                                                        <div class="player_operate">
+                                                            <a href="javascript:;" class="player_commentbarBtn"  title="显示/隐藏评论"></a>
+                                                        </div>
+                                                    </div>
+
+                                                    <% if t.cover_path and t.cover_path!="" %>
+                                                    <div class="pin" sound_popsrc="<%= t.id %>">
+                                                        <a href="<%= link_path "/#{t.uid}/sound/#{t.id}" %>" class="soundface">
+                                                            <img alt="" src="<%= picture_url('track', t.cover_path, '60') %>" data-options="defaultImg:track_60">
+                                                            <span></span>
+                                                        </a>
+                                                    </div>
+                                                    <% end %>
+
+                                                </div>
+                                            </div>
+                                            <div class="sound_content">
+                                              <%= t.intro.truncate(160) if t.intro %>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="sound_bottom">
+                                            <span class="createtime"><%= parse_time_until_now(r[:created_at]) %></span>
+                                            <div class="fr">
+                                                <a class="downloadToMobile link1">下载到手机</a>
+                                                <a href="javascript:;" class="likeBtn link1 <%= 'is-sound-liked' if is_favorited %>">赞(<span class="count"><%= track_favorite_count %></span>)</a>
+                                                <a href="javascript:;" class="commentBtn link1">评论(<span class="count"><%= track_favorite_count %></span>)</a>
+                                                <a href="javascript:;" class="forwardBtn link1">转采(<span class="count"><%= track_share_count %></span>)</a>
+                                                <% bds_config = {
+                                                    bdDes:"喜马拉雅好声音",
+                                                    text:"#{t.intro.truncate(80) if t.intro} 我觉得《#{t.title}》听起来挺不错的，你觉得呢？（分享自 @喜马拉雅好声音 ）",
+                                                    title:t.title,
+                                                    pic:picture_url('track', t.cover_path, '180'),
+                                                    url:"#{Settings.home_root}/#{t.uid}/sound/#{t.id}"
+                                                } %>
+                                                <a href="javascript:;" class="bdShareBtn link1" data="<%= oj_dump(bds_config) %>">分享</a>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="comment_box_entry"></div>
+                                            <div class="relay_box_entry"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <% end %>
+                        </ul>
+                        <div class="pagingBar mgTB20">
+                            <%== paginate CustomPagination.new(@track_records_count,@page,@per_page), {outer_window: 1, url:"/#{@u.uid}/sound", link_path: @current_uid.present?} %>
+                        </div> 
+                    </div>
+                    <% elsif @page <= 1 %>
+                    <div class="noItem">                    
+                        <span class="noItemTit">啊呀！<%= @u.nickname %>还没有声音！</span><br>
+                    </div>
+                    <% end %>
+                <% end %>
+            </div>
+        </div>
+    </div>
+
+    <%== erb :_mainbox_sound_right %>
+    
+    <%== $comment_inputbox_template %>
+    
+</div>

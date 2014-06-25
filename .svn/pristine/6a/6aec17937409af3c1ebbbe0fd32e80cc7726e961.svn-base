@@ -1,0 +1,134 @@
+GEM
+  remote: http://ruby.taobao.org/
+  remote: http://ruby.ximalaya.com/
+  specs:
+    activemodel (3.2.18)
+      activesupport (= 3.2.18)
+      builder (~> 3.0.0)
+    activerecord (3.2.18)
+      activemodel (= 3.2.18)
+      activesupport (= 3.2.18)
+      arel (~> 3.0.2)
+      tzinfo (~> 0.3.29)
+    activesupport (3.2.18)
+      i18n (~> 0.6, >= 0.6.4)
+      multi_json (~> 1.0)
+    amq-protocol (1.9.2)
+    arel (3.0.3)
+    backports (3.6.0)
+    bigdecimal (1.2.5)
+    builder (3.0.4)
+    bunny (1.2.1)
+      amq-protocol (>= 1.9.2)
+    celluloid (0.15.2)
+      timers (~> 1.1.0)
+    connection_pool (2.0.0)
+    core_async (1.0.0)
+      sidekiq (~> 3.0)
+    daemons (1.1.9)
+    eventmachine (1.0.3-x86-mingw32)
+    feed (0.0.4)
+      thrift (~> 0.9.0)
+    hessian2 (2.0.5)
+      bigdecimal
+    i18n (0.6.9)
+    idservice_client (0.0.1)
+    json (1.8.1)
+    mini_portile (0.6.0)
+    multi_json (1.10.0)
+    murmurhash (0.0.1)
+    mysql2 (0.3.15)
+    nokogiri (1.6.2.1-x86-mingw32)
+      mini_portile (= 0.6.0)
+    oj (2.9.3)
+    passport_thrift_client (0.1.1)
+    profile_thrift_client (0.0.1)
+    rack (1.5.2)
+    rack-protection (1.5.3)
+      rack
+    rack-test (0.6.2)
+      rack (>= 1.0)
+    rake (10.3.2)
+    redis (3.0.6)
+    redis-namespace (1.4.1)
+      redis (~> 3.0.4)
+    sanitize (2.1.0)
+      nokogiri (>= 1.4.4)
+    settingslogic (2.0.9)
+    sidekiq (3.0.2)
+      celluloid (>= 0.15.2)
+      connection_pool (>= 2.0.0)
+      json
+      redis (>= 3.0.6)
+      redis-namespace (>= 1.3.1)
+    sinarey (1.0.2)
+      sinatra (= 1.4.4)
+    sinarey_support (0.0.3)
+    sinatra (1.4.4)
+      rack (~> 1.4)
+      rack-protection (~> 1.4)
+      tilt (~> 1.3, >= 1.3.4)
+    sinatra-contrib (1.4.2)
+      backports (>= 2.0)
+      multi_json
+      rack-protection
+      rack-test
+      sinatra (~> 1.4.0)
+      tilt (~> 1.3)
+    stat-analysis-query (0.0.7)
+      thrift
+    stat-count-client (0.0.8.1)
+      hessian2
+      thrift-client
+    thin (1.6.2)
+      daemons (>= 1.0.9)
+      eventmachine (>= 1.0.0)
+      rack (>= 1.0.0)
+    thrift (0.9.1)
+    thrift-client (0.3.4)
+      thrift (~> 0.9.1)
+    tilt (1.4.1)
+    timerizer (0.1.4)
+    timers (1.1.0)
+    ting_model (0.3.4)
+      activerecord
+    tzinfo (0.3.39)
+    will_paginate (3.0.5)
+    wordfilter_client (0.0.2)
+    xunch (0.0.11)
+      murmurhash (~> 0.0.1)
+      redis (~> 3.0.5)
+    yajl-ruby (1.2.0)
+
+PLATFORMS
+  x86-mingw32
+
+DEPENDENCIES
+  activerecord (~> 3.2)
+  bunny
+  core_async (= 1.0.0)
+  feed (>= 0.0.2)
+  hessian2
+  idservice_client
+  mysql2
+  oj
+  passport_thrift_client (= 0.1.1)
+  profile_thrift_client (= 0.0.1)
+  rake
+  redis (= 3.0.6)
+  sanitize
+  settingslogic
+  sinarey
+  sinarey_support
+  sinatra-contrib (= 1.4.2)
+  stat-analysis-query (= 0.0.7)
+  stat-count-client (>= 0.0.6)
+  thin
+  thrift (~> 0.9.0)
+  thrift-client
+  timerizer
+  ting_model (= 0.3.4)
+  will_paginate (~> 3.0)
+  wordfilter_client (>= 0.0.2)
+  xunch (>= 0.0.6)
+  yajl-ruby

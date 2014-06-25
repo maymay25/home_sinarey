@@ -1,0 +1,273 @@
+<link href="<%= css_url '/css/passport/passport.css' %>" rel="stylesheet" type="text/css" />
+<!--主体 start-->
+<div id="home_wrapper">
+    <div id="home_containter">
+        <div class="personalSet aboutUs aboutUs-recruit">
+
+            <div class="personalSet-main">
+                <div class="personalSet-main-tit"> <strong>招纳贤士</strong>
+                </div>
+                <div class="aboutUs-panel">
+                    <p>
+                    <strong>推荐系统数据分析师</strong><br><br>
+
+
+                    汇报对象：技术总监<br><br>
+                    
+
+                    职位描述：<br>
+
+                    1、研究分析网站运营数据<br>
+
+                    2、用户兴趣建模和推荐算法设计<br><br>
+
+                    基本要求：<br>
+
+                    学历要求：全日制统招本科<br>
+
+                    性别要求：男<br>
+
+                    年龄要求：25-35<br>
+
+                    工作年限：3年以上<br><br>
+                     
+
+                    岗位要求：<br>
+
+                    1、 有良好的数学素养，对数据比较敏感，具有较强的数据分析挖掘能力<br>
+
+                    2、 熟练掌握R语言，熟悉MATLAB,SPSS,SAS等分析工具<br>
+
+                    3、 熟悉一门编程语言，熟悉常用算法和数据结构，了解map/reduce分布式计算原理<br>
+
+                    4、 对统计学、数据挖掘、机器学习、自然语言处理有较深入研究者优先<br>
+
+                    5、 有大规模用户数据或互联网内容数据处理经验者优先<br>
+
+                    6、 有推荐、广告、搜索相关工作经验者优先<br><br>
+
+                    
+                    
+                    
+                    联系人：lolita@ximalaya.com<br><br><br>
+                     </p>
+                    <p>
+                    <strong>PR和品牌经理</strong><br><br>
+
+                     
+
+                    汇报对象：市场总监<br><br>
+
+                    基本要求：<br>
+
+                     
+
+                    年龄要求：25-35<br>
+
+                    工作年限：3年以上<br><br>
+
+                    岗位要求：<br>
+
+                    1、负责公司所有对外PR工作，拓展和维护公司媒体资源，与重点媒体及记者时时沟通，及时反馈媒体合作意向。<br>
+
+                    2、建立媒体档案库，并能根据需求，联络、邀请各类媒体，与各界媒体保持良好关系。<br>
+
+                    3、能根据公司产品，进行新闻点和创意点的策划、组织，撰写媒体稿件。<br>
+
+                    4、建立并维护日常新闻稿件的发布媒体，监控、评估发布媒体的宣传效果。<br>
+
+                    5、深入挖掘和拓展自有品牌，从品牌定位、精神内涵、品牌推广等多个层面进行综合管理。<br>
+
+                    6、策划、指导、控制、协调并参与所有公关活动、市场活动，负责微博、微信等新媒体营销。<br><br>
+
+                     
+
+                    职位要求：<br>
+
+                    1、  具有极强的营销创意策划能力，对传播有洞察力，有很强的执行力。<br>
+
+                    2、  两年以上PR以及市场营销方面工作经验，熟悉品牌策划推广。<br>
+
+                    3、具有广泛的媒体资源（拥有电视台栏目资源者为佳）、人脉资源，具备互联网公关经验的优先。<br>
+
+                    4、熟悉公关活动流程及PR运作流程，具有优秀的公关活动项目策划及执行与拓展能力，文笔好。<br>
+
+                    5、能够独立组织新闻发布会、专访及其它公关活动。<br>
+
+                    6、拥有优秀的语言表达能力，能够熟练撰写新闻稿、发言稿以及其他公关所需文件。<br><br>
+
+                    
+                    
+                    
+                    联系人：lolita@ximalaya.com<br><br><br>
+                    </p>
+
+
+                    <p>
+
+                    <strong>andriod开发工程师</strong><br><br>
+
+ 
+
+                    汇报对象：team leader<br><br>
+                    
+
+                    职位描述：<br>
+
+                    1、独挡一面，负责android客户端的开发和优化<br>
+
+                    2、与各类工程师一起研讨技术、制定优秀的解决方案，开发核心模块<br>
+
+                    3、灵活的岗位调动，如果你突然哪天抽风，想了解一下后端开发或者iso开发，没关系，喜马拉雅给你机会<br>
+
+                    4、充分发挥你对（移动）互联网的理解和热情，对咱们的产品指点江山，任意吐槽<br>
+
+                    5、了解各种新鲜技术，选择最佳实现，与我们的产品有效结合，从中获取喜悦和成就感<br><br>
+                    
+                     
+
+                    岗位要求：<br>
+
+                    1、有扎实的编程基础，熟练掌握Java开发语言和android SDK<br>
+
+                    2、熟练掌握android系统特性，熟悉android系统各种控件和服务，并且能够自己定制控件<br>
+
+                    3、精通Socket、多线程编程<br>
+
+                    4、熟悉android framework，具有解读android源码的能力<br>
+
+                    5、熟练使用android常用的代码性能分析工具，定位程序ANR和OOM等问题<br>
+
+                    6、熟悉常用的编程模式，并且能灵活应用到日常的开发之中<br>
+
+                    7、具有良好的编程习惯和代码风格<br>
+
+                    8、思路清晰，思维敏捷，责任心强，良好的沟通能力和团队协作精神<br><br>
+
+                    
+                    加分项：<br>
+
+                    1、有音频和流媒体处理经验<br>
+
+                    2、有独立作品，或1个以上成熟项目经验<br>
+
+                    3、Github重度用户，有自己的开源项目和技术博客<br><br>
+                    
+                    
+                    联系人：lolita@ximalaya.com<br><br><br>
+                     </p>
+
+                     <p>
+                    <strong>web前端开发工程师</strong><br><br>
+
+ 
+
+                    汇报对象：team leader<br><br>
+                    
+
+                    职位描述：<br>
+
+                    1. 负责产品设计的前端开发工作，与网页设计师配合将设计转换成最终web界面；<br>
+                    2. 根据用户的需求,分析并给出最优的前台技术解决方案；<br>
+                    3. 基于JavaScript框架的应用和项目开发；<br>
+                    4. 有做“自己的产品”的热情，并愿意为之倾注心血，以技术和创新为产品提供强大的支撑甚至超出预期的用户体验。<br><br>
+                    
+                     
+
+                    
+                    职位要求：<br>
+                    1.  精通HTML、CSS、JavaScript等前台相关技术；<br>
+                    2.  熟悉W3C网页标准；<br>
+                    3.  理解AJAX运作机制，熟练运用常见AJAX框架，如YUI、Jquery、mootool等；<br>
+                    4.  了解各种常用工具，如Firebug，YSlow，JSLint，YUI compressor等；<br>
+                    5.  了解各大主流浏览器在页面渲染以及JS支持上的差异，保证站点服务的可用性；<br>
+                    6.  善于交流和表达，有良好的团队合作精神；<br>
+                    7.  热衷前端技术的研究和创新。<br>
+                    8.  熟悉nodejs/java/php/rails/asp.net任意一种。<br>
+                    9.     自我驱动，自我激励<br><br>
+
+                    
+                    加分项：<br>
+
+                    1、有前端MVC框架开发经验<br>
+
+                    2、有触屏版开发经验<br>
+
+                    3、有大型平台类产品工作经验<br>
+
+                    4、有nodejs开发经验<br><br>
+                    
+                    
+                    联系人：lolita@ximalaya.com<br><br><br>
+                     </p>
+                      <p>
+                    <strong>Ruby开发工程师</strong><br><br>
+
+ 
+
+                    汇报对象：技术总监<br><br>
+                    
+
+                    职位描述：<br>
+
+                    用新的、好的技术，编写程序，给喜马拉雅用户用，给我们编辑部用<br><br>
+                    
+                     
+
+                    
+                    岗位要求：<br>
+
+                    1. 喜爱Ruby，快乐编程<br>
+
+                    2. 沟通顺畅，责任心强<br>
+
+                    3. 效率高，能够独挡一面<br>
+
+                    4. 编写过gem，加分<br>
+
+                    5. 有为别人的开源软件贡献过代码、补丁，大加分<br><br>
+
+                
+                    
+                    
+                    联系人：lolita@ximalaya.com<br><br><br>
+
+
+                    </p>
+                </div>
+            </div>
+
+            <div class="personalSet-side">
+                <div class="personalSet-side-tit"> <strong>关于我们</strong>
+                </div>
+                <div class="personalSet-side-con">
+                    <ul class="personalSet-side-list">
+                        <li>
+                            <a class="ico_5" href="/help/aboutus/">关于喜马拉雅</a>
+                        </li>
+                        <li>
+                            <a class="ico_6" href="/help/contact_us">联系我们</a>
+                        </li>
+                         <li>
+                            <a class="ico_7" href="/help/official_news">公司新闻</a>
+                        </li>
+                        <li class="selectAbout">
+                            <a class="ico_9" href="javascript:;">招纳贤士</a>
+                        </li>
+                    </ul>
+                    <a class="personalSet-apply" href="/verify/"></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div></div>
+</div>
+<!--主体 end-->
+
+<% content_for :script_own do  %>
+<script>
+  requirejs(["page/404"], function (page) {
+    page.init();
+  });
+</script>
+<% end %>

@@ -1,0 +1,43 @@
+<script type="text/template" id="reply_box_template">
+
+<div class="commentBox mgT10">
+  <div class="commentBox_top cl">
+    <a href="javascript:;" class="closeBtn" title="关闭"></a>
+    <span>回复</span>
+  </div>
+  <div class="commentBox_middle">
+    <div class="left">
+      <a class="userface" href="javascript:;">
+        <img src="" data-options="defaultImg:person_60" alt=""></a>
+    </div>
+    <div class="right">
+      <div class="commentBox_inputBox">
+        <div class="effect_borderHover"></div>
+        <div class="effect_borderDefault"></div>
+        <input value="" type="text" placeholder="写点什么吧...">
+        <textarea rows="" cols=""></textarea>
+      </div>
+      <div class="cl">
+        <div class="fr">
+          <span class="charCount">
+            还剩 <em>145</em>
+            字
+          </span>
+          <a href="javascript:;" class="faceBtn"></a>
+          <a href="javascript:;" class="submitBtn">
+            <span>评论</span>
+          </a>
+        </div>
+        <span>点亮分享</span>
+        <a href="javascript:;" class="qqWeiboBtn" title="腾讯微博" data-type="comment" data-name="tQQ"></a>
+        <a href="javascript:;" class="qZoneBtn" title="QQ空间" data-type="comment" data-name="qzone" ></a>
+        <a href="javascript:;" class="sinaWeiboBtn" title="新浪微博" data-type="comment" data-name="tSina"></a>
+        <a href="javascript:;" class="renrenBtn" title="人人网" data-type="comment" data-name="renren" ></a>
+        <a href="/passport/profile">配置</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</script>

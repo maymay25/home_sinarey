@@ -1,0 +1,178 @@
+# Logfile created on 2014-05-20 14:23:55 +0800 by logger.rb/41954
+E, [2014-05-20T14:23:55.588580 #4744] ERROR -- : 2014-05-20 14:23:55 +0800 NameError: undefined local variable or method `params' for #<AlbumUpdatedWorker:0x73d1d08 @jid="4d63126770cc2d51999940a3"> 
+ d:/apps/home_sinarey/app/workers/methods/album_updated_worker_methods.rb:321:in `album_updated'
+d:/apps/home_sinarey/app/workers/methods/album_updated_worker_methods.rb:6:in `call'
+d:/apps/home_sinarey/app/workers/methods/album_updated_worker_methods.rb:6:in `perform'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/processor.rb:52:in `block (2 levels) in process'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:122:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:122:in `block in invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/server/active_record.rb:6:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:124:in `block in invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/server/retry_jobs.rb:62:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:124:in `block in invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/server/logging.rb:11:in `block in call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/logging.rb:22:in `with_context'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/server/logging.rb:7:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:124:in `block in invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:127:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:127:in `invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/processor.rb:51:in `block in process'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/processor.rb:94:in `stats'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/processor.rb:50:in `process'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/calls.rb:25:in `public_send'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/calls.rb:25:in `dispatch'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/calls.rb:122:in `dispatch'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/actor.rb:322:in `block in handle_message'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/actor.rb:416:in `block in task'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/tasks.rb:55:in `block in initialize'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/tasks/task_fiber.rb:13:in `block in create'
+I, [2014-05-20T14:27:27.513770 #10544]  INFO -- : 2014-05-20 14:27:27 +0800 publish last_uptrack.rb 2014-05-12 18:47:54 +0800
+I, [2014-05-20T14:27:27.775796 #10544]  INFO -- : 2014-05-20 14:27:27 +0800 18 track.updated.topic 212992
+I, [2014-05-20T14:27:27.804799 #10544]  INFO -- : 2014-05-20 14:27:27 +0800 18 track.updated.topic 212993
+I, [2014-05-20T14:27:27.835802 #10544]  INFO -- : 2014-05-20 14:27:27 +0800 18 track.updated.topic 212994
+I, [2014-05-20T14:27:27.865805 #10544]  INFO -- : 2014-05-20 14:27:27 +0800 18 track.updated.topic 212995
+I, [2014-05-20T14:27:27.962815 #10544]  INFO -- : 2014-05-20 14:27:27 +0800 18 track.updated.topic 212996
+I, [2014-05-20T14:27:27.973816 #10544]  INFO -- : 2014-05-20 14:27:27 +0800 18 album.updated.topic 79158
+I, [2014-05-20T14:27:27.997818 #10544]  INFO -- : 2014-05-20 14:27:27 +0800 18 修改专辑名称 []
+I, [2014-05-20T14:53:41.391142 #10544]  INFO -- : 2014-05-20 14:53:41 +0800 18 track.updated.topic 214610
+I, [2014-05-20T14:53:41.421145 #10544]  INFO -- : 2014-05-20 14:53:41 +0800 18 track.updated.topic 214611
+I, [2014-05-20T14:53:41.432146 #10544]  INFO -- : 2014-05-20 14:53:41 +0800 18 album.updated.topic 79441
+I, [2014-05-20T14:53:41.440147 #10544]  INFO -- : 2014-05-20 14:53:41 +0800 18 光棍节女鬼号  []
+I, [2014-05-20T14:53:49.746978 #10544]  INFO -- : 2014-05-20 14:53:49 +0800 publish last_uptrack.rb 2014-05-20 14:53:41 +0800
+I, [2014-05-20T14:53:49.765979 #10544]  INFO -- : move record 216792 from album 79441
+I, [2014-05-20T14:53:49.985001 #10544]  INFO -- : 2014-05-20 14:53:49 +0800 18 album.updated.topic old 79441
+I, [2014-05-20T14:53:50.005003 #10544]  INFO -- : 2014-05-20 14:53:50 +0800 18 album.updated.topic 79150
+I, [2014-05-20T14:53:50.014004 #10544]  INFO -- : 2014-05-20 14:53:50 +0800 18 新建专辑0512-17:59 []
+I, [2014-05-20T14:56:34.352436 #10884]  INFO -- : 2014-05-20 14:56:34 +0800 publish last_uptrack.rb 2014-05-20 14:53:41 +0800
+I, [2014-05-20T14:56:34.401441 #10884]  INFO -- : move record 216792 from album 79150
+E, [2014-05-20T14:56:58.625864 #10884] ERROR -- : 2014-05-20 14:56:58 +0800 Thrift::TransportException: Could not connect to 192.168.3.161:9095: Connection timeout to 192.168.3.161:9095 
+ c:/Ruby200/lib/ruby/gems/2.0.0/gems/thrift-0.9.1/lib/thrift/transport/socket.rb:54:in `rescue in open'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/thrift-0.9.1/lib/thrift/transport/socket.rb:36:in `open'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/thrift-0.9.1/lib/thrift/transport/framed_transport.rb:37:in `open'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/thrift-client-0.3.1/lib/thrift_client/thrift/client.rb:8:in `connect'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/thrift-client-0.3.1/lib/thrift_client/abstract_thrift_client.rb:140:in `ensure_connected'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/thrift-client-0.3.1/lib/thrift_client/abstract_thrift_client.rb:90:in `block in handle_method'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/thrift-client-0.3.1/lib/thrift_client/server.rb:35:in `block in with'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/thrift-client-0.3.1/lib/thrift_client/pool/thread_connection_pool.rb:18:in `execute'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/thrift-client-0.3.1/lib/thrift_client/server.rb:31:in `with'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/thrift-client-0.3.1/lib/thrift_client/abstract_thrift_client.rb:87:in `handle_method'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/thrift-client-0.3.1/lib/thrift_client/abstract_thrift_client.rb:63:in `getByLimit'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/stat-count-client-0.0.8.1/lib/stat-count-client/thrift_client.rb:96:in `get'
+d:/apps/home_sinarey/app/workers/methods/album_updated_worker_methods.rb:260:in `block in album_updated'
+d:/apps/home_sinarey/app/workers/methods/album_updated_worker_methods.rb:256:in `each'
+d:/apps/home_sinarey/app/workers/methods/album_updated_worker_methods.rb:256:in `album_updated'
+d:/apps/home_sinarey/app/workers/methods/album_updated_worker_methods.rb:6:in `call'
+d:/apps/home_sinarey/app/workers/methods/album_updated_worker_methods.rb:6:in `perform'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/processor.rb:52:in `block (2 levels) in process'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:122:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:122:in `block in invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/server/active_record.rb:6:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:124:in `block in invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/server/retry_jobs.rb:62:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:124:in `block in invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/server/logging.rb:11:in `block in call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/logging.rb:22:in `with_context'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/server/logging.rb:7:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:124:in `block in invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:127:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:127:in `invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/processor.rb:51:in `block in process'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/processor.rb:94:in `stats'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/processor.rb:50:in `process'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/calls.rb:25:in `public_send'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/calls.rb:25:in `dispatch'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/calls.rb:122:in `dispatch'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/actor.rb:322:in `block in handle_message'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/actor.rb:416:in `block in task'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/tasks.rb:55:in `block in initialize'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/tasks/task_fiber.rb:13:in `block in create'
+I, [2014-05-20T14:57:24.572458 #10884]  INFO -- : move record 216792 from album 79150
+I, [2014-05-20T14:57:24.901491 #10884]  INFO -- : 2014-05-20 14:57:24 +0800 18 album.updated.topic old 79150
+I, [2014-05-20T14:57:24.941495 #10884]  INFO -- : 2014-05-20 14:57:24 +0800 18 album.updated.topic 77855
+I, [2014-05-20T14:57:24.964497 #10884]  INFO -- : 2014-05-20 14:57:24 +0800 18 定时上传的声音测试 []
+I, [2014-05-20T15:54:13.495003 #10600]  INFO -- : 2014-05-20 15:54:13 +0800 publish last_uptrack.rb 2014-05-20 14:53:41 +0800
+I, [2014-05-20T15:54:13.546009 #10600]  INFO -- : move record 216792 from album 77855
+I, [2014-05-20T15:54:13.926047 #10600]  INFO -- : 2014-05-20 15:54:13 +0800 18 album.updated.topic old 77855
+I, [2014-05-20T15:54:13.947049 #10600]  INFO -- : 2014-05-20 15:54:13 +0800 定时上传的声音测试 album.plays.count - 1
+I, [2014-05-20T15:54:13.956050 #10600]  INFO -- : 2014-05-20 15:54:13 +0800 18 album.updated.topic 79150
+I, [2014-05-20T15:54:13.978052 #10600]  INFO -- : 2014-05-20 15:54:13 +0800 18 新建专辑0512-17:59 []
+I, [2014-05-20T15:54:18.387493 #10600]  INFO -- : 2014-05-20 15:54:18 +0800 publish last_uptrack.rb 2014-05-20 14:53:41 +0800
+I, [2014-05-20T15:54:18.406495 #10600]  INFO -- : move record 216792 from album 79150
+I, [2014-05-20T15:54:18.474501 #10600]  INFO -- : 2014-05-20 15:54:18 +0800 18 album.updated.topic old 79150
+I, [2014-05-20T15:54:18.494503 #10600]  INFO -- : 2014-05-20 15:54:18 +0800 新建专辑0512-17:59 album.plays.count - 1
+I, [2014-05-20T15:54:18.504504 #10600]  INFO -- : 2014-05-20 15:54:18 +0800 18 album.updated.topic 79099
+I, [2014-05-20T15:54:18.512505 #10600]  INFO -- : 2014-05-20 15:54:18 +0800 18 234 []
+I, [2014-05-20T15:54:24.974151 #10600]  INFO -- : 2014-05-20 15:54:24 +0800 publish last_uptrack.rb 2014-05-20 14:53:41 +0800
+I, [2014-05-20T15:54:24.993153 #10600]  INFO -- : move record 216792 from album 79099
+I, [2014-05-20T15:54:25.064160 #10600]  INFO -- : 2014-05-20 15:54:25 +0800 18 album.updated.topic old 79099
+I, [2014-05-20T15:54:25.084162 #10600]  INFO -- : 2014-05-20 15:54:25 +0800 234 album.plays.count - 1
+I, [2014-05-20T15:54:25.132167 #10600]  INFO -- : 2014-05-20 15:54:25 +0800 18 album.updated.topic 77367
+I, [2014-05-20T15:54:25.139168 #10600]  INFO -- : 2014-05-20 15:54:25 +0800 18 空专辑 []
+I, [2014-05-20T15:54:30.580712 #10600]  INFO -- : 2014-05-20 15:54:30 +0800 publish last_uptrack.rb 2014-05-20 14:53:41 +0800
+I, [2014-05-20T15:54:30.599714 #10600]  INFO -- : move record 216792 from album 77367
+I, [2014-05-20T15:54:30.674721 #10600]  INFO -- : 2014-05-20 15:54:30 +0800 18 album.updated.topic old 77367
+I, [2014-05-20T15:54:30.694723 #10600]  INFO -- : 2014-05-20 15:54:30 +0800 空专辑 album.plays.count - 1
+I, [2014-05-20T15:54:30.704724 #10600]  INFO -- : 2014-05-20 15:54:30 +0800 18 album.updated.topic 79441
+I, [2014-05-20T15:54:30.710725 #10600]  INFO -- : 2014-05-20 15:54:30 +0800 18 光棍节女鬼号  []
+I, [2014-05-20T15:54:40.614715 #10600]  INFO -- : 2014-05-20 15:54:40 +0800 publish last_uptrack.rb 2014-05-20 14:53:41 +0800
+I, [2014-05-20T15:54:40.632717 #10600]  INFO -- : move record 216792 from album 79441
+I, [2014-05-20T15:54:40.701724 #10600]  INFO -- : 2014-05-20 15:54:40 +0800 18 album.updated.topic old 79441
+I, [2014-05-20T15:54:40.721726 #10600]  INFO -- : 2014-05-20 15:54:40 +0800 光棍节女鬼号  album.plays.count - 1
+I, [2014-05-20T15:54:40.731727 #10600]  INFO -- : 2014-05-20 15:54:40 +0800 18 album.updated.topic 77170
+I, [2014-05-20T15:54:40.737727 #10600]  INFO -- : 2014-05-20 15:54:40 +0800 18 todo 测试计数 小弟 []
+I, [2014-05-20T15:56:32.989952 #11328]  INFO -- : 2014-05-20 15:56:32 +0800 publish last_uptrack.rb 2014-05-20 14:53:41 +0800
+I, [2014-05-20T15:56:33.044957 #11328]  INFO -- : move record 216792 from album 77170
+I, [2014-05-20T15:56:33.439997 #11328]  INFO -- : 2014-05-20 15:56:33 +0800 18 album.updated.topic old 77170
+I, [2014-05-20T15:56:33.460999 #11328]  INFO -- : 2014-05-20 15:56:33 +0800 todo 测试计数 小弟 album.plays.count - 1
+I, [2014-05-20T15:56:33.470000 #11328]  INFO -- : 2014-05-20 15:56:33 +0800 18 album.updated.topic 79150
+I, [2014-05-20T15:56:33.492002 #11328]  INFO -- : 2014-05-20 15:56:33 +0800 18 新建专辑0512-17:59 []
+I, [2014-05-20T15:56:41.536806 #11328]  INFO -- : 2014-05-20 15:56:41 +0800 18 album.updated.topic 79150
+I, [2014-05-20T15:56:41.545807 #11328]  INFO -- : 2014-05-20 15:56:41 +0800 18 新建专辑0512-17:59 []
+I, [2014-05-20T15:56:59.549607 #11328]  INFO -- : 2014-05-20 15:56:59 +0800 18 album.updated.topic 79441
+I, [2014-05-20T15:56:59.555608 #11328]  INFO -- : 2014-05-20 15:56:59 +0800 18 光棍节女鬼号  []
+I, [2014-05-20T15:57:27.884440 #11328]  INFO -- : 2014-05-20 15:57:27 +0800 publish last_uptrack.rb
+I, [2014-05-20T15:57:27.886441 #11328]  INFO -- : 2014-05-20 15:57:27 +0800 18 album.updated.topic 79441
+I, [2014-05-20T15:57:27.895442 #11328]  INFO -- : 2014-05-20 15:57:27 +0800 18 光棍节女鬼号  []
+I, [2014-05-20T15:57:41.979380 #11328]  INFO -- : 2014-05-20 15:57:41 +0800 publish last_uptrack.rb 2014-05-20 14:53:41 +0800
+I, [2014-05-20T15:57:41.998369 #11328]  INFO -- : move record 216792 from album nil
+I, [2014-05-20T15:57:42.052336 #11328]  INFO -- : 2014-05-20 15:57:42 +0800 18 album.updated.topic 77855
+I, [2014-05-20T15:57:42.059332 #11328]  INFO -- : 2014-05-20 15:57:42 +0800 18 定时上传的声音测试 []
+I, [2014-05-20T15:58:00.595204 #11328]  INFO -- : 2014-05-20 15:58:00 +0800 publish last_uptrack.rb
+I, [2014-05-20T15:58:00.606197 #11328]  INFO -- : 2014-05-20 15:58:00 +0800 18 album.updated.topic 77855
+I, [2014-05-20T15:58:00.613193 #11328]  INFO -- : 2014-05-20 15:58:00 +0800 18 定时上传的声音测试 []
+I, [2014-05-20T16:02:06.249723 #11328]  INFO -- : 2014-05-20 16:02:06 +0800 publish last_uptrack.rb 2014-05-20 14:53:41 +0800
+I, [2014-05-20T16:02:06.267712 #11328]  INFO -- : move record 216792 from album nil
+I, [2014-05-20T16:02:06.324678 #11328]  INFO -- : 2014-05-20 16:02:06 +0800 18 album.updated.topic 77855
+I, [2014-05-20T16:02:06.332673 #11328]  INFO -- : 2014-05-20 16:02:06 +0800 18 定时上传的声音测试 []
+I, [2014-05-20T16:02:12.052239 #11328]  INFO -- : move record 216792 from album 77855
+I, [2014-05-20T16:02:12.158175 #11328]  INFO -- : 2014-05-20 16:02:12 +0800 18 album.updated.topic old 77855
+I, [2014-05-20T16:02:12.179163 #11328]  INFO -- : 2014-05-20 16:02:12 +0800 定时上传的声音测试 album.plays.count - 1
+I, [2014-05-20T16:02:12.188157 #11328]  INFO -- : 2014-05-20 16:02:12 +0800 18 album.updated.topic 77855
+I, [2014-05-20T16:02:12.196153 #11328]  INFO -- : 2014-05-20 16:02:12 +0800 18 定时上传的声音测试 []
+I, [2014-05-20T16:02:25.693050 #11328]  INFO -- : 2014-05-20 16:02:25 +0800 publish last_uptrack.rb 2014-05-20 14:53:41 +0800
+I, [2014-05-20T16:02:25.712038 #11328]  INFO -- : move record 216792 from album 77855
+I, [2014-05-20T16:02:25.781996 #11328]  INFO -- : 2014-05-20 16:02:25 +0800 18 album.updated.topic old 77855
+I, [2014-05-20T16:02:25.801984 #11328]  INFO -- : 2014-05-20 16:02:25 +0800 定时上传的声音测试 album.plays.count - 1
+I, [2014-05-20T16:02:25.811978 #11328]  INFO -- : 2014-05-20 16:02:25 +0800 18 album.updated.topic 79119
+I, [2014-05-20T16:02:25.819973 #11328]  INFO -- : 2014-05-20 16:02:25 +0800 18 baby one more time []
+I, [2014-05-20T16:02:29.507759 #11328]  INFO -- : move record 216792 from album 79119
+I, [2014-05-20T16:02:29.593708 #11328]  INFO -- : 2014-05-20 16:02:29 +0800 18 album.updated.topic old 79119
+I, [2014-05-20T16:02:29.658669 #11328]  INFO -- : 2014-05-20 16:02:29 +0800 baby one more time album.plays.count - 1
+I, [2014-05-20T16:02:29.667663 #11328]  INFO -- : 2014-05-20 16:02:29 +0800 18 album.updated.topic 79119
+I, [2014-05-20T16:02:29.674659 #11328]  INFO -- : 2014-05-20 16:02:29 +0800 18 baby one more time []
+I, [2014-05-20T19:10:38.506254 #13188]  INFO -- : 2014-05-20 19:10:38 +0800 publish last_uptrack.rb 2014-05-12 18:47:54 +0800
+I, [2014-05-20T19:10:38.638254 #13188]  INFO -- : 2014-05-20 19:10:38 +0800 18 track.updated.topic 212992
+I, [2014-05-20T19:10:38.668254 #13188]  INFO -- : 2014-05-20 19:10:38 +0800 18 track.updated.topic 212994
+I, [2014-05-20T19:10:38.698254 #13188]  INFO -- : 2014-05-20 19:10:38 +0800 18 track.updated.topic 212995
+I, [2014-05-20T19:10:38.728254 #13188]  INFO -- : 2014-05-20 19:10:38 +0800 18 track.updated.topic 212993
+I, [2014-05-20T19:10:38.757254 #13188]  INFO -- : 2014-05-20 19:10:38 +0800 18 track.updated.topic 212996
+I, [2014-05-20T19:10:38.767254 #13188]  INFO -- : 2014-05-20 19:10:38 +0800 18 album.updated.topic 79158
+I, [2014-05-20T19:10:38.773254 #13188]  INFO -- : 2014-05-20 19:10:38 +0800 18 再修改一次 []
+I, [2014-05-20T19:12:22.537525 #13188]  INFO -- : 2014-05-20 19:12:22 +0800 publish last_uptrack.rb 2014-05-12 18:47:54 +0800
+I, [2014-05-20T19:12:22.576549 #13188]  INFO -- : 2014-05-20 19:12:22 +0800 18 track.updated.topic 212992
+I, [2014-05-20T19:12:22.586555 #13188]  INFO -- : 2014-05-20 19:12:22 +0800 18 track.updated.topic 212994
+I, [2014-05-20T19:12:22.599562 #13188]  INFO -- : 2014-05-20 19:12:22 +0800 18 track.updated.topic 212995
+I, [2014-05-20T19:12:22.609568 #13188]  INFO -- : 2014-05-20 19:12:22 +0800 18 track.updated.topic 212993
+I, [2014-05-20T19:12:22.619574 #13188]  INFO -- : 2014-05-20 19:12:22 +0800 18 track.updated.topic 212996
+I, [2014-05-20T19:12:22.629580 #13188]  INFO -- : 2014-05-20 19:12:22 +0800 18 album.updated.topic 79158
+I, [2014-05-20T19:12:22.637585 #13188]  INFO -- : 2014-05-20 19:12:22 +0800 18 啦baby啦啦专辑 []

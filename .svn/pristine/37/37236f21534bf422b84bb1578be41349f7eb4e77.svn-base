@@ -1,0 +1,56 @@
+# Logfile created on 2014-05-21 10:20:23 +0800 by logger.rb/41954
+E, [2014-05-21T10:20:23.969416 #7140] ERROR -- : 2014-05-21 10:20:23 +0800 NameError: undefined local variable or method `_content' for #<RelayCreatedWorker:0x210bf58 @jid="491d78180ffbd7ce268f13cb"> 
+ d:/apps/home_sinarey/app/workers/methods/relay_created_worker_methods.rb:202:in `relay_created'
+d:/apps/home_sinarey/app/workers/methods/relay_created_worker_methods.rb:6:in `call'
+d:/apps/home_sinarey/app/workers/methods/relay_created_worker_methods.rb:6:in `perform'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/processor.rb:52:in `block (2 levels) in process'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:122:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:122:in `block in invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/server/active_record.rb:6:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:124:in `block in invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/server/retry_jobs.rb:62:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:124:in `block in invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/server/logging.rb:11:in `block in call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/logging.rb:22:in `with_context'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/server/logging.rb:7:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:124:in `block in invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:127:in `call'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/middleware/chain.rb:127:in `invoke'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/processor.rb:51:in `block in process'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/processor.rb:94:in `stats'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/sidekiq-3.0.2/lib/sidekiq/processor.rb:50:in `process'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/calls.rb:25:in `public_send'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/calls.rb:25:in `dispatch'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/calls.rb:122:in `dispatch'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/actor.rb:322:in `block in handle_message'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/actor.rb:416:in `block in task'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/tasks.rb:55:in `block in initialize'
+c:/Ruby200/lib/ruby/gems/2.0.0/gems/celluloid-0.15.2/lib/celluloid/tasks/task_fiber.rb:13:in `block in create'
+I, [2014-05-21T10:32:28.334229 #7068]  INFO -- : 2014-05-21 10:32:28 +0800 18 209382 
+
+I, [2014-05-21T10:32:31.563552 #7068]  INFO -- : 2014-05-21 10:32:31 +0800 18 214691 
+
+I, [2014-05-21T10:32:35.384934 #7068]  INFO -- : 2014-05-21 10:32:35 +0800 18 214695 
+
+I, [2014-05-21T10:32:40.522448 #7068]  INFO -- : 2014-05-21 10:32:40 +0800 18 214693 
+
+I, [2014-05-21T10:32:47.526148 #7068]  INFO -- : 2014-05-21 10:32:47 +0800 18 214608 
+
+I, [2014-05-21T10:32:50.883484 #7068]  INFO -- : 2014-05-21 10:32:50 +0800 18 214682 
+
+I, [2014-05-21T10:32:54.247821 #7068]  INFO -- : 2014-05-21 10:32:54 +0800 18 214694 
+
+I, [2014-05-21T10:32:58.264222 #7068]  INFO -- : 2014-05-21 10:32:58 +0800 18 214572 
+
+I, [2014-05-21T10:33:02.173613 #7068]  INFO -- : 2014-05-21 10:33:02 +0800 18 214657 
+
+I, [2014-05-21T10:33:05.757971 #7068]  INFO -- : 2014-05-21 10:33:05 +0800 18 214658 
+
+I, [2014-05-21T10:33:09.215317 #7068]  INFO -- : 2014-05-21 10:33:09 +0800 18 214814 
+
+I, [2014-05-21T10:33:12.585654 #7068]  INFO -- : 2014-05-21 10:33:12 +0800 18 214813 
+
+I, [2014-05-21T10:33:15.814977 #7068]  INFO -- : 2014-05-21 10:33:15 +0800 18 214686 
+
+I, [2014-05-21T10:33:19.674363 #7068]  INFO -- : 2014-05-21 10:33:19 +0800 18 214803 
+

@@ -1,0 +1,204 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="<%= static_url "/poster/css/poster.css" %>" rel="stylesheet" type="text/css">
+<title>喜马拉雅</title>
+<%== erb :_check_redirect %>
+</head>
+<body>
+	<div class="dubWrap">
+		<div class="dubHd">
+			<a class="dubHd_logo" href="http://www.ximalaya.com"></a>
+			<a class="dubHdBtn" href="javascript:;" style="visibility:hidden;">展示区</a>
+			<a class="dubHdBtn on" href="/xposter/dub_translate">翻译首页</a>
+			<a class="dubHdBtn" href="/xposter/dub">大赛首页</a>
+		</div>
+		<div class="dubPopupWrap" id="dubPopup">
+			<div class="dubPopup">
+				<p>1.注册账号，上传头像并绑定邮箱或手机。</p>
+				<p>2.发送参赛作品至大赛指定邮箱。</p>
+				<p>3.审核通过，选手的喜马拉雅电台用户昵称、个人近照和个人简介将会展示在大赛展示区内</p>
+				<p>4.通过初赛，工作人员将会邮件或电话通知决赛安排。</p>
+				<a class="dubCloseBtn" id="dubCloseBtn" title="关闭"></a>
+			</div>
+		</div>
+		<div class="dubBanner">
+			<div class="dubBannerBtnWrap">
+				<a class="dubApplyBtn" id="dubApplyBtn"></a>
+			</div>
+			<div class="dubBanner2"></div>
+		</div>
+
+		<div class="dubIntroWrap">
+			<div class="dubIntroNavBarWrap navBar-trans">
+				<span class="dubIntroNavBarBg1"></span>
+				<ul class="dubIntroNavBar">
+					<li class="on">
+						<a href="#dubA1">大赛细则</a>
+					</li>
+					<li>
+						<a href="#dubA2">大赛安排</a>
+					</li>
+					<li>
+						<a href="#dubA3">大赛片段</a>
+					</li>
+				</ul>
+				<span class="dubIntroNavBarBg2"></span>
+			</div>
+			<div class="dubIntro">
+				<a id="dubA1"></a>
+				<div class="dubIntro_tit3">大赛细则</div>
+				<div class="dubIntro_txt2">
+					1、登陆网站，注册账号，上传头像并绑定邮箱或手机。
+					<br/>	
+					2、以个人为单位参加2014“译声一试”影视翻译配音大赛。
+					<br/>	
+					3、根据主办方提供的2个英文视频，翻译成中文配音脚本（按照
+					<a href="<%= static_url '/poster/dub_translate_example.docx' %>" target="_blank">范本格式</a>
+					填写）。
+					<br/>	
+					4、完成后以邮件附件形式发送至大赛邮箱ysysfanyi@163.com。
+					<br/>	
+					5、限投稿一次，经确认后，主办方不再接受参赛作品和选手个人信息的替换。
+					<br/>	
+					6、在附件中提供个人真实信息（姓名，性别，出生年月，居住地，联系方式，职业，获奖情况、个人近照等）。报名成功后，选手的喜马拉雅电台用户昵称、个人近照和个人简介将会展示在大赛展示区内，大赛主办方对选手的真实姓名和联系方式保密。
+					<br/>	
+					7、初赛作品统一命名格式：“喜马拉雅电台用户昵称_译声一试”。
+					<br/>	
+					8、初赛决出30强选手进入决赛。
+					<br/>	
+					9、决赛选手根据赛制要求完成比赛，获得翻译类各项奖次。
+				</div>
+			</div>
+			<div class="dubIntro">
+				<a id="dubA2"></a>
+				<div class="dubIntro_tit3">大赛安排</div>
+				<div class="dubIntro_txt2">
+					5月01日——6月16日&nbsp;&nbsp;网络报名、初赛
+					<br/>	
+					6月17日——7月上旬&nbsp;&nbsp;初赛评审
+					<br/>	
+					7月中下旬&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;决赛、颁奖（上海）
+					<br/>	
+
+				</div>
+			</div>
+			<div class="dubIntro">
+				<a id="dubA3"></a>
+				<div class="dubIntro_tit3">大赛片段</div>
+				<div class="dubIntro_txt1">
+					<div>
+						英译中片段1（
+						<a href="<%= static_url '/poster/dub_demo1.doc' %>" target="_blank">原文文本</a>
+						）
+					</div>
+					<div>
+						<embed src="http://static.video.qq.com/TPout.swf?vid=q0128ydn7si&auto=0" allowfullscreen="true" quality="high" width="740" height="500" align="middle" allowscriptaccess="always" type="application/x-shockwave-flash"></div>
+					<br/>	
+					<div>
+						英译中片段2（
+						<a href="<%= static_url '/poster/dub_demo2.docx' %>" target="_blank">原文文本</a>
+						）
+					</div>
+					<div>
+						<embed src="http://static.video.qq.com/TPout.swf?vid=g0128huhr0e&auto=0" allowfullscreen="true" quality="high" width="740" height="500" align="middle" allowscriptaccess="always" type="application/x-shockwave-flash"></div>
+				</div>
+			</div>
+
+			<div class="dubFooter">
+				网络文化经营许可证-文网文[2010]150号     北京那里汇聚网络科技有限公司 京ICP备12017437号-1 网络110报警服务
+				<br/>	
+				Copyright © 2011-2012 www.ximalaya.com lnc.ALL Rights Reserved     请使用者仔细阅读喜马拉雅网 使用协议 和 版权声明
+			</div>
+
+		</div>
+	</div>
+	
+<%== erb :_script %>
+
+<script type="text/javascript" src="http://lib.sinaapp.com/js/jquery/1.7.2/jquery.min.js"></script>
+<script>
+window.onload = function(){
+  var dubApplyBtn = document.getElementById("dubApplyBtn");
+  var dubPopup = document.getElementById("dubPopup");
+  var close=document.getElementById("dubCloseBtn");
+
+  dubApplyBtn.onclick = function(){
+  dubPopup.style.display = "block";
+  }
+  
+  close.onclick = function(){
+  dubPopup.style.display = "none";
+  }
+  
+}
+function init(){
+	var $document = $(document);
+	var $dubIntroNav = $(".dubIntroNavBarWrap").css({
+		"position" : "absolute",
+		"top" : 220,
+		"left" : "auto",
+		"right" : -190
+	});
+	var dubIntroNavTop = $dubIntroNav.offset().top;
+	var dubIntroNavLeft = $dubIntroNav.offset().left;
+	
+	var clientHeight = document.documentElement.clientHeight;
+	var $dubIntroWrap = $(".dubIntroWrap");
+	var $dubIntroNavBar = $dubIntroWrap.find(".dubIntroNavBar");
+	var $dubIntroNavBarLi = $dubIntroNavBar.find("li");
+	var $dubIntroNavBarLiOn = $dubIntroNavBarLi.eq(0);
+	var $dubIntro = $dubIntroWrap.find(".dubIntro");
+	var dubIntroTops = $dubIntro.map(function(){
+		return $(this).offset().top;
+	});
+	var dubIntroBottoms = $dubIntro.map(function(){
+		return $(this).offset().top + $(this).height();
+	});
+	
+	$dubIntroNavBarLi.off("click").on("click", function(){
+		var $el = $(this);
+		setTimeout(function(){
+			$dubIntroNavBarLiOn.removeClass("on");
+			$dubIntroNavBarLiOn = $el;
+			$dubIntroNavBarLiOn.addClass("on");	
+		},40);
+	});
+	$(window).off("scroll").scroll(function(e) {
+		var scrollTop = $document.scrollTop();
+		if(scrollTop > dubIntroNavTop){
+			$dubIntroNav.css({
+				"position" : "fixed",
+				"top" : 20,
+				"left" : dubIntroNavLeft,
+				"right": "auto"
+			});
+		}else{
+			$dubIntroNav.css({
+				"position" : "absolute",
+				"top" : 220,
+				"left" : "auto",
+				"right" : -190
+			});
+		}
+		for(var i=0,len=dubIntroTops.length;i<len;i++){
+			var dubIntroTop = dubIntroTops[i];
+			var dubIntroBottom = dubIntroBottoms[i];
+			var num = i;
+			if(dubIntroBottom<scrollTop+clientHeight && dubIntroBottom>scrollTop){
+				$dubIntroNavBarLiOn.removeClass("on");
+				$dubIntroNavBarLiOn = $dubIntroNavBarLi.eq(i).addClass("on");
+			}
+		}
+	});	
+}
+window.onresize = function(){
+	init();
+}
+init();
+</script>
+
+</body>
+
+</html>

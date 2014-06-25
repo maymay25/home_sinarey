@@ -1,0 +1,69 @@
+<div id="discoverAlbum" class="discoverAlbum">
+    <div class="layout_top">
+        <div class="dis_sound_top">
+            <div class="left">
+                <div class="hallo"></div>
+            </div>
+            <div class="right">
+                <div class="selecter group-select selecter-s3 <% if ![3,9].include?(params[:category].to_i) or true %>hidden<% end %>" id="nav_status">
+                    <div class="selecter-selected" data-value="">
+                        <span class="selecter-text">全部</span><em class="selecter-arrow">◆</em>
+                    </div> 
+                    <div class="selecter-options ">
+                        <ul>
+                            <li class="selecter-item" data-value='0'>全部</li>
+                            <li class="selecter-item" data-value='2'>连载中</li>
+                            <li class="selecter-item" data-value='1'>已完结</li>                     
+                        </ul>
+                    </div>
+                </div>
+                <ul class="nav_list fr" id='nav_condition'>
+                    <li class="nav_item <%= "on" if params[:condition].blank? or params[:condition]=='hot' %>" condition="hot">
+                        <a href="javascript:;">最火</a>
+                    </li>
+                    <li class="nav_item <%= "on" if params[:condition]=='recent' %>" condition="recent">
+                        <a href="javascript:;">最近更新</a>
+                    </li>
+                    <li class="nav_item <%= "on" if params[:condition]=='classic' %>" condition="classic">
+                        <a href="javascript:;">经典</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="dis_nav">
+        <span id="crumb_all"><a>全部</a></span>
+        <span id="crumb_sub" class="hidden">&gt;&gt; <a></a></span>
+        <span id="crumb_tag" class="hidden">&gt;&gt; <span></span></span>
+    </div>
+    <div class="layout_left">
+        <div class="dis_sound_sort">
+            <ul class="sort_list">
+                <% @categories.each do |category| %>
+                <li cid="<%= category.id %>" class="<%= 'on' if params[:category].to_i == category.id %>">
+                    <a href="javascript:;"><%= category.title %></a>
+                </li>
+                <% end %>
+
+                <div class="tags_panel">
+                    <div class="tag_wrap">
+                        <% @categories.each do |category| %>
+                            <div data-cache="<%= category.id %>">
+                                <% category.tags.each do |tag| %>
+                                    <a class="tagBtn" href="javascript:;" tid="<%= tag %>"><span><%= tag %></span></a>
+                                <% end if category.tags %>
+                            </div>
+                        <% end %>
+                    </div>
+                    <a class="pin_btn" href="javascript:;"></a>
+                </div>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="layout_right">
+        <%== erb :_album_detail %>
+    </div>
+
+</div>
+

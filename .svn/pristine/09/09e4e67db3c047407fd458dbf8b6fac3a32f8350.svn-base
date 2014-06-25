@@ -1,0 +1,23 @@
+<% if @timeline_calendar %>
+<div class="timelineLine" data-rel="timeLineBar">
+    <ul data-rel="timeLineBarList" class="timelineLineList">
+        <%
+            init_year = @timeline_calendar[:init][:year]
+            init_month = @timeline_calendar[:init][:month]
+        %>
+        <% @timeline_calendar[:list].each_with_index do |data,index| %>
+        <li class="<%= "current" if !data[:not_now] && init_year==data[:year] %>">
+            <a href="javascript:void(0);" class="timelineYear" data-time="<%= data[:year] %>" ><%= data[:nick_year] %></a>
+            <ol class="timelineMonthCon">
+            <% data[:months_list].each do |month| %>
+                <li class="<%= "current" if init_year==data[:year] and init_month==month %> <%= "hidden" if data[:nick_year]=="加入" %>">
+                    <a href="javascript:void(0);" class="timelineMonth" data-time="<%= month %>"><%= month %>月</a>
+                </li>
+            <% end %>
+            </ol>
+        </li>
+        <% end %>
+
+    </ul>
+</div>
+<% end %>

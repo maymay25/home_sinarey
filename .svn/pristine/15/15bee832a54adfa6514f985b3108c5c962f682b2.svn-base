@@ -1,0 +1,5 @@
+$("#mainbox").html('<%== escape_javascript erb(:_like_page) %>');
+
+require(['page/message/like'], function(page) {
+    page.init();
+});

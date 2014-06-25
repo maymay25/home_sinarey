@@ -1,0 +1,379 @@
+<!--录制信息 start-->        
+<div id="record_info">
+  <div class="conInfo">
+    <div class="conWrap">
+      <div class="conMain conMain_add_img">
+        <form action="<%= "/new_album/create" %>" autocomplete="off" method="post">
+          
+          <div id="multiFile">
+            <input class="track_destroy" type="hidden" value="" name="track_destroy">     
+
+            <div style="clear: both;margin-left: 15px;">
+              <input type="checkbox" id="set-top" name="is_records_desc" value="on" style="vertical-align: -2px;margin-right: 4px;">
+              <span style="color:black;">新声音排最先</span>（勾选了此选项，新加入该专辑的声音会自动排在专辑最上边，用户也会最先看到）
+            </div>
+
+            <div class="albumList">
+              
+              <ul class="progressBarContainer">
+              </ul>
+              
+              <% if @tracks.nil? or @tracks.count == 0 %>
+                <div class="editAlbum_none">为新的专辑添加声音</div>
+              <% end %>
+
+              <div class="editAlbum">
+                <a class="uploadSoundBtn" id="uploadNew" <% if @capacity_free<=0 %>forbid="true"<% end %>>
+                  上传新的声音
+                  <div  class="swfuploadWrap2">
+                    <div id="swfupload2"></div>
+                  </div>
+                </a>
+                <a class="uploadSoundBtn" id="addAlbum">选择已上传的声音</a>
+              </div>
+            </div>
+
+          </div>
+
+          <div id="info_table_warp">
+            <div class="infoTit">
+              <h3 class="h_info">
+                <span id="voice_info_title">专辑信息</span>
+                <span style="font-weight: normal;font-size: 12px;margin-left: 5px;">拖动即可改变顺序</span>
+              </h3>
+            </div>
+            <div id="info_table_show" class="info-table-show">
+              <span>
+                信息不完善？展开继续编辑
+                <a class="expand"></a>
+              </span>
+            </div>
+            <div class="tbInfo">
+              <table  cellspacing="20">
+                <tbody>
+
+                  <tr>
+                    <td class="vAlign_top">
+                      标题 <em>*</em>
+                    </td>
+                    <td colspan="2">
+                      <input value="" name="title" type="text" class="inputW1" id="title">        
+                      <br/>        
+                      <span class="c01 tip">标题不要超过40个字哦</span>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td class="vAlign_top">图片</td>
+                    <td colspan="2">
+                      <div id="imageWrap">
+                          <div class="imgBox2">
+                              <div class="imgItem">
+                                  <img src="<%= picture_url('album', "", '100') %>" alt="">
+                                  <input type="hidden" name="image">
+                                  <div class="imgLoading"></div>
+                              </div>
+                          </div>
+                          <div id="soundImgBox"></div>
+                      </div>
+                      <a class="uploadPicBtn" id="uploadPicBtn" href="javascript:;">上传图片</a>
+                      <br>
+                      <span class="c01 album-image-tips">亲，注意要上传大图哦~~ 文件大小&lt;3M,尺寸最好&gt;500X500</span>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td class="vAlign_top">简介</td>
+                    <td colspan="2">
+                      <input id="description" type="hidden" name="intro" value="">        
+                      <input type="hidden" name="intro_images" value="">      
+                      <textarea id="" rows="10" cols="30" name="rich_intro"></textarea>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>来源<em>*</em></td>
+                    <td colspan="2">
+                        <div id="origin" class="selecter selecter-s5">
+                            <input type="hidden" name="user_source" value=""/>    
+                            <div class="selecter-selected" data-value="">
+                                <span class="selecter-text">请选择</span>
+                                <em class="selecter-arrow">◆</em>
+                            </div>
+                            <div class="selecter-options">
+                                <ul>
+                                    <li class="selecter-item" data-value="">请选择</li>
+                                    <li class="selecter-item" data-value="1">原创</li>
+                                    <li class="selecter-item" data-value="2">采集</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <span class="c01">该信息必填</span>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>
+                      类型
+                      <em>*</em>
+                    </td>
+                    <td colspan="2">
+                      <div id="genre" class="selecter selecter-s5 ">
+                        <% default_category = CHOOSE_CATEGORIES[0] %>
+                        <input type="hidden" name="category_id" value="<%= default_category.id %>"/>        
+                        <div class="selecter-selected" data-value="<%= default_category.id %>">
+                          <span class="selecter-text"><%= default_category.title %></span>
+                          <em class="selecter-arrow">◆</em>
+                        </div>
+                        <div class="selecter-options">
+                          <ul>
+                            <% CHOOSE_CATEGORIES.each_with_index do |category,index| %>
+                            <li class="selecter-item" data-value="<%= category.id %>"><%= category.title %></li>
+                            <% end %>
+                          </ul>
+                        </div>
+                      </div>
+                      <div id="genre_sub" class="selecter selecter-s5">
+                        <% default_music_category = MUSIC_CATEGORIES[0] %>
+                        <input type="hidden" name="sub_category_id" value="<%= default_music_category %>"/>        
+                        <div class="selecter-selected" data-value="<%= default_music_category %>">
+                          <span class="selecter-text"><%= default_music_category %></span>
+                          <em class="selecter-arrow">◆</em>
+                        </div>
+                        <div class="selecter-options">
+                          <ul>
+                            <% MUSIC_CATEGORIES.each do |title| %>
+                            <li class="selecter-item" data-value="<%= title %>"><%= title %></li>
+                            <% end %>
+                          </ul>
+                        </div>
+                      </div>
+                      <span class="c01">该信息必填</span>
+                    </td>
+                  </tr>
+
+                  <tr class='hidden' id='is_finished'>
+                    <td>连载/完结</td>
+                    <td colspan="2">
+                        <div class="selecter selecter-s5 ">
+                            <input type="hidden" name="is_finished" value="0">
+
+                            <div class="selecter-selected" data-value="0">
+                                <span class="selecter-text">请选择</span>
+                                <em class="selecter-arrow">◆</em>
+                            </div>
+                            <div class="selecter-options">
+                                <ul>
+                                    <li class="selecter-item" data-value="0">请选择</li>
+                                    <li class="selecter-item" data-value="1">连载中</li>
+                                    <li class="selecter-item" data-value="2">完结</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td class="vAlign_top">声音标签</td>
+                    <td colspan="2">
+                        <div class="inputAreaWarp" style="position: relative;">
+                            <input type="hidden" id="chosen_area" name="tags"/>
+
+                            <div class="inputArea changeMode">
+                                <div class="inputArea-tag">
+                                  <div class="tagsBox"></div>
+                                </div>
+                                <div class="inputArea-txt">
+                                    <input id="editor_area" type="text" class="j-search-input"/>
+                                    <div class="j-search-list dropList"></div>
+                                </div>
+                            </div>
+                            <span class="c01">最多5个标签，单个标签最长8个汉字，按回车分隔</span>
+                        </div>
+                    </td>
+                  </tr>
+
+                  <% if @user_tags and @user_tags.size > 0 %>
+                  <tr>
+                      <td>我的标签</td>
+                      <td colspan="2">
+                          <div class="tagBtnList">
+                              <% @user_tags.each_with_index do |tag,index| ; next if tag.nil? %>    
+                              <a class="tagBtn2" href="javascript:;">
+                                  <span>
+                                      <%= tag["tag"] %>
+                                  </span>
+                              </a>
+                              <% end %>
+                          </div>
+                      </td>
+                  </tr>
+                  <% end %>    
+
+                  <tr>
+                      <td>推荐标签</td>
+                      <td colspan="2">
+                          <div class="tagBtnList" id="tagPanel">
+                              <% @tags.each_with_index do |tag,index| ; next if tag.nil? %>    
+                              <a class="tagBtn2" href="javascript:;">
+                                  <span>
+                                      <%= tag["tname"] %>
+                                  </span>
+                              </a>
+                              <% end %>
+                          </div>
+                      </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <% if @current_user.isVerified %>
+          <div class="timingPublish" id="timing_publish" public="true">
+              <div class="left"><input type="checkbox" name="is_publish">&nbsp;定时发布</div>
+              <div class="right disabled" id="publish_date">
+                  <div class="calendar">
+                      <input type="text" readonly="readonly" name="date">
+                      <a class="calendarBtn"></a>
+                  </div>
+                  <div class="selecter selecter-s6">
+                      <input type="hidden" value="0" name="hour">          
+                      <div class="selecter-selected" data-value="0">
+                          <span class="selecter-text">00</span>
+                      </div>
+                      <div class="selecter-options">
+                          <ul>
+                              <% 24.times do |time|%>
+                              <li class="selecter-item" title="" data-value="<%=time%>">
+                                  <% if time.to_s.size > 1 %>
+                                      <%= time%>
+                                  <% else %>
+                                      <%= "0"+time.to_s%>
+                                  <% end %>
+                              </li>
+                              <% end %>
+                          </ul>
+                      </div>
+                  </div>
+                  :
+                  <div class="selecter selecter-s6">
+                      <input type="hidden" value="0" name="minutes">
+                      <div class="selecter-selected" data-value="0">
+                          <span class="selecter-text">00</span>
+                      </div>
+                      <div class="selecter-options">
+                          <ul>
+                              <% 60.times do |time|%>
+                                  <li class="selecter-item" title="" data-value="<%=time%>">
+                                      <% if time.to_s.size > 1 %>
+                                          <%= time%>
+                                      <% else %>
+                                          <%= "0"+time.to_s%>
+                                      <% end %>
+                                  </li>
+                              <% end %>
+                          </ul>
+                      </div>
+                  </div>
+                  <span class="c01">&nbsp;定时发布任务数不能超过10个</span>
+              </div>
+          </div>
+          <% end %>
+
+          <div public="true">
+              <div class="infoTit">
+                  <h3 class="h_info">分享到</h3>
+              </div>
+              <table class="tbInfo share_panel" cellspacing="20" has_bind_share="true">
+                  <tbody>
+                  <tr>
+                      <td style="width:56px;">&nbsp;</td>
+                      <td id="shareSound" colspan="4" style="width:615px;">
+                          <div class="socialVerify" data-name="tSina" data-type="track">
+                              <div class="socialVerify_tit">新浪微博</div>
+                              <div class="socialVerify_status">已绑定</div>
+                              <a class="socialVerify_operate" href="javascript:;">配置</a>
+
+                              <div class="select"></div>
+                          </div>
+                          <div class="socialVerify shareqzone" data-name="qzone" data-type="track">
+                              <div class="socialVerify_tit">QQ空间</div>
+                              <div class="socialVerify_status">已绑定</div>
+                              <a class="socialVerify_operate" href="javascript:;">配置</a>
+                              <div class="select"></div>
+                          </div>
+
+                          <div class="socialVerify shareqqwb" data-name="tQQ" data-type="track">
+                              <div class="socialVerify_tit">腾讯微博</div>
+                              <div class="socialVerify_status">已绑定</div>
+                              <a class="socialVerify_operate" href="javascript:;">配置</a>
+                              <div class="select"></div>
+                          </div>
+                          <div class="socialVerify shareRenren" data-name="renren" data-type="track">
+                              <div class="socialVerify_tit">人人网</div>
+                              <div class="socialVerify_status">已绑定</div>
+                              <a class="socialVerify_operate" href="javascript:;">配置</a>
+                              <div class="select"></div>
+                          </div>
+                      </td>
+                  </tr>
+                  <tr class="share_content_tr">
+                      <td class="vAlign_top">分享内容</td>
+                      <td style="" colspan="4">
+                          <textarea id="share_content" default_sound_text="" default_album_text=""></textarea>
+
+                          <div class="c01 count-char">
+                              您还可以输入
+                              <span>100</span>
+                              字
+                          </div>
+                      </td>
+                  </tr>
+                  </tbody>
+              </table>
+          </div>
+
+          <table class="tbInfo btd" cellspacing="20" style="position:relative;">
+            <tbody>
+
+             <% if !@checkCaptcha %>
+                <%== erb :_valid_code_partial %>
+              <% end %>
+
+              <tr >
+                <td>&nbsp;</td>
+                <td align="right">
+                  <input type="checkbox" style="margin-left:90px;" name="input9" id="agreeDeal" checked="checked">        
+                  我已阅读并同意
+                  <a class="a_tdu apply_deal" href="javascript:;">用户协议与隐私协议</a>
+                </td>
+                <td align="right" style="width:220px;">
+                  <span>
+                    <span class="infoErr" id="infoErr"></span>
+                  </span>
+                  <a href="javascript:;" class="confirmBtn" id="submit_save">保存</a>
+                  <a href="<%= link_path "/#{@current_uid}/album" %>" id="cancel_save" class="cancelBtn">取消</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<!--录制信息 end--> 
+
+
+<% content_for :script_own do -%>
+
+<%== erb :_upload_js_config %>
+
+<script type="text/javascript">
+  require(['page/upload/edit_album'], function(page) {
+    page.init(true);
+  });
+</script>
+
+<% end %>

@@ -1,0 +1,5 @@
+$("#mainbox").html('<%== escape_javascript erb(:_referme_page) %>');
+
+require(['page/message/referme'], function(page) {
+    page.init();
+});

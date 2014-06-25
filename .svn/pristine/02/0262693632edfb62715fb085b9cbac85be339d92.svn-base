@@ -1,0 +1,9 @@
+$("#mainbox").html('<%== escape_javascript erb(:_index) %>');
+
+require(["page/discovery/dis_index"], function(page){
+    page.init();
+});
+
+<% if @this_title %>
+document.title="<%== escape_javascript @this_title %>";
+<% end %>

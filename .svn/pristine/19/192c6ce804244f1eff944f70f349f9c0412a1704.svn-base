@@ -1,0 +1,5 @@
+$("#mainbox").html('<%== escape_javascript erb(:_feed_page) %>');
+
+require(["page/setting/feed"], function(page){
+    page.init();
+});

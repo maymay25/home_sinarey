@@ -1,0 +1,10 @@
+<% if @track && @track_user.isVerified %>
+
+  <%
+    trackrich = TrackRich.shard(@track.id).where(track_id: @track.id).first
+    rich_intro = trackrich ? clean_html(trackrich.rich_intro) : clean_html(@track.intro)
+  %>
+  <article><%== simple_format(rich_intro) %></article>
+  <div><a class="arrow on">收起</a></div>
+  
+<% end %>

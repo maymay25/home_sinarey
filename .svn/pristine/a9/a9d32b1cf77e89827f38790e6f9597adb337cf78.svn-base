@@ -1,0 +1,93 @@
+# Logfile created on 2014-06-17 09:54:24 +0800 by logger.rb/41954
+2014-06-17 09:54:24 | _200_ | 212ms | 127.0.0.1 | GET  | http://local.ximalaya.com
+2014-06-17 09:54:25 | _200_ | 22 ms | 127.0.0.1 | POST | http://local.ximalaya.com/global_counts_json
+2014-06-17 09:54:25 | _404_ | 95 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/favicon.ico
+2014-06-17 09:54:30 | _200_ | 1653ms | 127.0.0.1 | GET  | http://local.ximalaya.com/go2explore.ajax
+2014-06-17 09:54:38 | _200_ | 155ms | 127.0.0.1 | GET  | http://local.ximalaya.com
+2014-06-17 09:54:40 | _200_ | 844ms | 127.0.0.1 | GET  | http://local.ximalaya.com/18/feed.ajax
+2014-06-17 09:54:40 | _200_ | 160ms | 127.0.0.1 | GET  | http://local.ximalaya.com/following_groups
+2014-06-17 09:55:10 | _200_ | 31 ms | 127.0.0.1 | POST | http://local.ximalaya.com/feed/no_read
+2014-06-17 09:55:41 | _500_ | 10 ms | 127.0.0.1 | POST | http://local.ximalaya.com/feed/no_read
+2014-06-17 09:56:11 | _500_ | 58 ms | 127.0.0.1 | POST | http://local.ximalaya.com/feed/no_read
+2014-06-17 09:56:41 | _500_ | 12 ms | 127.0.0.1 | POST | http://local.ximalaya.com/feed/no_read
+2014-06-17 09:57:11 | _500_ | 11 ms | 127.0.0.1 | POST | http://local.ximalaya.com/feed/no_read
+2014-06-17 09:57:41 | _500_ | 11 ms | 127.0.0.1 | POST | http://local.ximalaya.com/feed/no_read
+2014-06-17 09:58:11 | _500_ | 10 ms | 127.0.0.1 | POST | http://local.ximalaya.com/feed/no_read
+2014-06-17 09:58:40 | _500_ | 11 ms | 127.0.0.1 | POST | http://local.ximalaya.com/feed/no_read
+2014-06-17 09:59:10 | _500_ | 11 ms | 127.0.0.1 | POST | http://local.ximalaya.com/feed/no_read
+2014-06-17 09:59:40 | _200_ | 0  ms | 127.0.0.1 | POST | http://local.ximalaya.com/notices
+2014-06-17 09:59:40 | _500_ | 10 ms | 127.0.0.1 | POST | http://local.ximalaya.com/feed/no_read
+2014-06-17 10:00:40 | _500_ | 21 ms | 127.0.0.1 | POST | http://local.ximalaya.com/feed/no_read
+2014-06-17 10:01:10 | _500_ | 10 ms | 127.0.0.1 | POST | http://local.ximalaya.com/feed/no_read
+2014-06-17 10:01:40 | _500_ | 11 ms | 127.0.0.1 | POST | http://local.ximalaya.com/feed/no_read
+2014-06-17 10:02:10 | _500_ | 10 ms | 127.0.0.1 | POST | http://local.ximalaya.com/feed/no_read
+2014-06-17 10:02:40 | _500_ | 11 ms | 127.0.0.1 | POST | http://local.ximalaya.com/feed/no_read
+2014-06-17 10:03:09 | _200_ | 146ms | 127.0.0.1 | GET  | http://local.ximalaya.com
+2014-06-17 10:03:13 | _200_ | 140ms | 127.0.0.1 | GET  | http://local.ximalaya.com
+2014-06-17 10:03:17 | _200_ | 107ms | 127.0.0.1 | GET  | http://local.ximalaya.com
+2014-06-17 10:04:34 | _200_ | 139ms | 127.0.0.1 | GET  | http://local.ximalaya.com
+2014-06-17 10:04:35 | _200_ | 32 ms | 127.0.0.1 | POST | http://local.ximalaya.com/global_counts_json
+2014-06-17 10:04:39 | _200_ | 1726ms | 127.0.0.1 | GET  | http://local.ximalaya.com/go2explore.ajax
+2014-06-17 10:04:43 | _200_ | 1742ms | 127.0.0.1 | GET  | http://local.ximalaya.com/12872
+2014-06-17 10:04:45 | _200_ | 751ms | 127.0.0.1 | GET  | http://local.ximalaya.com/center/timeline_list?year=2014&month=6&page=1&per_page=30&uid=12872
+2014-06-17 10:04:46 | _200_ | 435ms | 127.0.0.1 | GET  | http://local.ximalaya.com/center/timeline_list?year=2014&month=5&page=1&per_page=30&uid=12872
+2014-06-17 10:04:47 | _404_ | 84 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/12872/sound/217210
+2014-06-17 10:04:47 | _200_ | 10 ms | 127.0.0.1 | POST | http://local.ximalaya.com/global_counts_json
+2014-06-17 10:04:49 | _200_ | 200ms | 127.0.0.1 | GET  | http://local.ximalaya.com/explore/sound
+2014-06-17 10:04:50 | _200_ | 263ms | 127.0.0.1 | GET  | http://local.ximalaya.com/explore/track_list?category=0&condition=daily&page=1&per_page=20&tag=
+2014-06-17 10:04:50 | _200_ | 10 ms | 127.0.0.1 | POST | http://local.ximalaya.com/global_counts_json
+2014-06-17 10:04:50 | _200_ | 136ms | 127.0.0.1 | GET  | http://local.ximalaya.com/explore/track_list?category=0&condition=daily&page=2&per_page=20&tag=
+2014-06-17 10:04:50 | _500_ | 137ms | 127.0.0.1 | GET  | http://local.ximalaya.com/12831/sound/204628
+2014-06-17 10:04:51 | _404_ | 92 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 10:12:54 | _200_ | 1475ms | 127.0.0.1 | GET  | http://local.ximalaya.com/12831/sound/204628
+2014-06-17 10:12:56 | _200_ | 399ms | 127.0.0.1 | GET  | http://local.ximalaya.com/track_blocks/avatars?track_ids=204628
+2014-06-17 10:12:56 | _200_ | 119ms | 127.0.0.1 | GET  | http://local.ximalaya.com/sounds/204628/comment_list?id=204628&page=1
+2014-06-17 10:13:00 | _200_ | 10 ms | 127.0.0.1 | POST | http://local.ximalaya.com/global_counts_json
+2014-06-17 14:09:10 | _200_ | 139ms | 127.0.0.1 | GET  | http://local.ximalaya.com
+2014-06-17 14:09:10 | _200_ | 21 ms | 127.0.0.1 | POST | http://local.ximalaya.com/global_counts_json
+2014-06-17 14:09:14 | _404_ | 163ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:12:47 | _200_ | 34 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/12/card
+2014-06-17 14:15:53 | _404_ | 86 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:15:55 | _404_ | 90 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:15:56 | _404_ | 85 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:15:56 | _404_ | 72 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:15:57 | _404_ | 128ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:15:57 | _404_ | 78 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:15:58 | _404_ | 100ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:16:00 | _404_ | 89 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:16:01 | _404_ | 81 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:16:02 | _404_ | 84 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:16:05 | _404_ | 87 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:16:05 | _404_ | 80 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:16:06 | _404_ | 92 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:16:07 | _404_ | 79 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:24:19 | _404_ | 99 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:37:16 | _404_ | 87 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:37:17 | _404_ | 80 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:37:17 | _404_ | 122ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:37:45 | _404_ | 80 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:37:47 | _404_ | 75 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:37:49 | _404_ | 86 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:37:50 | _404_ | 95 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 14:37:51 | _404_ | 85 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 15:39:58 | _500_ | 73 ms | 127.0.0.1 | GET  | http://local.ximalaya.com
+2014-06-17 15:39:58 | _404_ | 77 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 15:40:01 | _200_ | 166ms | 127.0.0.1 | GET  | http://local.ximalaya.com
+2014-06-17 15:40:09 | _500_ | 76 ms | 127.0.0.1 | POST | http://local.ximalaya.com/followings/create
+2014-06-17 15:40:15 | _200_ | 1893ms | 127.0.0.1 | GET  | http://local.ximalaya.com/12959/card
+2014-06-17 15:40:15 | _200_ | 68 ms | 127.0.0.1 | POST | http://local.ximalaya.com/followings/destroy
+2014-06-17 15:40:21 | _200_ | 789ms | 127.0.0.1 | POST | http://local.ximalaya.com/followings/create
+2014-06-17 15:40:22 | _200_ | 119ms | 127.0.0.1 | GET  | http://local.ximalaya.com/following_groups
+2014-06-17 15:40:23 | _200_ | 156ms | 127.0.0.1 | POST | http://local.ximalaya.com/followings/set_groups
+2014-06-17 15:45:54 | _200_ | 135ms | 127.0.0.1 | GET  | http://local.ximalaya.com
+2014-06-17 17:54:07 | _200_ | 211ms | 127.0.0.1 | GET  | http://local.ximalaya.com
+2014-06-17 17:54:08 | _200_ | 821ms | 127.0.0.1 | GET  | http://local.ximalaya.com/18/feed.ajax
+2014-06-17 17:54:08 | _200_ | 121ms | 127.0.0.1 | GET  | http://local.ximalaya.com/following_groups
+2014-06-17 17:54:10 | _200_ | 891ms | 127.0.0.1 | GET  | http://local.ximalaya.com/18/sound.ajax
+2014-06-17 17:54:24 | _500_ | 21 ms | 127.0.0.1 | GET  | http://local.ximalaya.com
+2014-06-17 17:54:24 | _404_ | 90 ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png
+2014-06-17 17:54:55 | _500_ | 65 ms | 127.0.0.1 | GET  | http://local.ximalaya.com
+2014-06-17 17:56:29 | _500_ | 64 ms | 127.0.0.1 | GET  | http://local.ximalaya.com
+2014-06-17 17:57:20 | _500_ | 63 ms | 127.0.0.1 | GET  | http://local.ximalaya.com
+2014-06-17 18:18:16 | _500_ | 43 ms | 127.0.0.1 | GET  | http://local.ximalaya.com
+2014-06-17 18:18:17 | _404_ | 112ms | 127.0.0.1 | GET  | http://local.ximalaya.com/__sinatra__/500.png

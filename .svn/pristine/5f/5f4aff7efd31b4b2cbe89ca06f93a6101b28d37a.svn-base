@@ -1,0 +1,48 @@
+<script>
+requirejs.config({
+    baseUrl:config.STATIC_ROOT + '/js/lib',
+    shim:{
+        'jquery':{
+            exports:'jQuery'
+        },
+        'swfupload.queue':{
+            deps:['swfupload'],
+            exports:'SWFUpload'
+        },
+        fileprogress:{
+            deps:['jquery']
+        },
+        swfupload:{
+            deps:['handlers', 'fileprogress'],
+            exports:'SWFUpload'
+        },
+        jrecorder:{
+            deps:['jquery', 'handlers', 'fileprogress']
+        },
+        ajaxFileUpload:{
+            deps:['jquery']
+        },
+        fileuploader:{
+            deps:['jquery']
+        },
+        'belatedpng':{
+        exports:'DD_belatedPNG'
+        },
+        'plugin/mailautocomplete':{
+            deps:['jquery']
+        }
+    },
+    paths:{
+        app:'../app',
+        plugin:'../plugin',
+        swfupload:'record/swfupload',
+        jrecorder:'record/jrecorder',
+        handlers:'record/handlers',
+        'swfupload.queue':'record/swfupload.queue',
+        fileprogress:'record/fileprogress',
+        ajaxFileUpload:'ajaxfileupload',
+        fileuploader:"jquery.fileuploader"
+    },
+    urlArgs:config.ASSETS_VERSION
+});
+</script>

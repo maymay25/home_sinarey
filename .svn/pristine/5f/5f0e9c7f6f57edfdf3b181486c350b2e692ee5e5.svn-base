@@ -1,0 +1,5 @@
+$("#mainbox").html('<%== escape_javascript erb(:_page_404) %>');
+
+require(["page/404"], function(page){
+    page.init();
+});

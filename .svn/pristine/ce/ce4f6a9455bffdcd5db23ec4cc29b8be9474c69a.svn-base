@@ -1,0 +1,194 @@
+<div id="personalPublish" class="mgT30">
+  <div class="mainbox_left">
+    <div class="personal_container">
+      <div class="personal_header">
+        <div class="picture">
+          <a href="<%= link_path("/#{@current_user.uid}/profile") %>">
+            <img src="<%= picture_url('header', @current_user.logoPic, '60') %>">
+          </a>
+         </div>
+        <div class="nav_wrap">
+          <div class="username">
+            <%= @current_user.nickname %>
+            <% if @current_user.isVerified %><i class="VIcon">&nbsp;</i><% end %>
+          </div>
+          <ul class="nav_list">
+            <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/profile") %>">主页</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/sound/") %>">声音</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/album/") %>">专辑</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/favorites/") %>">赞过的</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/follow/") %>">关注</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/fans/") %>">粉丝</a></li>
+            <li class="nav_item"><a href="<%= link_path("/#{@current_user.uid}/listened/") %>">听过</a></li>
+            <% if @current_user.isVerified %>
+            <li class="nav_item on"><a href="<%= link_path("/#{@current_user.uid}/publish/") %>">定时发布</a></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+      <div class="personal_body">
+        <div class="body_top">
+          <div class="left">
+            <span class="title">定时发布</span>
+          </div>
+        </div>
+        <div class="personal_list_head">
+          <div class="left"><%= "共有#{@public_tasks}个待发布任务" %></div>
+          <div class="personal_list_head_operate"><a class="uploadBtn2" href="/upload"><span>上传录制</span></a></div>
+        </div>
+        <% if @track_records.count > 0 || @albums_records.count > 0%>
+          <div class="body_list_wrap">
+            <ul class="body_list j-player-soundIdsWorking" sound_ids="<%= @track_records.collect{|r|r.id}.join(",") %>">
+              <% @results.each do |result|%>
+                <% if result[:type] == 'sound'%>
+                  <%# result[:data].each_with_index do |r,i| %>
+                  <% r = result[:data]%>
+                    <li class="item" sound_id="d_<%=r.id%>">
+                      <div class="content_wrap">
+                        <div class="sound">
+                          <div class="sound_unexpandBox">
+                            <div class="sound_titlebar">
+                              <span class="sound_title">
+                                <%= r.title %>
+                              </span>
+                              <div class="personal_operate">
+                                <a class="personal_deleteBtn" track_destroy_id="<%=r.id%>">删除</a>
+                              </div>
+                            </div>
+                            <div class="smallPlayer" sound_uploadid="<%= r.upload_id %>" sound_wave="<%= file_url r.waveform %>">
+                              <a href="javascript:;" class="playBtn"></a>
+                              <span class="duration"><%= parse_duration r.duration %></span>
+                              <% if r.cover_path and r.cover_path!="" %>
+                                <div class="pin" sound_popsrc="<%=r.track_id%>">
+                                  <a href="/#/<%=r.uid%>/sound/<%=r.id%>" class="soundface">
+                                    <img alt="" src="<%= picture_url('track', r.cover_path, '60') %>" data-options="defaultImg:track_60">
+                                    <span></span>
+                                  </a>
+                                </div>
+                              <% end %>
+                            </div>
+                          </div>
+                          <div class="sound_expandBox">
+                            <div class="sound_titlebar">
+                              <span class="sound_title">
+                                <%= r.title %>
+                              </span>
+                              <div class="fr">
+                                <span class="sound_position">00:00</span>/
+                                <span class="sound_duration"><%= parse_duration r.duration %></span>
+
+                                
+                              </div>
+                              <div class="personal_operate">
+                                <a class="personal_deleteBtn" track_destroy_id="<%=r.id%>">删除</a>
+                              </div>
+                            </div>
+                            <div class="feed_middlePlayerBox">
+                              <div class="middlePlayer">
+                                <div class="left">
+                                  <a class="playBtn"></a>
+                                </div>
+                                <div class="right">
+                                  <!-- 进度条 -->
+                                  <div class="player_progressbar">
+                                    <div class="player_progressbarBg"></div>
+                                    <div class="player_seekbar"></div>
+                                    <div class="player_playbar"></div>
+                                    <% if r.waveform %>
+                                      <div class="player_wavebox" sound_wave="<%= get_wave_url r.waveform %>" sound_uploadid="<%= r.upload_id %>"></div>
+                                    <% end %>
+                                    <div class="player_progressbarCoverBg"></div>
+                                    <div class="player_nonius">
+                                      <div class="player_nonius_cover"></div>
+                                      <div class="player_nonius_time">00:00</div>
+                                      <div class="player_nonius_line5"></div>
+                                      <div class="player_nonius_line3"></div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <% if r.cover_path and r.cover_path!="" %>
+                                  <div class="pin" sound_popsrc="<%=r.track_id%>">
+                                    <a href="/#/<%=r.uid%>/sound/<%=r.id%>" class="soundface">
+                                      <img alt="" src="<%= picture_url('track', r.cover_path, '60') %>" data-options="defaultImg:track_60">
+                                      <span></span>
+                                    </a>
+                                  </div>
+                                <% end %>
+                              </div>
+                            </div>
+                            <div class="sound_content">
+                            </div>
+                          </div>
+                          <div class="sound_bottom">
+                            <div class="publish_time">
+                              将发布于<%= (r.publish_at.to_s)[0,16]%>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <div class="comment_box_entry"></div>
+                            <div class="relay_box_entry"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  <%# end %>
+                <% else %>
+                  <%# result[:data].each do |albums_record|%>
+                  <% albums_record = result[:data]%>
+                    <% tracks = DelayedTrack.where(:delayed_album_id => albums_record.id)%>
+                    <li class="item">
+                      <div class="content_wrap">
+                        <div class="feed pubAlbum">
+                          <a class="deleteBtn" album_destroy_id="<%= albums_record.id%>">删除</a>
+                          <div class="feed_title">
+                            <span class="feed_albumName"><%= "《#{albums_record.title}》" %></span>
+                            <span> <%= tracks.size%>个声音</span>
+                          </div>
+                          <div class="feed_content">
+                            <ul sound_ids="<%=tracks.collect{|r|r.id}.join(",")%>">
+                              <% tracks.each_with_index do |track,index|%>
+                              <li class="gapB <%="hidden" if index > 2%>" sound_id="d_<%=track.id%>" >
+                                <div class="miniPlayer">
+                                  <a class="playBtn"></a>
+                                  <% href = "/#{track.uid}/sound/#{track.id}"%>
+                                  <span class="title" href="javascript:;">
+                                    <%= track.title %>
+                                  </span>
+                                </div>
+                              </li>
+                              <% end %>
+                            </ul>
+                          </div>
+                          <div class="publish_time">
+                            将发布于<%= (albums_record.publish_at.to_s)[0,16]%>
+                          </div>
+                        </div>
+                        <% if tracks.size > 3%>
+                          <div class="moreBtn unexpand">
+                            <div class="bg"></div>
+                            <a href="javascript:;"><span class="expandtext">展开</span><span class="unexpandtext">收起</span>更多声音&nbsp;&nbsp;&nbsp;</a>
+                          </div>
+                        <% end %>
+                      </div>
+                    </li>
+                  <%# end %>
+                <% end %>
+              <% end %>
+
+            </ul>
+        	</div>
+        <% else %>	
+          <div class="noItem">                    
+            <span>立即<a href="/upload">上传或录制</a>一段声音，展示给大家</span>
+          </div>
+        <% end %>
+    	</div>
+  	</div>
+	</div>
+
+  <%== erb :'my/_mainbox_sound_right' %>
+
+  <%== $comment_inputbox_template %>
+
+</div>

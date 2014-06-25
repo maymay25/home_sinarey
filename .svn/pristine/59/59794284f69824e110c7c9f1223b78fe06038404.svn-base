@@ -1,0 +1,324 @@
+<div id="discoverPage">
+
+    <div class="bar2 mgT30">
+        <div class="left">
+            <div class="picWrapper">
+                <div class="left">
+                <% @wall_slide.each_with_index do |arr, index| %>
+                    <% link_url, pic_path, content, track_id, track_uploadid, track_waveform = arr %>
+                    <% if track_id %>
+                    <div class="picShow" style="<%= 'display:block;' if index == 0 %>" >
+                        <a href="<%= link_url %>" target="_blank">
+                            <img src="<%= file_url(pic_path) %>" alt="">
+                        </a>
+                        <div class="bg"></div>
+                        <div class="pictitle">
+                            <div class="miniPlayer4" sound_id="<%= track_id %>">
+                                <div class="player_progressbar is-drawed">
+                                    <div class="player_wavebox" sound_wave="<%= file_url(track_waveform) %>" sound_uploadid="<%= track_uploadid %>">
+                                        <div class="player_backgroundbar"></div>
+                                        <div class="player_seekbar"></div>
+                                        <div class="player_playbar"></div>
+                                    </div>
+                                </div>
+                                <div class="player_titleBar mgL20">
+                                    <div class="left">
+                                        <a class="playBtn fr"></a>
+                                    </div>
+                                    <div class="right">
+                                        <a class="title" href="<%= link_url %>" target="_blank" title="<%= content %>"><%= content.truncate(45) if content %></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <% else %>
+                    <div class="picShow" style="<%= 'display:block;' if index == 0 %>" >
+                        <a href="<%= link_url %>" target="_blank">
+                            <img src="<%= file_url(pic_path) %>" alt="" />
+                        </a>
+                        <div class="bg"></div>
+                        <div class="pictitle">
+                            <div class="miniPlayer4" sound_id="<%= track_id %>">
+                                <div class="player_titleBar mgL20">
+                                    <div class="right mgL0">
+                                        <a class="title" href="<%= link_url %>" target="_blank" title="<%= content %>"><%= content.truncate(45) if content %></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <% end %>
+                <% end %>
+                </div>
+                <div class="right">
+                    <% @wall_slide.each do |arr| %>
+                    <a href="<%= arr[0] %>" target="_blank" class="nav">
+                        <img src="<%= file_url(arr[1]) %>" alt="">
+                        <div class="img-cover"></div>
+                    </a>
+                    <% end %>
+                    <a class="border-wrap" href="javascript:;" target="_blank">
+                        <div class="border"></div>
+                        <span class="discover-leftArrow hidden"></span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="right bg-fff bd">
+            <% if @editor_recommend1 %>
+            <div class="rankInfo mgT10 mgLR10">
+                <div class="seditMain">
+                <a class="coverOutter" href="<%= @editor_recommend1.web_link_url %>"><img class="cover mgB5" src="<%= picture_url('discover_recommend',@editor_recommend1.cover_path,'190') %>" alt=""></a>
+                <div class="seditMain_info"><div class="mask"></div><a href="<%= @editor_recommend1.web_link_url %>"><%= @editor_recommend1.content %></a></div>
+                </div>
+                <div class="sedit"></div>
+            </div>
+            <% end %>
+
+            <% if @editor_recommend2 %>
+            <div class="seditList">
+                <div class="fl"><a href="<%= @editor_recommend2.web_link_url %>"><%= @editor_recommend2.content %></a></div>
+                <div class="fr"><a class="userface" href="<%= @editor_recommend2.web_link_url %>"><img src="<%= picture_url('discover_recommend',@editor_recommend2.cover_path,'40') %>" alt=""></a></div>
+            </div>
+            <div class="line mgLR5"></div>
+            <% end %>
+
+            <% if @editor_recommend3 %>
+            <div class="seditList">
+                <div class="fl"><a href="<%= @editor_recommend3.web_link_url %>"><%= @editor_recommend3.content %></a></div>
+                <div class="fr"><a class="userface" href="<%= @editor_recommend3.web_link_url %>"><img src="<%= picture_url('discover_recommend',@editor_recommend3.cover_path,'40') %>" alt=""></a></div>
+            </div>
+            <% end %>
+
+        </div>
+    </div>
+
+    <div class="bar2">
+        <div class="left bg-fff">
+            <div class="recommend">
+                <div class="main">
+                    <div class="left">
+                        <% if @wall_user and u1 = @wall_user[0]  %>
+                        <div class="userPanel1">
+                            <div class="left">
+                                <a class="soundface180" href="<%= link_his_path(u1.uid) %>"> 
+                                    <img src="<%= picture_url('header', u1.logoPic, '200') %>" alt="">
+                                </a>
+                            </div>
+                            <div class="right">
+                                <span class="title">
+                                    <a href="<%= link_his_path(u1.uid) %>"> 
+                                        <%= u1.nickname %>
+                                    </a>
+                                </span>
+                                <span class="BVIcon">&nbsp;</span>
+                                <span class="content mgT10">
+                                    <%= u1.personDescribe %>
+                                </span>
+                            </div>
+                        </div>
+                        <% end %>
+                    </div>
+                    <div class="right">
+                        <div class="newSounds">
+                            <span class="title">最新的声音</span>
+                            <a class="upload1Btn fr" href="/upload">
+                                <span>我也上传一首</span>
+                            </a>
+                            <p class="cl"></p>
+                        </div>
+                        <div class="disSoundlist mgT20">
+                            <% @wall_new_sound.each do |track| %>
+                            <div class="listItem mgB30" sound_id="<%= track.id %>">
+                                <div class="disSoundPanel">
+                                    <div class="left">
+                                        <a class="userface40" href="<%= link_his_path "#{track.uid}" %>"> 
+                                            <img card="<%= track.uid %>" src="<%= picture_url('header', track.avatar_path, '60') %>" alt="">
+                                        </a>
+                                    </div>
+                                    <div class="right">
+                                        <div class="miniPlayer2">
+                                            <div class="player_titleBar">
+                                                <div class="left">
+                                                    <a class="playBtn"></a>
+                                                </div>
+                                                <div class="right">
+                                                    <a class="title" href="<%= link_path "/#{track['uid']}/sound/#{track.id}" %>" title="<%= track.title %>"><%= track.title.truncate(30) %></a>
+                                                    <span class="fr mgR5">
+                                                        <%= parse_time_until_now track.created_at %>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="player_progressbar ">
+                                                <div class="player_progressbarBg"></div>
+                                                <div class="player_seekbar"></div>
+                                                <div class="player_playbar"></div>
+                                                <div class="player_wavebox" sound_uploadid="<%= track.upload_id %>" sound_wave="<%= get_wave_url track.waveform %>"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="cl"></p>
+                                    <div class="shareCon hidden">
+                                        <span class="share forwardBtn"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <% end %>
+                        </div>
+                    </div>
+                </div>
+                <span class="newtitle">
+                    热门个人电台
+                </span>
+                <a class="getAllRadio" href="<%= link_path '/explore/u' %>">查看全部</a>
+                <div class="userFaceList mgT5">
+                    <% @wall_user[1..-1].each do |u| %>
+                    <div class="listItem">
+                        <a class="userface" href="<%= link_his_path(u.uid) %>"> 
+                            <img card="<%= u.uid %>" src="<%= picture_url('header', u.logoPic, '60') %>" alt="">
+                        </a>
+                    </div>
+                    <% end if @wall_user and @wall_user[1..-1] %>
+                    <p class="cl"></p>
+                </div>
+            </div>
+        </div>
+        <div class="right">
+            <div class="advertisement">
+                <%== erb :_advertise, locals: { id: 727426, width:'210px',height:'340px' } %>
+            </div>
+        </div> 
+        <p class="cl"></p>
+    </div>
+
+    <% @category_datas.each do |data| %>
+
+    <div class="bar2 mgT20">
+        <div class="left bg-fff">
+            <div class="titlePanel">
+                <div class="titleCon">
+                    <div class="filter_new">
+                        <span class="title mgL15 cateBtn_<%= data[:name] %>"><%= data[:title] %></span>
+                        <% data[:tags].each do |tag| %>
+                        <a href="<%= link_path "/explore/sound?tag=#{tag[:tname]}&category=#{data[:id]}" %>" class="none-border"><%= tag[:tname] %></a>
+                        <% end %>
+                        <a href="<%= link_path "/explore/u?category=#{data[:id]}" %>" class="none-border">更多</a>
+                    </div>
+                </div>
+                <div class="disUserlist">
+
+                    <% 2.times.each do |n| %>
+                    <% users = data[:users] && data[:users][n*3,3] || [] %>
+
+                        <% if users.length > 0 %>
+                        <div class="listItem <%= "none-border" if n==1 or data[:users].count<4 %>">
+
+                            <% users.each_with_index do |user,m| %>
+                            
+                            <%
+                              next if user.nil?
+                              pic_desc = "#{user['personDescribe']}".strip
+                              pic_desc = "#{user['personalSignature']}".strip if pic_desc == ""
+                              lastest_track = user['lastest_track']
+                            %>
+
+                            <div class="disRankUserPanel <%= 'none-border' if m==2 %>">
+                                <div class="rankUserPanel2 mgL15 mgT15">
+                                    <div class="left">
+                                        <a class="userface60" href="<%= link_path "/#{user['uid']}/" %>"> 
+                                            <img card="<%= user['uid'] %>" src="<%= picture_url("header",user['logoPic'],'200') %>" alt="<%= user['nickname'] %>">
+                                        </a>
+                                    </div>
+                                    <div class="right rankUserInfo">
+                                        <span class="title mgB5">
+                                            <a href="<%= link_path "/#{user['uid']}/" %>">
+                                            <%= user['nickname'] %>
+                                            </a>
+                                            <% if user['isVerified'] %><i class="VIcon">&nbsp;</i><% end %>
+                                        </span>
+                                        <span class="title1 mgB5" title="<%= pic_desc %>"><%= cut_str(pic_desc,30,"..") %></span>
+                                        <a href="<%= link_path "/#{user['uid']}/sound/" %>">
+                                            <span class="radioSoundIcon"><%= user['tracks_counts'] %></span>
+                                        </a>
+                                        <a href="<%= link_path "/#{user['uid']}/fans/" %>">
+                                            <span class="radioFansIcon"><%= user['followers_counts'] %></span>
+                                        </a>
+                                    </div>
+                                    <p class="cl"></p>
+                                </div>
+                                <% if lastest_track && lastest_track.track_id -%>
+                                <div class="miniPlayer2 mgLR15 mgT10" sound_id="<%= lastest_track.track_id %>">
+                                    <div class="player_titleBar">
+                                        <div class="left">
+                                            <a class="playBtn"></a>
+                                        </div>
+                                        <div class="right">
+                                            <a class="title" href="<%= link_path("/#{lastest_track.uid}/sound/#{lastest_track.track_id}") %>" title="<%= lastest_track.track_title %>"><%= lastest_track.track_title %></a>
+                                            <%= '【转采】' if lastest_track.is_resend %>
+                                        </div>
+                                    </div>
+                                    <div class="player_progressbar ">
+                                        <div class="player_progressbarBg"></div>
+                                        <div class="player_seekbar"></div>
+                                        <div class="player_playbar"></div>
+                                        <div class="player_wavebox" sound_wave="<%= get_wave_url lastest_track.waveform %>" sound_uploadid="<%= lastest_track.upload_id %>" style=""></div>
+                                    </div>   
+                                </div>
+                                <% end -%>
+                            </div>
+
+                            <% end %>
+                            
+                            <p class="cl"></p>
+                        </div>
+                        <% end %>
+
+                    <% end %>
+
+                </div>
+            </div>
+        </div>
+        <div class="right bg-fff">
+            <div class="titlePanel1">
+                <div class="titleCon">
+                    <div class="filter_new">
+                        <span class="title mgL5"><%= data[:title] %></span>
+                    </div>
+                </div>
+                    <div class="rankSoundList">
+                        <% data[:tracks].each_with_index do |track,index| %>
+                        <% index = index + 1 %>
+                        <div class="listItem <%= 'none-border' if index==data[:tracks].count %>">
+                            <div class="rankSoundPanel">
+                                <div class="left">
+                                    <a class="rank <%= 'grew' if index > 3 %>"><%= index %></a>
+                                </div>
+                                <div class="right">
+                                    <a class="title" title="<%= track['title'] %>" href="<%= link_path "/#{track['uid']}/sound/#{track['track_id']}" %>"><%= track['title'] %></a>
+                                    <div class="hidden">波形</div>
+                                </div>
+                                <p class="cl"></p>
+                            </div>
+                        </div>
+                        <% end %>
+
+                        <p class="cl"></p>
+                    </div>
+            </div>
+        </div> 
+        <p class="cl"></p>
+    </div>
+    <% end %>
+
+</div>
+
+<% if cookies[:close_download].nil? and !@temp[:view_downloadApp] %>
+<% @temp[:view_downloadApp] = true %>
+<div class="downloadApp">
+  <a href="javascript:;" class="closeBtn" title="关闭"></a>
+  <!-- <span class="tit">移动App</span> -->
+  <a href="/download" target="_blank"><img src="<%= static_url "/css/img/code.png" %>">下载客户端</a>
+</div>
+<% end %>

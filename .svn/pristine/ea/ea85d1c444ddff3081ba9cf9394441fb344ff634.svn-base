@@ -1,0 +1,13 @@
+
+<%== erb :_seo_meta, locals: {seo_meta:{name: "track", default_key: "json:cms_data_discovery_user_page", data: {'category_title' => @init_category.nil? ? "全部" : @categories[@init_category.to_i-1]["title"]}}} %> 
+<%== erb :_friendly_link, locals: {friendly_link:{ name: "discovery" }} %>
+
+<%== erb :_user_page %>
+
+<% content_for :script_own do  %>
+  <script>
+      require(['page/discovery/dis_user'], function(page) {
+          page.init();
+      });
+  </script>
+<% end %>

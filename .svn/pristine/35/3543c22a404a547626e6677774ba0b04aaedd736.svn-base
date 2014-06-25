@@ -1,0 +1,158 @@
+<% content_for :script_own do  %>
+<script type="text/javascript">
+require(["page/podcast/apply"], function (page) {
+  page.init();
+});
+</script>
+<% end %>
+
+<div class="mainbox_wrapper">
+  <form>
+  <div class="form">
+    <div class="formName">填写申请</div>
+    <div class="formTit">
+      <em>选择专辑</em><span>（请选择您要申请上传的专辑）</span>
+      <span class="fr">（有问题请私信联系客服<a target="_blank" href="http://www.ximalaya.com/8914100/">http://www.ximalaya.com/8914100/</a>）</span>
+    </div>
+
+    <ul class="formAlubmList" id="formAlubmList">
+      <input type="hidden" name="album_id" id="album_id_input">
+      <%== erb :_podcast_apply_albums,locals:{albums:@albums} %>
+    </ul>
+
+    <% if @next_page %>
+    <div class="moreBtn" id="more_album_btn" data-next-page='<%= @next_page %>'>
+      <div class="bg"></div>
+      <input type="hidden" name="pod_cover_path">
+      <a href="javascript:;">展开更多专辑</a>
+    </div>
+    <% end %>
+
+    <div class="formTit">
+      <span class="chooseImgBtnIcon">选择图片</span><span>（根据Podcast的相关要求，您需要上传一张1400*1400像素以上的jpg格式的图片作为专辑封面）</span>
+    </div>
+    <div class="formBd">
+      <div>
+        <a class="chooseImgBtn"><span>选择图片</span></a>
+      </div>
+      <div class="formImg" style="display:none;">
+        <input type="hidden" name="faceimage">
+        <img src="">
+      </div>
+    </div>
+    <div class="formTit">
+      <em>添加explicit标签</em><span>（如果您的节目含有粗口、成人等露骨内容，请添加explicit标签）</span>
+    </div>
+    <div class="formBd">
+      <input type="radio" id="explicit_yes" name="explicit" value="yes">
+      <label for="explicit_yes">添加</label>
+      <input type="radio" id="explicit_no" name="explicit" value="no" checked='checked'>
+      <label for="explicit_no">不添加</label>
+    </div>
+    <div class="formTit">
+      <em>选择分类</em><span>（至少选择一个分类）</span>
+    </div>
+    <div class="formBd">
+      <div class="formLine">
+        <div class="selecter selecter-s5 w1" action="#category1sub">
+          <input type="hidden" id="pod_category1" name="pod_category[]" value="">
+          <div class="selecter-selected">
+            <span class="selecter-text">请选择</span>
+            <em class="selecter-arrow">◆</em>
+          </div>
+          <div class="selecter-options">
+            <ul>
+              <% @categories.each do |title,category| %>
+              <li class="selecter-item" data-value="<%= title %>"><%= category['text'] %></li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+        <div class="selecter selecter-s5" id="category1sub">
+          <input type="hidden" name="pod_sub_category[]" value="">
+          <div class="selecter-selected">
+            <span class="selecter-text">请选择</span>
+            <em class="selecter-arrow">◆</em>
+          </div>
+          <div class="selecter-options">
+            <ul>
+              <li class="selecter-item">最新资讯</li>
+              <li class="selecter-item">音乐</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="formLine">
+        
+        <div class="selecter selecter-s5 w1" action="#category2sub">
+          <input type="hidden" id="pod_category2" name="pod_category[]" value="">
+          <div class="selecter-selected">
+            <span class="selecter-text">请选择</span>
+            <em class="selecter-arrow">◆</em>
+          </div>
+          <div class="selecter-options">
+            <ul>
+              <% @categories.each do |title,category| %>
+              <li class="selecter-item" data-value="<%= title %>"><%= category['text'] %></li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="selecter selecter-s5" id="category2sub">
+          <input type="hidden" name="pod_sub_category[]" value="">
+          <div class="selecter-selected">
+            <span class="selecter-text">请选择</span>
+            <em class="selecter-arrow">◆</em>
+          </div>
+          <div class="selecter-options">
+            <ul>
+              <li class="selecter-item">最新资讯</li>
+              <li class="selecter-item">音乐</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+      <div class="formLine">
+
+        <div class="selecter selecter-s5 w1" action="#category3sub">
+          <input type="hidden" id="pod_category3" name="pod_category[]" value="">
+          <div class="selecter-selected">
+            <span class="selecter-text">请选择</span>
+            <em class="selecter-arrow">◆</em>
+          </div>
+          <div class="selecter-options">
+            <ul>
+              <% @categories.each do |title,category| %>
+              <li class="selecter-item" data-value="<%= title %>"><%= category['text'] %></li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+
+        <div class="selecter selecter-s5" id="category3sub">
+          <input type="hidden" name="pod_sub_category[]" value="">
+          <div class="selecter-selected">
+            <span class="selecter-text">请选择</span>
+            <em class="selecter-arrow">◆</em>
+          </div>
+          <div class="selecter-options">
+            <ul>
+              <li class="selecter-item">最新资讯</li>
+              <li class="selecter-item">音乐</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="formSubmitPanel">
+      <a class="confirmBtn3" data-url="/podcast/create">提交申请</a>
+    </div>
+  </div>
+  </form>
+</div>
+
+<script type="text/javascript">
+  var categories = <%= @categories.to_json.html_safe %>;
+</script>

@@ -1,0 +1,47 @@
+<!--评论 start-->
+<% if feed and feed.events.size > 0 %>
+  <%
+    user = @users[feed.uid]
+    user_url = (@current_uid != user.uid ?  link_his_path(user.uid) : '#')
+  %>
+    <li class="listItem" listitem="<%= feed.id %>">
+        <div class="feed">
+            <div class="left">
+                <a class="userface" href="<%= user_url %>" card="<%= user.uid %>">
+                  <img src="<%= picture_url('header', user.logoPic, '60') %>" alt="<%= user.nickname %>" />
+                </a>
+            </div>
+            <div class="right">
+                <div class="feed_operate">
+                    <a href="javascript:;" class="closeBtn" title="删除" feed_id='<%= feed.id %>'></a>
+                </div>
+                <div class="feed_title">
+                    <a href="<%= user_url %>" card="<%= user.uid %>">
+                      <%= user.nickname %>
+                      <% if user.isVerified %><i class="VIcon">&nbsp;</i><% end %>
+                    </a>
+  				         <span>留下了1个评论</span>
+                </div>
+                <div class="feed_content">
+                    <div class="commentBubble" sound_id="<%= feed.events[0].toTid %>">
+                        <div class="miniPlayer">
+                            <a class="playBtn"></a>
+                            <a class="title" href="<%= link_path("/#{feed.events[0].toUid}/sound/#{feed.events[0].toTid}") %>"><%= feed.events[0].title %></a>
+                        </div>
+                        <div class="comment_content">
+                            <span><%= puts_face(feed.events[0].content).html_safe %></span>
+                            <div class="bud"></div>
+                        </div>
+                        <div class="comment_bottom">
+                            <span class="comment_createtime"><%= parse_time_until_now(feed.createdAt.to_datetime) %></span>
+                            <a href="javascript:;" class="replyBtn" data-options="<%= oj_dump({c_id: feed.events[0].cid, c_second:nil, c_nickname: user.nickname, t_id: feed.events[0].toTid}) %>">回复</a>
+                        </div>
+                        <div>
+                            <div class="reply_box_entry"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </li>
+<% end %>

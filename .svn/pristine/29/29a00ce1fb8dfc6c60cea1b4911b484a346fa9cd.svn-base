@@ -1,0 +1,17 @@
+$("#mainbox").html('<%== escape_javascript erb(:_sound_page) %>');
+
+require(["page/center/sound"], function(page){
+    page.init();
+});
+
+if(document.getElementById("bdshell_js")){
+  document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + new Date().getHours();
+}
+
+if(window.bdShare){
+  bdShare.fn.init();
+}
+
+<% if @this_title %>
+document.title="<%== escape_javascript @this_title %>";
+<% end %>
